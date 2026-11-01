@@ -42,7 +42,10 @@ Other projects have submitted plain SAR ADCs and stand-alone bandgaps before (se
 |---|---|
 | Process | sky130 |
 | Supply | VDPWR = 1.8 V only (no VAPWR) |
-| Tiles | **1x2** (about 160 × 225 µm — check against the TT analog template DEF) |
+| Tiles | **1x2** = **161.00 × 225.76 µm** (36 347 µm²), from TT `tt-support-tools` `tech/sky130A/tile_sizes.yaml` and `def/analog/tt_analog_1x2.def` |
+| Pin locations | `ua[0]` at x = 152.26 µm, `ua[1]` at x = 132.94 µm, on the **bottom** edge (met4, 0.9 × 1.0 µm). Digital pins (`clk`, `ui_in`, …) on the **top** edge (met4, 0.3 × 1.0 µm). Place VIN-side analog near the bottom right and SAR logic near the top |
+| Power | We draw our own `VDPWR`/`VGND` straps; they must be on **met4**, at least **1.2 µm** wide (precheck rule) |
+| Allowed layers | Full sky130 stack including met5, `capm` (MIM m3–m4) and `capm2` (MIM m4–m5) |
 | Analog pins | **2** (`ua[0]`, `ua[1]`) |
 | Total supply current | < 300 µA while converting (target), < 10 µA powered down (stretch) |
 | Clock | `clk` = SAR clock, 1 MHz nominal (≈ 100 kS/s, 10 clocks/conversion), 10 MHz stretch |
@@ -107,5 +110,7 @@ When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the 
 ## Open questions
 
 1. SAR logic implementation: synthesized sky130 standard cells placed by script, or hand-placed standard-cell DFFs and gates?
-2. MIM capacitor and TT power straps: check how `cap_mim_m3_1` (met3/capm/met4) fits around the
-   met4 power stripes in the 1x2 template. Prior TT SARs (TT06, 26d) used MIM successfully.
+2. MIM placement vs. our own met4 power straps: since we draw the straps, keep them clear of the
+   DAC array (or use `cap_mim_m4_2` and route power around it). Prior TT SARs (TT06, 26d) used MIM successfully.
+3. Pad series resistance and capacitance of `ua[]`: the numbers are on tinytapeout.com/specs/analog,
+   which wasn't reachable from the build environment. Fill them in here.

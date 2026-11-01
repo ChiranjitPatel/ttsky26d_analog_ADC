@@ -16,6 +16,9 @@ Specs live in `docs/specs/`. Read them before changing any circuit.
 | Post-layout sim | ngspice | Same testbenches, extracted netlist swapped in |
 | Sign-off | GitHub Actions `gds.yaml` (TT precheck) | Must pass before submission |
 
+TT precheck uses **KLayout 0.30.4** and **Magic 8.3.568** (`tt-support-tools/precheck/tool-versions.json`).
+Use these versions for local DRC; the Ubuntu apt packages are older.
+
 ## Simulation policy
 
 - **Phase 1 (now):** a single operating point — `tt` corner, 27 °C, VDPWR = 1.80 V.
