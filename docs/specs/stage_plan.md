@@ -52,7 +52,7 @@ the specs only define what the final system must do.
 
 ### Stage 2 — Error amplifier (OTA)
 - **Goal:** the bandgap's error amplifier. The same topology may be reused for the VREF buffer (stage 5).
-- **Cells:** `ota` (5-transistor first; two-stage only if the gain is too low).
+- **Cells:** `ota`. Two-stage Miller with PMOS input: a 5-transistor OTA gives only ≈ 38 dB with these devices.
 - **Targets†:** DC gain ≥ 50 dB; phase margin ≥ 60 ° with the bandgap load; input offset σ ≤ 2 mV
   (Phase 2 Monte Carlo); input common-mode range covers Vbe ≈ 0.55–0.75 V.
 - **Testbenches:** `tb_ota_ac` (gain, unity-gain bandwidth, phase margin), `tb_ota_dc` (input range), `tb_ota_mc` (offset).
@@ -146,7 +146,7 @@ pass through simulation, layout and LVS on a small block.
 |---|---|---|---|---|---|---|---|---|
 | 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (B1 moved to 1.25 V), tight headroom at 1.62 V |
 | 1 Bias | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps |
-| 2 OTA | | | | | | | | |
+| 2 OTA | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/ota/README.md`: two-stage, 80.4 dB, PM 72° (0.5 pF), 5.8 µA; Monte Carlo offset in Phase 2 |
 | 3 Bandgap | | | | | | | | |
 | 4 PTAT | | | | | | | | |
 | 5 VREF buffer | | | | | | | | |
