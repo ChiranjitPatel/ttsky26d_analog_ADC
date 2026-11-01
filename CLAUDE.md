@@ -61,6 +61,7 @@ docs/specs/      block specifications (this is the contract)
 xschem/          schematics + symbols (.sch/.sym)
 sim/             ngspice testbenches, run scripts, results summaries
 layout/          GDS, KLayout Python generators, DRC/LVS scripts
+material/        explanatory images and drawings for the designer, in topic subfolders (see material/README.md)
 src/project.v    blackbox Verilog for the TT top module (pins only)
 ```
 

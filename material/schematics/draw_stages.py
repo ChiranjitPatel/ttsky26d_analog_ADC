@@ -1,0 +1,188 @@
+"""Simple transistor-level drawings of stage 1 (bias_gen) and stage 2 (ota) for reading the circuits.
+
+Not the source of truth (that is xschem/*.sch). Regenerate: python3 draw_stages.py .
+Needs: pip install schemdraw
+"""
+import sys
+import schemdraw
+import schemdraw.elements as elm
+
+OUT = sys.argv[1]
+schemdraw.config(fontsize=10, lw=1.2)
+NETC = "#1565c0"   # net label colour
+DEVC = "#555555"   # device annotation colour
+
+
+class Sch:
+    def __init__(self):
+        self.d = schemdraw.Drawing(show=False)
+
+    def fet(self, kind, x, ysrc, gate="right", name="", info=""):
+        """Place an NFet/PFet by its source. NFet: drain above source; PFet: drain below source."""
+        e = (elm.NFet() if kind == "n" else elm.PFet()).right()
+        e = e.at((x, ysrc)).anchor("source")
+        if gate == "left":
+            e = e.reverse()
+        e = self.d.add(e)
+        a = {k: tuple(e.absanchors[k]) for k in ("drain", "gate", "source")}
+        # annotation on the side opposite the gate
+        tx = x + (0.25 if gate == "left" else -0.25)
+        ha = "left" if gate == "left" else "right"
+        ymid = (a["drain"][1] + a["source"][1]) / 2
+        self.d.add(elm.Label().at((tx, ymid + 0.3)).label(name, halign=ha, fontsize=10))
+        self.d.add(elm.Label().at((tx, ymid - 0.25)).label(info, halign=ha, fontsize=8, color=DEVC))
+        return a
+
+    def w(self, *pts, dot_end=False, dot_start=False):
+        for p, q in zip(pts, pts[1:]):
+            self.d.add(elm.Line().at(p).to(q))
+        if dot_start: self.d.add(elm.Dot().at(pts[0]))
+        if dot_end: self.d.add(elm.Dot().at(pts[-1]))
+
+    def dot(self, p): self.d.add(elm.Dot().at(p))
+
+    def net(self, p, name, side="right", dy=0.0):
+        ha = {"right": "left", "left": "right", "above": "center", "below": "center"}[side]
+        off = {"right": (0.15, dy), "left": (-0.15, dy), "above": (0, 0.3), "below": (0, -0.35)}[side]
+        self.d.add(elm.Label().at((p[0] + off[0], p[1] + off[1])).label(name, halign=ha, color=NETC, fontsize=10))
+
+    def rail(self, y, x0, x1, name):
+        self.w((x0, y), (x1, y))
+        self.d.add(elm.Label().at((x0 - 0.2, y)).label(name, halign="right", fontsize=11))
+
+    def gnd(self, p):
+        self.d.add(elm.Ground().at(p))
+
+    def title(self, x, y, t, sub=""):
+        self.d.add(elm.Label().at((x, y)).label(t, halign="left", fontsize=14))
+        if sub: self.d.add(elm.Label().at((x, y - 0.55)).label(sub, halign="left", fontsize=9, color=DEVC))
+
+    def save(self, path):
+        self.d.save(path, dpi=130)
+
+
+# =================================================================== stage 1: bias_gen
+s = Sch()
+VDD, GND = 11.0, 0.0
+s.title(0, 13.2, "Stage 1 — bias_gen (β-multiplier, 1 µA)",
+        "all L in µm; W/L shown as W/L ×mult; body of NMOS = VGND, PMOS = VDPWR")
+s.rail(VDD, 0, 26, "VDPWR")
+s.rail(GND, 0, 26, "VGND")
+
+# PMOS mirror
+mp1 = s.fet("p", 2, VDD, "right", "MP1", "pfet_lvt 2/2")
+mp2 = s.fet("p", 6, VDD, "left", "MP2", "pfet_lvt 2/2")
+s.w(mp1["gate"], mp2["gate"])
+pb = (4.0, mp1["gate"][1])
+s.dot(pb)
+s.w(pb, (4.0, 8.3), (6, 8.3)); s.dot((6, 8.3))          # MP2 diode
+s.net((4.0, mp1["gate"][1] + 0.05), "pbias", "above")
+# NMOS pair
+mn1 = s.fet("n", 2, 3.0, "right", "MN1", "nfet 2/2")
+mn2 = s.fet("n", 6, 3.0, "left", "MN2", "nfet 2/2 ×4")
+s.w(mn1["gate"], mn2["gate"])
+nb = (3.37, 5.2)
+s.w(mn1["gate"], (mn1["gate"][0], 5.2), (2, 5.2)); s.dot((2, 5.2)); s.dot(mn1["gate"])   # MN1 diode
+s.net((2, 6.6), "nbias", "left")
+s.w(mp1["drain"], mn1["drain"])
+s.w(mp2["drain"], mn2["drain"])
+s.w(mn1["source"], (2, GND)); s.dot((2, GND))
+r1 = s.d.add(elm.Resistor().down().at(mn2["source"]).to((6, GND)).label("R1\n≈63 kΩ\nxhigh 0.35/11", loc="bottom", fontsize=8))
+s.dot((6, GND))
+s.net((6, 2.6), "nr", "right")
+s.dot((2, VDD)); s.dot((6, VDD))
+
+# startup
+s.d.add(elm.Label().at((9.2, 12.0)).label("startup", halign="left", fontsize=11, color=DEVC))
+mpd2 = s.fet("p", 12, VDD, "right", "MPD2", "pfet 0.42/0.15")
+s.net(mpd2["gate"], "pd", "right")
+ms2 = s.fet("p", 12, mpd2["drain"][1] - 0.4, "right", "MS2", "pfet 0.42/50")
+s.w(mpd2["drain"], ms2["source"])
+s.w(ms2["gate"], (ms2["gate"][0] + 0.5, ms2["gate"][1]), (ms2["gate"][0] + 0.5, ms2["gate"][1] - 0.4)); s.gnd((ms2["gate"][0] + 0.5, ms2["gate"][1] - 0.4))
+ms3 = s.fet("n", 12, 2.2, "left", "MS3", "nfet 2/2")
+s.w(ms2["drain"], ms3["drain"])
+s.net((12, (ms2["drain"][1] + ms3["drain"][1]) / 2 + 0.55), "su", "right")
+s.w(ms3["source"], (12, GND)); s.dot((12, GND))
+s.net(ms3["gate"], "nbias", "left")
+ms1 = s.fet("n", 9.0, 5.0, "right", "MS1", "nfet 0.42/1")
+s.w(ms1["drain"], (9.0, 8.3), (6, 8.3))
+su_y = ms1["gate"][1]
+s.w(ms1["gate"], (12, su_y)); s.dot((12, su_y))
+s.w(ms1["source"], (9.0, GND)); s.dot((9.0, GND))
+s.dot((12, VDD))
+
+# power-down switches (connected by net name)
+s.d.add(elm.Label().at((15.0, 12.0)).label("power-down (pd = 1 → off)", halign="left", fontsize=11, color=DEVC))
+mpd1 = s.fet("p", 16, VDD, "right", "MPD1", "pfet 0.42/0.15")
+s.net(mpd1["gate"], "pdb", "right"); s.net(mpd1["drain"], "pbias", "below"); s.dot((16, VDD))
+mnd1 = s.fet("n", 16, 2.0, "right", "MND1", "nfet 0.42/0.15")
+s.net(mnd1["gate"], "pd", "right"); s.net(mnd1["drain"], "nbias", "above"); s.w(mnd1["source"], (16, GND)); s.dot((16, GND))
+mnd2 = s.fet("n", 20, 2.0, "right", "MND2", "nfet 0.42/0.15")
+s.net(mnd2["gate"], "pd", "right"); s.net(mnd2["drain"], "su", "above"); s.w(mnd2["source"], (20, GND)); s.dot((20, GND))
+# inverter pd -> pdb
+mip = s.fet("p", 24, VDD, "left", "MIP", "pfet 0.84/0.15")
+mn_ = s.fet("n", 24, 4.0, "left", "MIN", "nfet 0.42/0.15")
+s.w(mip["drain"], mn_["drain"]); s.w(mn_["source"], (24, GND)); s.dot((24, GND)); s.dot((24, VDD))
+gx = mip["gate"][0] - 0.6
+s.w(mip["gate"], (gx, mip["gate"][1]), (gx, mn_["gate"][1]), mn_["gate"])
+s.dot((gx, (mip["gate"][1] + mn_["gate"][1]) / 2)); s.net((gx, (mip["gate"][1] + mn_["gate"][1]) / 2), "pd", "left")
+s.dot((24, 7.0)); s.w((24, 7.0), (25.2, 7.0)); s.net((25.2, 7.0), "pdb", "right")
+
+# ports
+s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, pd (in), nbias (out), pbias (out).   "
+        "nbias → gate of nfet 2/2 sinks 1 µA;  pbias → gate of pfet_lvt 2/2 sources 1 µA.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage1_bias_gen.png")
+
+# =================================================================== stage 2: ota
+s = Sch()
+VDD, GND = 11.0, 0.0
+s.title(0, 13.2, "Stage 2 — ota (two-stage Miller, PMOS input)",
+        "all L in µm; W/L shown as W/L ×mult; body of NMOS = VGND, PMOS = VDPWR; pbias from bias_gen")
+s.rail(VDD, 0, 22, "VDPWR")
+s.rail(GND, 0, 22, "VGND")
+
+m5 = s.fet("p", 4, VDD, "right", "M5", "pfet_lvt 2/2 ×2  (2 µA)")
+s.net(m5["gate"], "pbias", "right"); s.dot((4, VDD))
+TY = 8.6
+s.w(m5["drain"], (4, TY)); s.w((2, TY), (6, TY)); s.dot((4, TY)); s.net((4, TY), "tail", "below")
+m1 = s.fet("p", 2, TY, "left", "M1", "pfet_lvt 8/2")
+m2 = s.fet("p", 6, TY, "right", "M2", "pfet_lvt 8/2")
+s.net(m1["gate"], "inn  (−)", "left"); s.net(m2["gate"], "inp  (+)", "right")
+m3 = s.fet("n", 2, 1.5, "right", "M3", "nfet 1/4")
+m4 = s.fet("n", 6, 1.5, "left", "M4", "nfet 1/4")
+s.w(m3["gate"], m4["gate"]); s.dot(m3["gate"])
+s.w(m3["gate"], (m3["gate"][0], 4.2), (2, 4.2)); s.dot((2, 4.2))      # M3 diode
+s.w(m1["drain"], m3["drain"]); s.w(m2["drain"], m4["drain"])
+s.net((2, 5.6), "d1", "left")
+s.w(m3["source"], (2, GND)); s.w(m4["source"], (6, GND)); s.dot((2, GND)); s.dot((6, GND))
+# out1 -> M6 gate
+O1 = (6, 4.6)
+s.dot(O1); s.net((6, 5.25), "out1", "left")
+m6 = s.fet("n", 11, 1.5, "left", "M6", "nfet 1/4 ×4  (4 µA)")
+s.w(O1, (9.0, 4.6), (9.0, m6["gate"][1]), m6["gate"])
+s.w(m6["source"], (11, GND)); s.dot((11, GND))
+m7 = s.fet("p", 11, VDD, "right", "M7", "pfet_lvt 2/2 ×4  (4 µA)")
+s.net(m7["gate"], "pbias", "right"); s.dot((11, VDD))
+s.w(m7["drain"], m6["drain"])
+# Miller compensation out1 -- RZ -- CC -- out
+CY = 6.6
+s.dot((6, CY))
+s.d.add(elm.Resistor().right().at((6, CY)).to((8.4, CY)).label("RZ ≈40 kΩ", loc="top", fontsize=8))
+s.d.add(elm.Capacitor().right().at((8.4, CY)).to((11, CY)).label("CC 0.5 pF\nMIM", loc="top", fontsize=8))
+s.dot((11, CY)); s.net((8.4, CY), "cz", "below")
+# output
+OY = 5.2
+s.dot((11, OY)); s.w((11, OY), (16.5, OY)); s.d.add(elm.Dot(open=True).at((16.5, OY)))
+s.net((16.5, OY), "out", "right")
+# power-down
+s.d.add(elm.Label().at((13.2, 12.0)).label("power-down (pd = 1 → off)", halign="left", fontsize=11, color=DEVC))
+mpd = s.fet("p", 15, VDD, "right", "MPD", "pfet 0.42/0.15")
+s.net(mpd["gate"], "pdb", "right"); s.dot((15, VDD))
+s.w(mpd["drain"], (15, OY)); s.dot((15, OY))
+mnd = s.fet("n", 18, 1.5, "right", "MND", "nfet 0.42/0.15")
+s.net(mnd["gate"], "pd", "right"); s.net(mnd["drain"], "out1", "above"); s.w(mnd["source"], (18, GND)); s.dot((18, GND))
+s.d.add(elm.Label().at((18.6, 8.2)).label("+ local inverter pd → pdb\n  (MIP pfet 0.84/0.15, MIN nfet 0.42/0.15),\n  same as in bias_gen", halign="left", fontsize=8, color=DEVC))
+s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, pbias (in), pd (in), inp (in), inn (in), out (out).   "
+        "Stage 1: M1/M2 pair + M3/M4 mirror → out1.  Stage 2: M6 common source + M7 load → out.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage2_ota.png")
+print("ok")
