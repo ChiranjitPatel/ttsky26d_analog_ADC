@@ -96,7 +96,7 @@ step_pdk() {
   log "open_pdks $OPEN_PDKS_COMMIT (sky130A, reference commits)"
   clone https://github.com/RTimothyEdwards/open_pdks open_pdks "$OPEN_PDKS_COMMIT"
   cd "$BUILD/open_pdks"
-  ./configure --prefix="$PREFIX" --with-sky130-variants=A --with-reference \
+  ./configure --prefix="$PREFIX" --enable-sky130-pdk --with-sky130-variants=A --with-reference \
     --enable-primitive-sky130 --enable-io-sky130 --enable-sc-hd-sky130 \
     --enable-xschem-sky130 --enable-klayout-sky130 --enable-precheck-sky130 \
     --disable-sc-hs-sky130 --disable-sc-ms-sky130 --disable-sc-ls-sky130 --disable-sc-lp-sky130 \
