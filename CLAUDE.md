@@ -40,8 +40,8 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
    Never connect a fast or high-impedance node directly to a pad.
 3. Every function must be observable on the digital pins (codes, flags, comparator output),
    so it can be tested from the TT demo board's RP2040 without lab equipment.
-4. Provide bypass and debug modes on digital inputs: external SAR control, an analog debug
-   mux, enable/power-down for each block.
+4. Provide bypass and debug modes on digital inputs: external SAR control, internal nodes
+   readable through the ADC input mux, enable/power-down for each block.
 5. Comparator kickback and DAC top-plate coupling must be checked in simulation; shield the
    top-plate routing (lesson from TT06 silicon, see `docs/specs/prior_art.md`).
 6. Matched devices: common-centroid or interdigitated, with dummies, the same orientation, and guard rings.

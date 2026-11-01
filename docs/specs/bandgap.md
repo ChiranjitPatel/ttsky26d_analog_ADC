@@ -5,7 +5,8 @@
 ## Function
 
 This block generates a temperature-stable voltage `vbg`. The ADC uses it as its reference
-(through the VREF buffer), and it can be viewed on `ua[1]` through the debug mux. It also
+(through the VREF buffer). The buffered VREF can be viewed on `ua[1]`. VBG and VPTAT themselves are
+measured only through the ADC, never on a pad. It also
 provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip temperature sensor**.
 
 ## Proposed architecture

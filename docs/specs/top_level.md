@@ -32,7 +32,7 @@ Other projects have submitted plain SAR ADCs and stand-alone bandgaps before (se
   │   VGND  ────►└───────┘      └───▲────┘  └────┬─────┘  └────┬────┘  │
   │                                 └────── code ◄──────────────┘      │
   │                                   (or ui[7:0] in external mode)    │
-  │ ua[1] ◄──► AMUX out (VBG / VREF / VPTAT)  or  VREF_EXT in ─────────┘
+  │ ua[1] ◄──► VREF_OUT (buffered VREF)  or  VREF_EXT in ──────────────┘
   └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -74,9 +74,12 @@ If the design doesn't fit, cut in this order: (1) comparator preamp, (2) VREF bu
 | Pin | Name | Dir | Description |
 |---|---|---|---|
 | `ua[0]` | VIN | in | ADC input, 0 … VREF |
-| `ua[1]` | AMUX / VREF_EXT | in/out | `REF_SEL` = 1: external reference **input** (1.0–1.8 V, decouple off-chip). `REF_SEL` = 0: analog debug **output** selected by `AMUX_SEL`. Measure it with a high-impedance meter only. |
+| `ua[1]` | VREF_OUT / VREF_EXT | in/out | `REF_SEL` = 1: external reference **input** (1.0–1.8 V, decouple off-chip). `REF_SEL` = 0 and `VREF_OE` = 1: **buffered VREF output** (DMM check). Otherwise Hi-Z. |
 
-When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the debug output never fights the external source.
+When `REF_SEL` = 1, the on-chip logic forces the VREF output switch off, so the output never fights the external source.
+
+**VBG and VPTAT never go to a pad.** They're too high-impedance to drive the pad's 5 pF and 500 Ω, so
+they're measured only through the ADC (`INSEL`). This decision saves the area of a debug buffer and mux.
 
 ### Digital
 
@@ -85,7 +88,8 @@ When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the 
 | `clk` | SAR clock | unused |
 | `rst_n` | active-low reset | active-low reset |
 | `ui[0]` | START (rising edge starts a conversion) | EXT_D0 |
-| `ui[2:1]` | AMUX_SEL: 00 Hi-Z, 01 VBG, 10 VREF buffered, 11 VPTAT | EXT_D[2:1] |
+| `ui[1]` | VREF_OE: 1 = buffered VREF on `ua[1]` (ignored when `REF_SEL` = 1) | EXT_D1 |
+| `ui[2]` | unused (tie low) | EXT_D2 |
 | `ui[3]` | BG_PD: 1 = power down the bandgap and buffer | EXT_D3 |
 | `ui[7:4]` | unused (tie low) | EXT_D[7:4] |
 | `uo[7:0]` | D[7:0], conversion result | D[7:0] mirrors EXT_D (loopback check) |
@@ -105,7 +109,7 @@ When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the 
 |---|---|---|
 | Normal ADC | MODE=0, REF_SEL=0, INSEL=00 | VIN digitized against the internal bandgap |
 | Temperature sensor | MODE=0, REF_SEL=0, INSEL=01 | Code proportional to absolute temperature |
-| Bandgap check (DMM) | MODE=0, REF_SEL=0, AMUX_SEL=01 | VBG on `ua[1]` |
+| VREF check (DMM) | MODE=0, REF_SEL=0, VREF_OE=1 | Buffered VREF on `ua[1]` |
 | Bandgap check (ADC) | MODE=0, REF_SEL=1 (known VREF on `ua[1]`), INSEL=10 | VBG digitized against a known reference |
 | Bandgap fallback | MODE=0, REF_SEL=1, INSEL=00 | ADC works even if the bandgap is dead |
 | Analog core debug | MODE=1 | RP2040 runs the SAR algorithm itself |
@@ -123,5 +127,5 @@ When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the 
   is 1 µs ≫ 7τ (needed for 0.5 LSB at 8 bits). OK, but source impedance off-chip adds to this.
 - External VREF on `ua[1]`: the DAC draws charge from VREF during every bit cycle through the 500 Ω path.
   Needs an off-chip decoupling cap (≥ 100 nF) next to the pin. Check settling in `tb_adc_ramp` with the pad model.
-- Debug output on `ua[1]`: the 5 pF pad plus the probe loads the selected node. Only buffered
-  or low-impedance nodes go to the pad (VREF buffer output); VBG/VPTAT go through a buffer or are read with the ADC.
+- VREF output on `ua[1]`: the VREF buffer must stay stable driving 5 pF + 500 Ω + probe while also driving the DAC.
+  Check this in the buffer testbench. VBG/VPTAT are read only through the ADC.

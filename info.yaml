@@ -26,8 +26,8 @@ project:
 pinout:
   # Inputs
   ui[0]: "START / EXT_D0"
-  ui[1]: "AMUX_SEL0 / EXT_D1"
-  ui[2]: "AMUX_SEL1 / EXT_D2"
+  ui[1]: "VREF_OE / EXT_D1"
+  ui[2]: "EXT_D2"
   ui[3]: "BG_PD / EXT_D3"
   ui[4]: "EXT_D4"
   ui[5]: "EXT_D5"
@@ -56,7 +56,7 @@ pinout:
 
   # Analog pins - make sure to also set "analog_pins" above, else the pins won't be connected
   ua[0]: "VIN"
-  ua[1]: "AMUX / VREF_EXT"
+  ua[1]: "VREF_OUT / VREF_EXT"
   ua[2]: ""
   ua[3]: ""
   ua[4]: ""
