@@ -1,0 +1,66 @@
+* Stage 1 — bias_gen testbench (Phase 1: tt, 27 C, VDPWR 1.8 V)
+* Output mirrors: one nfet_01v8 W=2 L=2 sink (gate = nbias) and one pfet_01v8_lvt W=2 L=2 source
+* (gate = pbias), both into 0.9 V. These are the unit devices other blocks will use.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.temp 27
+.param vdd=1.8
+
+VDD  vdd 0 {vdd}
+VPD  pd  0 0
+x1 vdd 0 pd nbias pbias bias_gen
+
+* unit output mirrors
+VMN mn 0 0.9
+XMON mn nbias 0 0 sky130_fd_pr__nfet_01v8 W=2 L=2 nf=1
+VMP mp 0 0.9
+XMOP mp pbias vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=2 nf=1
+
+.control
+set wr_singlescale
+set wr_vecnames
+echo "=== OP (enabled)"
+op
+let isink = -i(VMN)
+let isrc  = i(VMP)
+let itot  = -i(VDD)
+print v(nbias) v(pbias) isink isrc itot
+let icore = itot - isrc   ; supply current of bias_gen itself (the sink draws from VMN, not VDD)
+print icore
+
+echo "=== Output-voltage sweep of the unit sink (compliance)"
+dc VMN 0 1.8 0.01
+wrdata ../out/bias/sink_vout.dat i(VMN)
+
+echo "=== Supply sweep"
+dc VDD 1.4 2.0 0.01
+let isink = -i(VMN)
+let isrc  = i(VMP)
+wrdata ../out/bias/line.dat isink isrc
+meas dc isink162 find isink at=1.62
+meas dc isink180 find isink at=1.80
+meas dc isink198 find isink at=1.98
+meas dc isrc162 find isrc at=1.62
+meas dc isrc198 find isrc at=1.98
+
+echo "=== Power-down"
+alter VPD dc = 1.8
+op
+let ipd = -i(VDD)
+print ipd i(VMN) i(VMP)
+alter VPD dc = 0
+
+echo "=== Startup: VDPWR ramp 0 -> 1.8 V in 1 us, all nodes start at 0 V"
+alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
+tran 10n 40u uic
+let isink = -i(VMN)
+wrdata ../out/bias/startup.dat isink v(nbias) v(pbias) v(x1.su)
+
+echo "=== Startup, slow ramp: 0 -> 1.8 V in 100 us"
+alter @VDD[pulse] = [ 0 1.8 0 100u 1u 1 2 ]
+tran 50n 150u uic
+let isink = -i(VMN)
+wrdata ../out/bias/startup_slow.dat isink v(nbias) v(pbias) v(x1.su)
+quit
+.endc
+.end

@@ -44,7 +44,7 @@ the specs only define what the final system must do.
 
 ### Stage 1 — Bias current reference
 - **Goal:** a supply-independent bias current for the OTA, the VREF buffer and the comparator tail (if needed).
-- **Cells:** `bias_gen` (β-multiplier or a PTAT-mirror tap from the bandgap; decide in stage).
+- **Cells:** `bias_gen` (β-multiplier, chosen in stage 1 so the bandgap's OTA bias doesn't depend on the bandgap itself).
 - **Targets†:** I_bias = 1 µA nominal, mirrored outputs; changes < 10 % for VDPWR 1.62–1.98 V (Phase 2);
   has a startup circuit and powers down with `bg_pd`.
 - **Testbenches:** `tb_bias_op`, `tb_bias_startup` (supply ramp from 0 V, CLAUDE.md rule 7).
@@ -145,7 +145,7 @@ pass through simulation, layout and LVS on a small block.
 | Stage | a | b | c | d | e | f | g | Notes |
 |---|---|---|---|---|---|---|---|---|
 | 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (B1 moved to 1.25 V), tight headroom at 1.62 V |
-| 1 Bias | | | | | | | | |
+| 1 Bias | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps |
 | 2 OTA | | | | | | | | |
 | 3 Bandgap | | | | | | | | |
 | 4 PTAT | | | | | | | | |
