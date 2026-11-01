@@ -1,6 +1,7 @@
-# Project rules — TTSKY26d analog: 8-bit SAR ADC + bandgap reference
+# Project rules — TTSKY26d analog: bandgap-referenced 8-bit SAR ADC + temperature sensor
 
-Tiny Tapeout analog project on SkyWater sky130. Top module: `tt_um_adc`.
+Tiny Tapeout analog project on SkyWater sky130. Top module: `tt_um_chiranjitpatel_sar_adc`.
+**Fixed budget: 1x2 tile, 2 analog pins (`ua[0]`, `ua[1]`), VDPWR only.** It's already purchased; don't grow it.
 Specs live in `docs/specs/`. Read them before changing any circuit.
 
 ## Tool flow (keep to this flow)
@@ -28,19 +29,22 @@ Specs live in `docs/specs/`. Read them before changing any circuit.
 
 ## Design rules
 
-1. Keep scope small. The bandgap must be usable on its own; the ADC must also work with an
-   external reference (`ua[2]`), so a bandgap failure doesn't kill the ADC.
+1. Keep scope small and stay within the area budget in `docs/specs/top_level.md`. The ADC must
+   also work with an external reference on `ua[1]`, so a bandgap failure doesn't kill the ADC.
+   If the design doesn't fit, cut in the order listed in the spec. Resolution is the last thing to cut.
 2. Analog pads are slow and lossy (series resistance and pad capacitance — check the current
    numbers on the TT analog specs page). Never connect a fast or high-impedance node directly to a pad.
 3. Every function must be observable on the digital pins (codes, flags, comparator output),
    so it can be tested from the TT demo board's RP2040 without lab equipment.
 4. Provide bypass and debug modes on digital inputs: external SAR control, an analog debug
    mux, enable/power-down for each block.
-5. Matched devices: common-centroid or interdigitated, with dummies, the same orientation, and guard rings.
-6. Every node that can start in a bad state (bandgap, biasing) needs a startup circuit,
+5. Comparator kickback and DAC top-plate coupling must be checked in simulation; shield the
+   top-plate routing (lesson from TT06 silicon, see `docs/specs/prior_art.md`).
+6. Matched devices: common-centroid or interdigitated, with dummies, the same orientation, and guard rings.
+7. Every node that can start in a bad state (bandgap, biasing) needs a startup circuit,
    and a transient testbench that proves it starts from 0 V.
-7. Layout is frozen 3 weeks before the shuttle deadline; the remaining time is for DRC/LVS/precheck only.
-8. `docs/info.md` must contain the full test procedure before tapeout.
+8. Layout is frozen 3 weeks before the shuttle deadline; the remaining time is for DRC/LVS/precheck only.
+9. `docs/info.md` must contain the full test procedure before tapeout.
 
 ## Repository layout (create as needed)
 

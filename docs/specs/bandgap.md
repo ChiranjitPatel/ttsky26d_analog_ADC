@@ -1,12 +1,12 @@
 # Bandgap reference — specification
 
-**Status: DRAFT v0.1**
+**Status: DRAFT v0.2** (1x2 tile, 2 analog pins)
 
 ## Function
 
 This block generates a temperature-stable voltage `vbg`. The ADC uses it as its reference
 (through the VREF buffer), and it can be viewed on `ua[1]` through the debug mux. It also
-provides a PTAT voltage for temperature monitoring.
+provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip temperature sensor**.
 
 ## Proposed architecture
 
@@ -16,7 +16,10 @@ provides a PTAT voltage for temperature monitoring.
 - Error amplifier: 5-transistor OTA or a two-stage OTA. Pick whichever has enough gain and
   input-offset tolerance (offset is amplified onto VBG).
 - Startup circuit: required. It must release once the core is biased.
-- Enable / power-down input `en_bg`.
+- **PTAT branch:** a separate mirrored copy of the PTAT core current into its own resistor
+  (not a tap on the core), so the ADC input mux doesn't load the core. Target
+  VPTAT ≈ 0.6 V at 27 °C with a slope of ≈ 2 mV/°C, within the ADC range for VREF = 1.2 V.
+- Power-down input `bg_pd` (`ui[3]`).
 - Alternative if 1.62 V headroom is a problem in Phase 2: a current-mode (Banba)
   bandgap with an output of about 0.6–0.9 V. Decide after Phase 1.
 
@@ -31,8 +34,12 @@ provides a PTAT voltage for temperature monitoring.
 | B5 | Temperature coefficient | −40 … 125 °C, tt | | 30 | 50 | ppm/°C | 2 |
 | B6 | VBG spread | all corners, untrimmed | | | ±3 | % | 2 |
 | B7 | PSRR | DC / 1 MHz | 40 / 20 | | | dB | 2 |
-| B8 | Power-down current | `en_bg` = 0 | | | 1 | µA | 2 |
-| B9 | Area | | | | 100 × 80 | µm | layout |
+| B8 | Power-down current | `bg_pd` = 1 | | | 1 | µA | 2 |
+| B9 | Area (core + PTAT branch + startup + VREF buffer) | layout | | | 9 500 | µm² | layout |
+| B10 | VPTAT | tt, 27 °C, 1.8 V | 0.5 | 0.6 | 0.7 | V | 1 |
+| B11 | VPTAT slope | −40 … 125 °C | 1.8 | 2.0 | | mV/°C | 2 |
+| B12 | Temperature-sensor resolution (via 8-bit ADC, VREF = 1.2 V) | | | 2.3 | 2.6 | °C/LSB | 2 |
+| B13 | Temperature-sensor accuracy, untrimmed (1-point calibration in firmware) | −40 … 125 °C | | ±3 | ±5 | °C | 2 |
 
 ## Testbenches (to be written in `sim/bandgap/`)
 
@@ -43,6 +50,7 @@ provides a PTAT voltage for temperature monitoring.
 | `tb_bg_line` | B4 | `.dc` sweep of VDPWR |
 | `tb_bg_temp` | B5 | `.dc temp` sweep |
 | `tb_bg_psrr` | B7 | `.ac` with AC source on VDPWR |
+| `tb_bg_ptat` | B10, B11 | `.op` and `.dc temp` on `vptat` |
 
 ## Status
 
