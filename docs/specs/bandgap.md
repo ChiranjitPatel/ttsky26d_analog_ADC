@@ -14,8 +14,8 @@ provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip te
 - Classic op-amp-based bandgap: two PNP branches with an area ratio of 1:8, using
   `sky130_fd_pr__pnp_05v5_W3p40L3p40` in a 3×3 common-centroid array (1 centre + 8 around).
 - High-resistance poly resistors (`sky130_fd_pr__res_xhigh_po_0p35`) to keep the area small at low current.
-- Error amplifier: 5-transistor OTA or a two-stage OTA. Pick whichever has enough gain and
-  input-offset tolerance (offset is amplified onto VBG).
+- Error amplifier: the stage 2 two-stage OTA (a 5-transistor OTA has too little gain).
+  Its input offset is amplified onto VBG by about 1 + R2/R1.
 - Startup circuit: required. It must release once the core is biased.
 - **PTAT branch:** a separate mirrored copy of the PTAT core current into its own resistor
   (not a tap on the core), so the ADC input mux doesn't load the core. Target
@@ -60,4 +60,10 @@ sky130 PNP is ≈ 1.253 V (`sim/devices/README.md`).
 
 | # | Result | Phase | Date | Notes |
 |---|---|---|---|---|
-| — | not yet simulated | | | |
+| B1 | 1.2154 V | 1 (tt) | 2026-11-01 | Passes, but only 5 mV above the minimum; zero-TC point of this circuit. B1 change proposed in `sim/bandgap/README.md` |
+| B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-01 | core 13.6 µA |
+| B3 | 0.34 µs after a 1 µs ramp | 1 | 2026-11-01 | also starts on a 100 µs ramp |
+| B4 | 6.1 mV/V | early, tt only | 2026-11-01 | |
+| B5 | 22 ppm/°C | early, tt only | 2026-11-01 | R2/R1 = 19/2 |
+| B7 | 45.8 dB DC / −9.8 dB at 1 MHz | early, tt only | 2026-11-01 | ❌ at 1 MHz; RC filter before the VREF buffer proposed |
+| B8 | 1.4 nA | early, tt only | 2026-11-01 | incl. bias_gen |

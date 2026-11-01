@@ -82,7 +82,7 @@ N 760 510 760 550 {lab=cz}
 C {lab_pin.sym} 760 550 0 0 {name=p30 sig_type=std_logic lab=cz}
 N 740 480 700 480 {lab=VGND}
 C {lab_pin.sym} 700 480 0 0 {name=p31 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/cap_mim_m3_1.sym} 1140 480 0 0 {name=CC W=15.8 L=15.8 MF=1 model=cap_mim_m3_1 spiceprefix=X}
+C {sky130_fd_pr/cap_mim_m3_1.sym} 1140 480 0 0 {name=CC W=18.7 L=18.7 MF=1 model=cap_mim_m3_1 spiceprefix=X}
 N 1140 450 1140 410 {lab=cz}
 C {lab_pin.sym} 1140 410 0 0 {name=p32 sig_type=std_logic lab=cz}
 N 1140 510 1140 550 {lab=out}

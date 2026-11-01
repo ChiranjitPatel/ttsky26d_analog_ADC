@@ -1,4 +1,4 @@
-"""Simple transistor-level drawings of stage 1 (bias_gen) and stage 2 (ota) for reading the circuits.
+"""Simple transistor-level drawings of each stage (bias_gen, ota, bandgap_core, ...) for reading the circuits.
 
 Not the source of truth (that is xschem/*.sch). Regenerate: python3 draw_stages.py .
 Needs: pip install schemdraw
@@ -168,7 +168,7 @@ s.w(m7["drain"], m6["drain"])
 CY = 6.6
 s.dot((6, CY))
 s.d.add(elm.Resistor().right().at((6, CY)).to((8.4, CY)).label("RZ ≈40 kΩ", loc="top", fontsize=8))
-s.d.add(elm.Capacitor().right().at((8.4, CY)).to((11, CY)).label("CC 0.5 pF\nMIM", loc="top", fontsize=8))
+s.d.add(elm.Capacitor().right().at((8.4, CY)).to((11, CY)).label("CC 0.7 pF\nMIM", loc="top", fontsize=8))
 s.dot((11, CY)); s.net((8.4, CY), "cz", "below")
 # output
 OY = 5.2
@@ -185,4 +185,64 @@ s.d.add(elm.Label().at((18.6, 8.2)).label("+ local inverter pd → pdb\n  (MIP p
 s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, pbias (in), pd (in), inp (in), inn (in), out (out).   "
         "Stage 1: M1/M2 pair + M3/M4 mirror → out1.  Stage 2: M6 common source + M7 load → out.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage2_ota.png")
+
+# =================================================================== stage 3: bandgap_core
+s = Sch()
+VDD, GND = 13.0, 0.0
+s.title(0, 15.2, "Stage 3 — bandgap_core (VBG = Vbe + (R2/R1)·ΔVbe ≈ 1.215 V)",
+        "all L in µm; W/L shown as W/L ×mult; body of NMOS = VGND, PMOS = VDPWR; R units = res_xhigh_po 0.35/2 ≈ 12.1 kΩ")
+s.rail(VDD, 0, 28.5, "VDPWR")
+s.rail(GND, 0, 28.5, "VGND")
+
+def pnp(x, ytop, name, info):
+    q = s.d.add(elm.BjtPnp(circle=True).right().at((x, ytop)).anchor("emitter"))
+    b, c = tuple(q.absanchors["base"]), tuple(q.absanchors["collector"])
+    s.w(c, (x, GND)); s.dot((x, GND))
+    s.w(b, (b[0] - 0.5, b[1]), (b[0] - 0.5, GND)); s.dot((b[0] - 0.5, GND))
+    s.d.add(elm.Label().at((x + 0.5, ytop - 0.4)).label(name, halign="left", fontsize=10))
+    s.d.add(elm.Label().at((x + 0.5, ytop - 0.95)).label(info, halign="left", fontsize=8, color=DEVC))
+
+mpa = s.fet("p", 3, VDD, "left", "MPA", "pfet 8/4")
+mpb = s.fet("p", 7.5, VDD, "left", "MPB", "pfet 8/4")
+mpc = s.fet("p", 12, VDD, "left", "MPC", "pfet 8/4")
+for m in (mpa, mpb, mpc):
+    s.net(m["gate"], "vgp", "left")
+for x in (3, 7.5, 12):
+    s.dot((x, VDD))
+# branch A: Q1
+s.w(mpa["drain"], (3, 4.5)); s.dot((3, 8.5)); s.net((3, 8.5), "va", "right")
+pnp(3, 4.5, "Q1", "PNP ×1")
+# branch B: R1 + Q2
+s.w(mpb["drain"], (7.5, 9.5)); s.dot((7.5, 10.2)); s.net((7.5, 10.2), "vb", "right")
+s.d.add(elm.Resistor().down().at((7.5, 9.5)).to((7.5, 6.5)).label("R1 = 2 units\n≈ 24 kΩ", loc="bottom", fontsize=8))
+s.w((7.5, 6.5), (7.5, 4.5)); s.net((7.5, 5.6), "vq2", "right")
+pnp(7.5, 4.5, "Q2", "PNP ×8")
+# branch C: R2 + Q3 and output
+s.w(mpc["drain"], (12, 9.5)); s.dot((12, 10.2))
+s.d.add(elm.Resistor().down().at((12, 9.5)).to((12, 6.5)).label("R2 = 19 units\n≈ 230 kΩ", loc="bottom", fontsize=8))
+s.w((12, 6.5), (12, 4.5)); s.net((12, 5.6), "vq3", "right")
+pnp(12, 4.5, "Q3", "PNP ×1")
+s.w((12, 10.2), (16, 10.2)); s.d.add(elm.Dot(open=True).at((16, 10.2))); s.net((16, 10.2), "vbg", "right")
+# OTA
+o = s.d.add(elm.Opamp(leads=True).right().at((20.0, 6.0)).anchor("out"))
+i1, i2, oo = tuple(o.absanchors["in1"]), tuple(o.absanchors["in2"]), tuple(o.absanchors["out"])
+s.net(i1, "va  (inn)", "left"); s.net(i2, "vb  (inp)", "left"); s.net(oo, "vgp", "right")
+s.d.add(elm.Label().at((16.8, 4.3)).label("ota (stage 2)\npbias, pd", halign="left", fontsize=8, color=DEVC))
+s.d.add(elm.Label().at((14.2, 8.0)).label("OTA forces va = vb\n→ I = ΔVbe / R1 ≈ 2.26 µA per branch", halign="left", fontsize=9, color=DEVC))
+# startup
+s.d.add(elm.Label().at((22.0, 14.0)).label("startup", halign="left", fontsize=11, color=DEVC))
+msu2 = s.fet("p", 24, VDD, "left", "MSU2", "pfet_lvt 2/2 (1 µA)")
+s.net(msu2["gate"], "pbias", "left"); s.dot((24, VDD))
+msu3 = s.fet("n", 24, 4.0, "left", "MSU3", "nfet 1/1")
+s.w(msu2["drain"], msu3["drain"]); s.net(msu3["gate"], "vbg", "left")
+s.w(msu3["source"], (24, GND)); s.dot((24, GND))
+SU = (24, 8.0); s.dot(SU); s.net(SU, "su", "right")
+msu1 = s.fet("n", 27.6, 4.0, "left", "MSU1", "nfet 0.42/1")
+s.w(SU, (25.8, 8.0), (25.8, msu1["gate"][1]), msu1["gate"])
+s.net(msu1["drain"], "vgp", "above"); s.w(msu1["source"], (27.6, GND)); s.dot((27.6, GND))
+msd = s.fet("n", 21.0, 1.0, "left", "MSD", "nfet 0.42/0.15")
+s.net(msd["drain"], "su", "above"); s.net(msd["gate"], "pd", "left"); s.w(msd["source"], (21.0, GND)); s.dot((21.0, GND))
+s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, pbias (in), pd (in), vbg (out), vgp (out, for the PTAT branch).   "
+        "Startup: while vbg is low, MSU2 pulls su high and MSU1 pulls vgp low; once vbg is up, MSU3 holds su low.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage3_bandgap_core.png")
 print("ok")

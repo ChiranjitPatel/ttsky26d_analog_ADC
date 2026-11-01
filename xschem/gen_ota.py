@@ -26,7 +26,7 @@ from xsch import Schematic
 NF, PF, PFL = "sky130_fd_pr/nfet_01v8.sym", "sky130_fd_pr/pfet_01v8.sym", "sky130_fd_pr/pfet_01v8_lvt.sym"
 RX, CM = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/cap_mim_m3_1.sym"
 
-CC_W = CC_L = 15.8   # um -> ~0.5 pF  (2.0 fF/um^2 + 0.164 fF/um, stage 0)
+CC_W = CC_L = 18.7   # um -> ~0.7 pF (2.0 fF/um^2 + 0.164 fF/um, stage 0); raised from 0.5 pF for the bandgap loop (stage 3)
 RZ_L = 7.0           # um -> ~40 kOhm (2004 ohm/sq, 312 ohm per end)
 
 s = Schematic()

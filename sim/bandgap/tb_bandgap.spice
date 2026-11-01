@@ -1,0 +1,47 @@
+* Stage 3 — bandgap_core testbench (Phase 1: tt, 27 C, VDPWR 1.8 V)
+* bias_gen (stage 1) supplies pbias. VMB measures the bandgap_core supply current alone.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.temp 27
+
+VDD  vdd  0 1.8
+VMB  vdd  vddb 0
+VPD  pd   0 0
+xb   vdd  0 pd nbias pbias bias_gen
+xbg  vddb 0 pbias pd vbg vgp bandgap_core
+
+.control
+set wr_singlescale
+set wr_vecnames
+echo "=== OP"
+op
+let ibg = i(VMB)
+let itot = -i(VDD)
+let dv_in = v(xbg.vb) - v(xbg.va)
+print v(vbg) v(vgp) v(xbg.va) v(xbg.vb) v(xbg.vq2) v(xbg.vq3) v(xbg.su) dv_in ibg itot
+print @m.xbg.xmpa.msky130_fd_pr__pfet_01v8[id] @m.xbg.xmpb.msky130_fd_pr__pfet_01v8[id] @m.xbg.xmpc.msky130_fd_pr__pfet_01v8[id]
+
+echo "=== Temperature sweep (tt)"
+dc temp -40 125 5
+wrdata ../out/bandgap/temp.dat v(vbg) v(xbg.va) v(xbg.vb)
+* (ngspice-36 can't 'meas' on a temperature sweep; report.py evaluates temp.dat)
+
+echo "=== Supply sweep"
+dc VDD 1.2 2.0 0.01
+wrdata ../out/bandgap/line.dat v(vbg)
+meas dc vbg162 find v(vbg) at=1.62
+meas dc vbg198 find v(vbg) at=1.98
+
+echo "=== Startup: 1 us ramp, all nodes from 0 V"
+alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
+tran 10n 40u uic
+wrdata ../out/bandgap/startup.dat v(vbg) v(vgp) v(xbg.su) v(pbias)
+
+echo "=== Startup: 100 us ramp"
+alter @VDD[pulse] = [ 0 1.8 0 100u 1u 1 2 ]
+tran 50n 150u uic
+wrdata ../out/bandgap/startup_slow.dat v(vbg) v(vgp) v(xbg.su) v(pbias)
+quit
+.endc
+.end

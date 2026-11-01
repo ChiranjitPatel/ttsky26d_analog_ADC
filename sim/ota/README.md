@@ -19,7 +19,7 @@ Two-stage Miller OTA, biased from `bias_gen` (`pbias`):
 | M3, M4 | nfet_01v8 | 1/4 | 1 µA each | mirror load |
 | M6 | nfet_01v8 | 1/4 × 4 | 4 µA | 2nd stage (4× M3 density → zero systematic offset) |
 | M7 | pfet_01v8_lvt | 2/2 × 4 | 4 µA | 2nd-stage load |
-| CC | cap_mim_m3_1 | 15.8 × 15.8 | — | 0.5 pF Miller cap (bottom plate on `out`) |
+| CC | cap_mim_m3_1 | 18.7 × 18.7 | — | 0.7 pF Miller cap (bottom plate on `out`); was 0.5 pF, raised in stage 3 for the bandgap loop margin |
 | RZ | res_xhigh_po_0p35 | L = 7 | — | ≈ 40 kΩ zero-nulling resistor |
 
 - **PMOS input pair:** the bandgap inputs sit at Vbe ≈ 0.55–0.80 V. An NMOS pair (Vgs ≈ 0.6 V)
@@ -31,8 +31,8 @@ Two-stage Miller OTA, biased from `bias_gen` (`pbias`):
 
 ## Phase 1 results (tt, 27 °C, 1.8 V)
 
-See `results.md` (generated): 80.4 dB, 4.1 MHz unity-gain frequency, 72° phase margin with
-0.5 pF load, input range ≤ 0.20–1.28 V, 5.8 µA, 0.7 nA powered down.
+See `results.md` (generated): 80.4 dB, 3.0 MHz unity-gain frequency, 81° phase margin with
+0.5 pF load (CC = 0.7 pF since stage 3; it was 4.1 MHz / 72° with CC = 0.5 pF), input range ≤ 0.20–1.28 V, 5.8 µA, 0.7 nA powered down.
 
 ## Notes for stage 3 and Phase 2
 
@@ -41,7 +41,7 @@ See `results.md` (generated): 80.4 dB, 4.1 MHz unity-gain frequency, 72° phase 
    open-loop margin, is what counts.
 2. **Offset σ ≤ 2 mV is still to be checked** with Monte Carlo (Phase 2). Pelgrom estimate for the
    8/2 input pair is ≈ 1–1.5 mV; the 1/4 NMOS loads add to it.
-3. **Area:** CC is the largest device (≈ 250 µm²). If area gets tight, reduce CC together with the
+3. **Area:** CC is the largest device (≈ 350 µm² at 0.7 pF). If area gets tight, reduce CC together with the
    bandgap's real load after stage 3.
 4. **ngspice-36 quirk:** running `op` after a `tran` with an `alter`ed source gave a false solution
    (v(out) = 2.26 V). Power-down is therefore checked in its own testbench.
