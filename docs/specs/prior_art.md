@@ -1,7 +1,7 @@
 # Prior art — Tiny Tapeout SAR ADCs and bandgaps (surveyed 2026-11-01)
 
-The survey covered GitHub repo search and web search. tinytapeout.com wasn't reachable from the
-survey environment, so the list may be incomplete.
+The survey covered GitHub repo search and web search. tinytapeout.com wasn't reachable at survey
+time, so the list may be incomplete.
 
 ## SAR ADCs
 

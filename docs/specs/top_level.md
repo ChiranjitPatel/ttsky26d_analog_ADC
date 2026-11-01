@@ -44,8 +44,11 @@ Other projects have submitted plain SAR ADCs and stand-alone bandgaps before (se
 | Supply | VDPWR = 1.8 V only (no VAPWR) |
 | Tiles | **1x2** = **161.00 × 225.76 µm** (36 347 µm²), from TT `tt-support-tools` `tech/sky130A/tile_sizes.yaml` and `def/analog/tt_analog_1x2.def` |
 | Pin locations | `ua[0]` at x = 152.26 µm, `ua[1]` at x = 132.94 µm, on the **bottom** edge (met4, 0.9 × 1.0 µm). Digital pins (`clk`, `ui_in`, …) on the **top** edge (met4, 0.3 × 1.0 µm). Place VIN-side analog near the bottom right and SAR logic near the top |
-| Power | We draw our own `VDPWR`/`VGND` straps; they must be on **met4**, at least **1.2 µm** wide (precheck rule) |
-| Allowed layers | Full sky130 stack including met5, `capm` (MIM m3–m4) and `capm2` (MIM m4–m5) |
+| Power | We draw our own `VDPWR`/`VGND` straps: **vertical met4 stripes**, at least **1.2 µm** wide, starting within the bottom 10 µm and reaching the top 10 µm of the tile. The PDN drops about 0.1 V at 20 mA |
+| Analog pad path (`ua[]`) | Goes through the TT analog switch `tt_asw_3v3`. **R < 500 Ω, C < 5 pF, max 4 mA** |
+| Digital pads | 4 mA drive, 33 MHz max output, 66 MHz max input. `clk` has up to 10 ns insertion delay. Demo board RP2040 can generate 1 Hz–66.5 MHz |
+| Unused outputs | All unused `uo_out`, `uio_out`, `uio_oe` must be tied to VGND (no floating outputs) |
+| Allowed layers | sky130 up to **met4 only — met5 is forbidden** (it carries the TT power grid). So MIM = `cap_mim_m3_1` (`capm`, m3–m4) only; `cap_mim_m4_2` is **not** usable |
 | Analog pins | **2** (`ua[0]`, `ua[1]`) |
 | Total supply current | < 300 µA while converting (target), < 10 µA powered down (stretch) |
 | Clock | `clk` = SAR clock, 1 MHz nominal (≈ 100 kS/s, 10 clocks/conversion), 10 MHz stretch |
@@ -110,7 +113,15 @@ When `REF_SEL` = 1, the on-chip logic forces the AMUX output switch off, so the 
 ## Open questions
 
 1. SAR logic implementation: synthesized sky130 standard cells placed by script, or hand-placed standard-cell DFFs and gates?
-2. MIM placement vs. our own met4 power straps: since we draw the straps, keep them clear of the
-   DAC array (or use `cap_mim_m4_2` and route power around it). Prior TT SARs (TT06, 26d) used MIM successfully.
-3. Pad series resistance and capacitance of `ua[]`: the numbers are on tinytapeout.com/specs/analog,
-   which wasn't reachable from the build environment. Fill them in here.
+2. MIM placement vs. our own met4 power straps: the MIM top plate is on met4, and the power stripes are
+   vertical met4 running the full tile height. Place the DAC array between two stripes, with no stripe
+   crossing it. Prior TT SARs (TT06, 26d) used MIM successfully.
+
+## Pad budget checks (from TT analog specs: R < 500 Ω, C < 5 pF)
+
+- VIN sampling: τ ≈ (500 Ω + R_switch) × C_DAC (2.5 pF) ≈ 2–3 ns. At 1 MHz the sampling phase
+  is 1 µs ≫ 7τ (needed for 0.5 LSB at 8 bits). OK, but source impedance off-chip adds to this.
+- External VREF on `ua[1]`: the DAC draws charge from VREF during every bit cycle through the 500 Ω path.
+  Needs an off-chip decoupling cap (≥ 100 nF) next to the pin. Check settling in `tb_adc_ramp` with the pad model.
+- Debug output on `ua[1]`: the 5 pF pad plus the probe loads the selected node. Only buffered
+  or low-impedance nodes go to the pad (VREF buffer output); VBG/VPTAT go through a buffer or are read with the ADC.

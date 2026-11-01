@@ -35,8 +35,9 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
 1. Keep scope small and stay within the area budget in `docs/specs/top_level.md`. The ADC must
    also work with an external reference on `ua[1]`, so a bandgap failure doesn't kill the ADC.
    If the design doesn't fit, cut in the order listed in the spec. Resolution is the last thing to cut.
-2. Analog pads are slow and lossy (series resistance and pad capacitance — check the current
-   numbers on the TT analog specs page). Never connect a fast or high-impedance node directly to a pad.
+2. Analog pads are slow and lossy: R < 500 Ω, C < 5 pF, max 4 mA, through the TT analog switch
+   (tinytapeout.com/specs/analog). Model this in every testbench that touches `ua[]`.
+   Never connect a fast or high-impedance node directly to a pad.
 3. Every function must be observable on the digital pins (codes, flags, comparator output),
    so it can be tested from the TT demo board's RP2040 without lab equipment.
 4. Provide bypass and debug modes on digital inputs: external SAR control, an analog debug
@@ -48,6 +49,8 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
    and a transient testbench that proves it starts from 0 V.
 8. Layout is frozen 3 weeks before the shuttle deadline; the remaining time is for DRC/LVS/precheck only.
 9. `docs/info.md` must contain the full test procedure before tapeout.
+10. **No met5** anywhere (TT power grid). Power = vertical met4 stripes ≥ 1.2 µm wide, from the bottom
+    10 µm to the top 10 µm of the tile. Tie all unused digital outputs to VGND.
 
 ## Repository layout (create as needed)
 
