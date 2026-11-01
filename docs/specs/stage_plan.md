@@ -144,7 +144,7 @@ pass through simulation, layout and LVS on a small block.
 
 | Stage | a | b | c | d | e | f | g | Notes |
 |---|---|---|---|---|---|---|---|---|
-| 0 Devices | — | | | — | — | — | — | |
+| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (above B1), tight headroom at 1.62 V |
 | 1 Bias | | | | | | | | |
 | 2 OTA | | | | | | | | |
 | 3 Bandgap | | | | | | | | |

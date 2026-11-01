@@ -1,0 +1,27 @@
+* Stage 0 — MIM capacitor characterization: sky130_fd_pr__cap_mim_m3_1 (tt)
+* C = |I| / (2*pi*f*|V|) at 1 MHz with 1 V AC. Three sizes separate area and perimeter terms:
+*   C = Ca * W*L + Cp * 2*(W+L)
+* Pins: c0 (top, met4/capm) c1 (bottom, met3)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.temp 27
+
+V1 a 0 dc 0 ac 1
+V2 a c2 0
+V5 a c5 0
+V10 a c10 0
+xc2  c2  0 sky130_fd_pr__cap_mim_m3_1 W=2  L=2  MF=1
+xc5  c5  0 sky130_fd_pr__cap_mim_m3_1 W=5  L=5  MF=1
+xc10 c10 0 sky130_fd_pr__cap_mim_m3_1 W=10 L=10 MF=1
+
+.control
+set wr_singlescale
+set wr_vecnames
+ac lin 1 1meg 1meg
+let c2  = mag(i(V2))/(2*pi*1e6)
+let c5  = mag(i(V5))/(2*pi*1e6)
+let c10 = mag(i(V10))/(2*pi*1e6)
+print c2 c5 c10
+wrdata ../out/devices/mim.dat c2 c5 c10
+quit
+.endc
+.end

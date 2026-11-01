@@ -1,0 +1,137 @@
+* Stage 0 — MOSFET characterization (tt, 27 C, VDPWR 1.8 V)
+* All devices W = 2 um, nf = 1. NMOS: source/bulk = 0 V, drain = 0.9 V.
+* PMOS: source/bulk = 1.8 V, drain = 0.9 V, |Vgs| = v(gn). Sweep |Vgs| 0 -> 1.8 V.
+* Saves id, gm, gds, vth, cgg per device; post-processed by stage0.py into gm/Id tables.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.temp 27
+
+VDD vdd 0 1.8
+VGN gn 0 0
+EGP gp 0 vdd gn 1
+VDN dn 0 0.9
+VDP dp 0 0.9
+
+xn_0p15 dn gn 0 0 sky130_fd_pr__nfet_01v8 W=2 L=0.15 nf=1
+xn_0p35 dn gn 0 0 sky130_fd_pr__nfet_01v8 W=2 L=0.35 nf=1
+xn_0p5 dn gn 0 0 sky130_fd_pr__nfet_01v8 W=2 L=0.5 nf=1
+xn_1 dn gn 0 0 sky130_fd_pr__nfet_01v8 W=2 L=1 nf=1
+xn_2 dn gn 0 0 sky130_fd_pr__nfet_01v8 W=2 L=2 nf=1
+xp_0p15 dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=0.15 nf=1
+xp_0p35 dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=0.35 nf=1
+xp_0p5 dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=0.5 nf=1
+xp_1 dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=1 nf=1
+xp_2 dp gp vdd vdd sky130_fd_pr__pfet_01v8 W=2 L=2 nf=1
+xnl_0p15 dn gn 0 0 sky130_fd_pr__nfet_01v8_lvt W=2 L=0.15 nf=1
+xnl_0p35 dn gn 0 0 sky130_fd_pr__nfet_01v8_lvt W=2 L=0.35 nf=1
+xnl_0p5 dn gn 0 0 sky130_fd_pr__nfet_01v8_lvt W=2 L=0.5 nf=1
+xnl_1 dn gn 0 0 sky130_fd_pr__nfet_01v8_lvt W=2 L=1 nf=1
+xnl_2 dn gn 0 0 sky130_fd_pr__nfet_01v8_lvt W=2 L=2 nf=1
+xpl_0p35 dp gp vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=0.35 nf=1
+xpl_0p5 dp gp vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=0.5 nf=1
+xpl_1 dp gp vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=1 nf=1
+xpl_2 dp gp vdd vdd sky130_fd_pr__pfet_01v8_lvt W=2 L=2 nf=1
+
+.control
+save v(gn)
+save @m.xn_0p15.msky130_fd_pr__nfet_01v8[id]
+save @m.xn_0p15.msky130_fd_pr__nfet_01v8[gm]
+save @m.xn_0p15.msky130_fd_pr__nfet_01v8[gds]
+save @m.xn_0p15.msky130_fd_pr__nfet_01v8[vth]
+save @m.xn_0p15.msky130_fd_pr__nfet_01v8[cgg]
+save @m.xn_0p35.msky130_fd_pr__nfet_01v8[id]
+save @m.xn_0p35.msky130_fd_pr__nfet_01v8[gm]
+save @m.xn_0p35.msky130_fd_pr__nfet_01v8[gds]
+save @m.xn_0p35.msky130_fd_pr__nfet_01v8[vth]
+save @m.xn_0p35.msky130_fd_pr__nfet_01v8[cgg]
+save @m.xn_0p5.msky130_fd_pr__nfet_01v8[id]
+save @m.xn_0p5.msky130_fd_pr__nfet_01v8[gm]
+save @m.xn_0p5.msky130_fd_pr__nfet_01v8[gds]
+save @m.xn_0p5.msky130_fd_pr__nfet_01v8[vth]
+save @m.xn_0p5.msky130_fd_pr__nfet_01v8[cgg]
+save @m.xn_1.msky130_fd_pr__nfet_01v8[id]
+save @m.xn_1.msky130_fd_pr__nfet_01v8[gm]
+save @m.xn_1.msky130_fd_pr__nfet_01v8[gds]
+save @m.xn_1.msky130_fd_pr__nfet_01v8[vth]
+save @m.xn_1.msky130_fd_pr__nfet_01v8[cgg]
+save @m.xn_2.msky130_fd_pr__nfet_01v8[id]
+save @m.xn_2.msky130_fd_pr__nfet_01v8[gm]
+save @m.xn_2.msky130_fd_pr__nfet_01v8[gds]
+save @m.xn_2.msky130_fd_pr__nfet_01v8[vth]
+save @m.xn_2.msky130_fd_pr__nfet_01v8[cgg]
+save @m.xp_0p15.msky130_fd_pr__pfet_01v8[id]
+save @m.xp_0p15.msky130_fd_pr__pfet_01v8[gm]
+save @m.xp_0p15.msky130_fd_pr__pfet_01v8[gds]
+save @m.xp_0p15.msky130_fd_pr__pfet_01v8[vth]
+save @m.xp_0p15.msky130_fd_pr__pfet_01v8[cgg]
+save @m.xp_0p35.msky130_fd_pr__pfet_01v8[id]
+save @m.xp_0p35.msky130_fd_pr__pfet_01v8[gm]
+save @m.xp_0p35.msky130_fd_pr__pfet_01v8[gds]
+save @m.xp_0p35.msky130_fd_pr__pfet_01v8[vth]
+save @m.xp_0p35.msky130_fd_pr__pfet_01v8[cgg]
+save @m.xp_0p5.msky130_fd_pr__pfet_01v8[id]
+save @m.xp_0p5.msky130_fd_pr__pfet_01v8[gm]
+save @m.xp_0p5.msky130_fd_pr__pfet_01v8[gds]
+save @m.xp_0p5.msky130_fd_pr__pfet_01v8[vth]
+save @m.xp_0p5.msky130_fd_pr__pfet_01v8[cgg]
+save @m.xp_1.msky130_fd_pr__pfet_01v8[id]
+save @m.xp_1.msky130_fd_pr__pfet_01v8[gm]
+save @m.xp_1.msky130_fd_pr__pfet_01v8[gds]
+save @m.xp_1.msky130_fd_pr__pfet_01v8[vth]
+save @m.xp_1.msky130_fd_pr__pfet_01v8[cgg]
+save @m.xp_2.msky130_fd_pr__pfet_01v8[id]
+save @m.xp_2.msky130_fd_pr__pfet_01v8[gm]
+save @m.xp_2.msky130_fd_pr__pfet_01v8[gds]
+save @m.xp_2.msky130_fd_pr__pfet_01v8[vth]
+save @m.xp_2.msky130_fd_pr__pfet_01v8[cgg]
+save @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[id]
+save @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[gm]
+save @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[gds]
+save @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[vth]
+save @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[cgg]
+save @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[id]
+save @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[gm]
+save @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[gds]
+save @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[vth]
+save @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[cgg]
+save @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[id]
+save @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[gm]
+save @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[gds]
+save @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[vth]
+save @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[cgg]
+save @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[id]
+save @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[gm]
+save @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[gds]
+save @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[vth]
+save @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[cgg]
+save @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[id]
+save @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[gm]
+save @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[gds]
+save @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[vth]
+save @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[cgg]
+save @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[id]
+save @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[gm]
+save @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[gds]
+save @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[vth]
+save @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[cgg]
+save @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[id]
+save @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[gm]
+save @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[gds]
+save @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[vth]
+save @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[cgg]
+save @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[id]
+save @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[gm]
+save @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[gds]
+save @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[vth]
+save @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[cgg]
+save @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[id]
+save @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[gm]
+save @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[gds]
+save @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[vth]
+save @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[cgg]
+dc VGN 0 1.8 0.005
+set wr_singlescale
+set wr_vecnames
+wrdata ../out/devices/mos.dat v(gn) @m.xn_0p15.msky130_fd_pr__nfet_01v8[id] @m.xn_0p15.msky130_fd_pr__nfet_01v8[gm] @m.xn_0p15.msky130_fd_pr__nfet_01v8[gds] @m.xn_0p15.msky130_fd_pr__nfet_01v8[vth] @m.xn_0p15.msky130_fd_pr__nfet_01v8[cgg] @m.xn_0p35.msky130_fd_pr__nfet_01v8[id] @m.xn_0p35.msky130_fd_pr__nfet_01v8[gm] @m.xn_0p35.msky130_fd_pr__nfet_01v8[gds] @m.xn_0p35.msky130_fd_pr__nfet_01v8[vth] @m.xn_0p35.msky130_fd_pr__nfet_01v8[cgg] @m.xn_0p5.msky130_fd_pr__nfet_01v8[id] @m.xn_0p5.msky130_fd_pr__nfet_01v8[gm] @m.xn_0p5.msky130_fd_pr__nfet_01v8[gds] @m.xn_0p5.msky130_fd_pr__nfet_01v8[vth] @m.xn_0p5.msky130_fd_pr__nfet_01v8[cgg] @m.xn_1.msky130_fd_pr__nfet_01v8[id] @m.xn_1.msky130_fd_pr__nfet_01v8[gm] @m.xn_1.msky130_fd_pr__nfet_01v8[gds] @m.xn_1.msky130_fd_pr__nfet_01v8[vth] @m.xn_1.msky130_fd_pr__nfet_01v8[cgg] @m.xn_2.msky130_fd_pr__nfet_01v8[id] @m.xn_2.msky130_fd_pr__nfet_01v8[gm] @m.xn_2.msky130_fd_pr__nfet_01v8[gds] @m.xn_2.msky130_fd_pr__nfet_01v8[vth] @m.xn_2.msky130_fd_pr__nfet_01v8[cgg] @m.xp_0p15.msky130_fd_pr__pfet_01v8[id] @m.xp_0p15.msky130_fd_pr__pfet_01v8[gm] @m.xp_0p15.msky130_fd_pr__pfet_01v8[gds] @m.xp_0p15.msky130_fd_pr__pfet_01v8[vth] @m.xp_0p15.msky130_fd_pr__pfet_01v8[cgg] @m.xp_0p35.msky130_fd_pr__pfet_01v8[id] @m.xp_0p35.msky130_fd_pr__pfet_01v8[gm] @m.xp_0p35.msky130_fd_pr__pfet_01v8[gds] @m.xp_0p35.msky130_fd_pr__pfet_01v8[vth] @m.xp_0p35.msky130_fd_pr__pfet_01v8[cgg] @m.xp_0p5.msky130_fd_pr__pfet_01v8[id] @m.xp_0p5.msky130_fd_pr__pfet_01v8[gm] @m.xp_0p5.msky130_fd_pr__pfet_01v8[gds] @m.xp_0p5.msky130_fd_pr__pfet_01v8[vth] @m.xp_0p5.msky130_fd_pr__pfet_01v8[cgg] @m.xp_1.msky130_fd_pr__pfet_01v8[id] @m.xp_1.msky130_fd_pr__pfet_01v8[gm] @m.xp_1.msky130_fd_pr__pfet_01v8[gds] @m.xp_1.msky130_fd_pr__pfet_01v8[vth] @m.xp_1.msky130_fd_pr__pfet_01v8[cgg] @m.xp_2.msky130_fd_pr__pfet_01v8[id] @m.xp_2.msky130_fd_pr__pfet_01v8[gm] @m.xp_2.msky130_fd_pr__pfet_01v8[gds] @m.xp_2.msky130_fd_pr__pfet_01v8[vth] @m.xp_2.msky130_fd_pr__pfet_01v8[cgg] @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[id] @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[gds] @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[vth] @m.xnl_0p15.msky130_fd_pr__nfet_01v8_lvt[cgg] @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[id] @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[gds] @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[vth] @m.xnl_0p35.msky130_fd_pr__nfet_01v8_lvt[cgg] @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[id] @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[gds] @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[vth] @m.xnl_0p5.msky130_fd_pr__nfet_01v8_lvt[cgg] @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[id] @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[gds] @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[vth] @m.xnl_1.msky130_fd_pr__nfet_01v8_lvt[cgg] @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[id] @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[gm] @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[gds] @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[vth] @m.xnl_2.msky130_fd_pr__nfet_01v8_lvt[cgg] @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[id] @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[gm] @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[gds] @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[vth] @m.xpl_0p35.msky130_fd_pr__pfet_01v8_lvt[cgg] @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[id] @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[gm] @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[gds] @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[vth] @m.xpl_0p5.msky130_fd_pr__pfet_01v8_lvt[cgg] @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[id] @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[gm] @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[gds] @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[vth] @m.xpl_1.msky130_fd_pr__pfet_01v8_lvt[cgg] @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[id] @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[gm] @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[gds] @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[vth] @m.xpl_2.msky130_fd_pr__pfet_01v8_lvt[cgg]
+quit
+.endc
+.end

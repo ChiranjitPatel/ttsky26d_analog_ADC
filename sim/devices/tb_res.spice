@@ -1,0 +1,25 @@
+* Stage 0 — poly resistor characterization (tt). 1 V across each resistor.
+* Two lengths per type separate sheet resistance from end (contact) resistance:
+*   R(L) = Rsh * L / W + 2*Rend
+* Pins: r0 r1 body(b)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.temp 27
+
+V1 a 0 1
+Vxs a xs 0
+Vxl a xl 0
+Vhs a hs 0
+Vhl a hl 0
+xrxs xs 0 0 sky130_fd_pr__res_xhigh_po_0p35 W=0.35 L=5
+xrxl xl 0 0 sky130_fd_pr__res_xhigh_po_0p35 W=0.35 L=20
+xrhs hs 0 0 sky130_fd_pr__res_high_po_0p35 W=0.35 L=5
+xrhl hl 0 0 sky130_fd_pr__res_high_po_0p35 W=0.35 L=20
+
+.control
+set wr_singlescale
+set wr_vecnames
+dc temp -40 125 5
+wrdata ../out/devices/res.dat i(Vxs) i(Vxl) i(Vhs) i(Vhl)
+quit
+.endc
+.end
