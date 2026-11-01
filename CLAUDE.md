@@ -3,6 +3,8 @@
 Tiny Tapeout analog project on SkyWater sky130. Top module: `tt_um_chiranjitpatel_sar_adc`.
 **Fixed budget: 1x2 tile, 2 analog pins (`ua[0]`, `ua[1]`), VDPWR only.** It's already purchased; don't grow it.
 Specs live in `docs/specs/`. Read them before changing any circuit.
+Work follows the bottom-up stage plan in `docs/specs/stage_plan.md`: one block per stage,
+integration one proven block at a time. Update its Status table as stages finish.
 
 ## Tool flow (keep to this flow)
 
