@@ -28,11 +28,11 @@ decisions + 1 EOC). It runs in two modes:
   a preamp only if needed and if area allows. Shield the top-plate routing.
 - **SAR logic:** 8-bit successive-approximation register plus a sequencer, built from
   sky130_fd_sc_hd standard cells (implementation method TBD).
-- **Reference:** `vref` = buffered bandgap (≈ 1.2 V) or external VREF on `ua[1]` (1.0–1.8 V), selected by `REF_SEL`.
+- **Reference:** `vref` = buffered bandgap (≈ 1.25 V) or external VREF on `ua[1]` (1.0–1.8 V), selected by `REF_SEL`.
 
 ## Specification
 
-LSB = VREF / 256 ≈ 4.69 mV at VREF = 1.2 V.
+LSB = VREF / 256 ≈ 4.88 mV at VREF = 1.25 V.
 
 | # | Parameter | Condition | Min | Typ | Max | Unit | Phase |
 |---|---|---|---|---|---|---|---|
@@ -43,7 +43,7 @@ LSB = VREF / 256 ≈ 4.69 mV at VREF = 1.2 V.
 | A5 | INL | ramp, tt 27 °C | −1 | | +1 | LSB | 1 |
 | A6 | ENOB | sine near Nyquist, tt 27 °C | 7.0 | 7.5 | | bit | 1 |
 | A7 | Comparator input offset (σ) | Monte Carlo | | | 10 | mV | 2 |
-| A8 | Comparator input-referred noise | | | | 1.2 (LSB/4) | mV rms | 2 |
+| A8 | Comparator input-referred noise | | | | 1.22 (LSB/4) | mV rms | 2 |
 | A9 | Sampling settling error | including pad R + switch | | | 0.5 | LSB | 1 |
 | A10 | Comparator decision time | 1 mV overdrive | | | 50 | ns | 1 |
 | A11 | Supply current (ADC + VREF buffer) | converting, 1 MHz | | 150 | 300 | µA | 1 |

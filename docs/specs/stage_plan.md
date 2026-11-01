@@ -59,7 +59,7 @@ the specs only define what the final system must do.
 - **Depends on:** 1.
 
 ### Stage 3 — Bandgap core + startup
-- **Goal:** VBG ≈ 1.20 V.
+- **Goal:** VBG ≈ 1.25 V.
 - **Cells:** `bandgap_core` (PNP 1:8 array, resistors, OTA from stage 2, startup).
 - **Specs:** B1, B2, B3 in Phase 1; B4–B8 in Phase 2; B9 at layout.
 - **Testbenches:** `tb_bg_op`, `tb_bg_startup`, `tb_bg_line`, `tb_bg_temp`, `tb_bg_psrr`.
@@ -77,7 +77,7 @@ the specs only define what the final system must do.
 - **Goal:** drive the DAC reference and (optionally) the `ua[1]` pad from VBG.
 - **Cells:** `vref_buf` (unity-gain, based on the stage 2 OTA or a variant of it), `vref_sel`
   (internal/external selection + output switch, controlled by `REF_SEL` and `VREF_OE`).
-- **Targets†:** VREF settles to within 0.5 LSB (2.3 mV) by the end of each bit cycle while driving the DAC
+- **Targets†:** VREF settles to within 0.5 LSB (2.4 mV) by the end of each bit cycle while driving the DAC
   (2.5 pF switched); stable driving pad + probe (5 pF, 500 Ω, plus 10 pF probe); phase margin ≥ 45 °.
 - **Testbenches:** `tb_vref_step` (DAC-like load steps), `tb_vref_pad` (stability with pad), `tb_vref_sel`.
 - **Depends on:** 2 (topology), 3 (input).
@@ -144,7 +144,7 @@ pass through simulation, layout and LVS on a small block.
 
 | Stage | a | b | c | d | e | f | g | Notes |
 |---|---|---|---|---|---|---|---|---|
-| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (above B1), tight headroom at 1.62 V |
+| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (B1 moved to 1.25 V), tight headroom at 1.62 V |
 | 1 Bias | | | | | | | | |
 | 2 OTA | | | | | | | | |
 | 3 Bandgap | | | | | | | | |

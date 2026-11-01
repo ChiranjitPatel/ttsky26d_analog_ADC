@@ -19,16 +19,19 @@ provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip te
 - Startup circuit: required. It must release once the core is biased.
 - **PTAT branch:** a separate mirrored copy of the PTAT core current into its own resistor
   (not a tap on the core), so the ADC input mux doesn't load the core. Target
-  VPTAT ≈ 0.6 V at 27 °C with a slope of ≈ 2 mV/°C, within the ADC range for VREF = 1.2 V.
+  VPTAT ≈ 0.6 V at 27 °C with a slope of ≈ 2 mV/°C, within the ADC range for VREF = 1.25 V.
 - Power-down input `bg_pd` (`ui[3]`).
 - Alternative if 1.62 V headroom is a problem in Phase 2: a current-mode (Banba)
   bandgap with an output of about 0.6–0.9 V. Decide after Phase 1.
 
 ## Specification
 
+B1 moved from 1.20 V to 1.25 V on 2026-11-01: stage 0 showed that the zero-TC point of the
+sky130 PNP is ≈ 1.253 V (`sim/devices/README.md`).
+
 | # | Parameter | Condition | Min | Typ | Max | Unit | Phase |
 |---|---|---|---|---|---|---|---|
-| B1 | Output voltage VBG | tt, 27 °C, 1.8 V | 1.16 | 1.20 | 1.24 | V | 1 |
+| B1 | Output voltage VBG | tt, 27 °C, 1.8 V | 1.21 | 1.25 | 1.29 | V | 1 |
 | B2 | Supply current | tt, 27 °C, 1.8 V, enabled | | 20 | 50 | µA | 1 |
 | B3 | Startup time (VBG within 1 % of final value) | VDPWR ramp 0→1.8 V in 1 µs | | | 20 | µs | 1 |
 | B4 | Line regulation | VDPWR 1.62–1.98 V | | | 10 | mV/V | 2 |
@@ -39,7 +42,7 @@ provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip te
 | B9 | Area (core + PTAT branch + startup + VREF buffer) | layout | | | 9 500 | µm² | layout |
 | B10 | VPTAT | tt, 27 °C, 1.8 V | 0.5 | 0.6 | 0.7 | V | 1 |
 | B11 | VPTAT slope | −40 … 125 °C | 1.8 | 2.0 | | mV/°C | 2 |
-| B12 | Temperature-sensor resolution (via 8-bit ADC, VREF = 1.2 V) | | | 2.3 | 2.6 | °C/LSB | 2 |
+| B12 | Temperature-sensor resolution (via 8-bit ADC, VREF = 1.25 V) | | | 2.4 | 2.7 | °C/LSB | 2 |
 | B13 | Temperature-sensor accuracy, untrimmed (1-point calibration in firmware) | −40 … 125 °C | | ±3 | ±5 | °C | 2 |
 
 ## Testbenches (to be written in `sim/bandgap/`)

@@ -7,7 +7,7 @@ the gm/Id lookup tables in `lut/` and the plots in `plots/`.
 
 1. **Zero-TC bandgap voltage is ≈ 1.25 V, not 1.20 V.** With this PNP (ideality 1.012,
    CTAT −1.92 mV/K at 1 µA), the first-order zero-TC point is VBG ≈ 1253 mV. That's above spec B1's
-   1.24 V maximum. Proposal: move B1 to 1.25 V typ (1.21–1.29 V); the ADC LSB becomes 4.88 mV.
+   old 1.24 V maximum. **B1 was moved to 1.25 V typ (1.21–1.29 V)**; the ADC LSB is now 4.88 mV.
 2. **Headroom is tight.** 1.25 V at VDPWR = 1.62 V leaves ≈ 0.37 V for the PMOS current sources,
    and Vbe rises to ≈ 0.80 V at −40 °C. This must be checked first in stage 3 Phase 2; the
    current-mode (Banba) fallback in `docs/specs/bandgap.md` stays open.
