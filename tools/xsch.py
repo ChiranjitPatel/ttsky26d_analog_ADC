@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Tiny helper to write xschem schematics (.sch) and symbols (.sym) from Python.
 
-Every device pin gets a `lab_pin` net label placed exactly on the pin, so connectivity is by
-net name (no wires). The result is a valid xschem schematic that netlists correctly; tidy the
+Every device pin gets a short wire stub with a `lab_pin` net label at its end, so connectivity
+is by net name. The result is a valid xschem schematic that netlists correctly; tidy the
 drawing in the xschem GUI if you like — connectivity doesn't change when you add wires.
 
 Usage (see xschem/gen_*.py):
@@ -43,7 +43,7 @@ def _fmt(v):
 
 
 class Schematic:
-    def __init__(self, cols=6, dx=280, dy=220):
+    def __init__(self, cols=5, dx=380, dy=280):
         self.lines = []
         self.ports = []  # (name, dir)
         self.n = 0
@@ -57,9 +57,9 @@ class Schematic:
         self.n += 1
         return x, y
 
-    def _label(self, x, y, net):
+    def _label(self, x, y, net, flip=0):
         self.nlab += 1
-        self.lines.append(f"C {{lab_pin.sym}} {x:g} {y:g} 0 0 {{name=p{self.nlab} sig_type=std_logic lab={net}}}")
+        self.lines.append(f"C {{lab_pin.sym}} {x:g} {y:g} 0 {flip} {{name=p{self.nlab} sig_type=std_logic lab={net}}}")
 
     def port(self, name, direction):
         """direction: in | out | inout"""
@@ -78,7 +78,17 @@ class Schematic:
         self.lines.append(f"C {{{sym}}} {x} {y} 0 0 {{{attrs}}}")
         for pin, net in conn.items():
             px, py = pins[pin]
-            self._label(x + px, y + py, net)
+            ax, ay = x + px, y + py
+            # short wire stub pointing away from the symbol, label at its end
+            if abs(px) >= abs(py):
+                if px < 0:
+                    bx, by, flip = ax - 40, ay, 0
+                else:  # right side: go past the device's attribute text, text to the right
+                    bx, by, flip = ax + 110, ay, 1
+            else:
+                bx, by, flip = ax, ay + (40 if py > 0 else -40), 0
+            self.lines.append(f"N {ax:g} {ay:g} {bx:g} {by:g} {{lab={net}}}")
+            self._label(bx, by, net, flip)
 
     def text(self, s):
         self.texts.append(s)
