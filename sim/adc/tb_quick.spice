@@ -15,16 +15,16 @@ VRST rst_n 0 pwl(0 0 1.5u 0 1.501u 1.8)
 VST start 0 1.8
 VMODE mode 0 0
 VZ z 0 0
-VIN vsrc 0 pwl(1.5e-06 0.1 1.501e-06 0.1 1.15e-05 0.3 1.1501e-05 0.3 2.15e-05 0.6 2.1501e-05 0.6 3.15e-05 0.9 3.1501e-05 0.9 4.15e-05 1.15 4.1501e-05 1.15)
+VIN vsrc 0 pwl(1.5e-06 0.1 1.1499e-05 0.1 1.15e-05 0.3 2.1499e-05 0.3 2.15e-05 0.6 3.1499e-05 0.6 3.15e-05 0.9 4.1499e-05 0.9 4.15e-05 1.15 5.1499e-05 1.15)
 RPAD vsrc vadc_pad 500
 CPAD vadc_pad 0 5p
 x1 vdd 0 pbias vref vadc_pad clk rst_n start mode z z z z z z z z z z d0 d1 d2 d3 d4 d5 d6 d7 eoc cmp adc_core
 .control
 set wr_singlescale
 set wr_vecnames
-save v(clk) v(eoc) v(vsrc) v(x1.vtop) v(x1.vcm) v(x1.smpt) v(d0) v(d1) v(d2) v(d3) v(d4) v(d5) v(d6) v(d7)
+save v(clk) v(eoc) v(vsrc) v(x1.vtop) v(x1.vcm) v(x1.smpt) v(vref) v(d0) v(d1) v(d2) v(d3) v(d4) v(d5) v(d6) v(d7)
 tran 2n 5.5e-05
-wrdata ../out/adc/quick.dat v(clk) v(eoc) v(vsrc) v(x1.vtop) v(x1.vcm) v(x1.smpt) v(d0) v(d1) v(d2) v(d3) v(d4) v(d5) v(d6) v(d7)
+wrdata ../out/adc/quick.dat v(clk) v(eoc) v(vsrc) v(x1.vtop) v(x1.vcm) v(x1.smpt) v(d0) v(d1) v(d2) v(d3) v(d4) v(d5) v(d6) v(d7) v(vref)
 quit
 .endc
 .end

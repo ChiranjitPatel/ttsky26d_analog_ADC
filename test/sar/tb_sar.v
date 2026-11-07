@@ -17,6 +17,14 @@ module tb_sar;
     always #500 clk = ~clk;                       // 1 MHz
     real VREF = 1.215, vin = 0.0, vs = 0.0, vr;
     always @(negedge smpt) vs = vin;               // sampling instant
+    // exactly one sampling edge per conversion (catches glitches on smpt in gate-level runs)
+    integer smpt_falls = 0, glitch_errors = 0;
+    always @(negedge smpt) smpt_falls = smpt_falls + 1;
+    always @(posedge eoc) begin
+        if (smpt_falls != 1 && $time > 5000) begin glitch_errors = glitch_errors + 1;
+            $display("smpt fell %0d times in one conversion at %0t", smpt_falls, $time); end
+        smpt_falls = 0;
+    end
     always @(posedge cmp_clk) q = ((VREF * b / 256.0) - vs) > 0.0;
 
     integer errors = 0, n = 0, k, t_start, t_eoc;
@@ -55,7 +63,7 @@ module tb_sar;
         end
         ext_sample = 0; ext_cmp_clk = 0; #10;
         if (smp !== 0 || smpt !== 0 || cmp_clk !== 0) begin errors = errors + 1; $display("external mode FAIL (low)"); end
-        $display("RESULT: %0d conversions checked, %0d errors", n, errors);
+        $display("RESULT: %0d conversions checked, %0d errors, %0d smpt-glitch errors", n, errors, glitch_errors);
         $finish;
     end
 endmodule

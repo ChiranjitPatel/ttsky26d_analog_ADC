@@ -3,8 +3,9 @@
 // then trial codes on b[7:0]; comparator q = 1 means vtop > vcm, i.e. Vin < trial level -> bit = 0.
 //
 // Internal mode (mode = 0), 10 clocks per conversion:
-//   SAMPLE : smp = 1 (bottom plates track vadc). smpt = 1 only while clk is high, so the top plate
-//            opens at the falling edge of clk = the sampling instant (bottom-plate sampling).
+//   SAMPLE : smp = 1 (bottom plates track vadc). smpt (falling-edge flip-flop) goes low at the falling
+//            edge of clk in this cycle = the sampling instant (bottom-plate sampling); it returns high
+//            at the falling edge of the EOC cycle.
 //   BIT7..BIT0 : on the rising edge the trial code is applied; the DAC settles while clk is high;
 //            the comparator evaluates while clk is low (cmp_clk = ~clk); on the next rising edge the
 //            decision is used (keep the bit if q = 0) and the next trial code is applied.
@@ -62,8 +63,17 @@ module sar_logic (
     end
 
     wire tracking = (state == S_IDLE) || (state == S_SAMPLE) || (state == S_EOC);
+    // Top-plate switch: a falling-edge flip-flop, so it is glitch-free. It opens at the falling edge of
+    // the SAMPLE cycle (the sampling instant), stays open through CONV, and closes again at the falling
+    // edge of the EOC cycle. (A combinational version, tracking & ~(SAMPLE & ~clk), glitched high on the
+    // rising edge that ends SAMPLE - clk rose before the state left SAMPLE - and re-sampled the top plate
+    // while the bottom plates switched. Found in integration stage I2.)
+    reg smpt_r;
+    always @(negedge clk or negedge rst_n)
+        if (!rst_n) smpt_r <= 1'b1;
+        else        smpt_r <= ~((state == S_SAMPLE) || (state == S_CONV));
     assign smp     = mode ? ext_sample  : tracking;
-    assign smpt    = mode ? ext_sample  : (tracking & ~(state == S_SAMPLE & ~clk));
+    assign smpt    = mode ? ext_sample  : smpt_r;
     assign b       = mode ? ext_d       : (state == S_CONV ? code : 8'd0);
     assign cmp_clk = mode ? ext_cmp_clk : ((state == S_CONV) & ~clk);
     assign d       = mode ? ext_d       : result;
