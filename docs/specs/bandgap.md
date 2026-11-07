@@ -19,30 +19,33 @@ provides `vptat`, a PTAT voltage that the ADC digitizes to make the **on-chip te
 - Startup circuit: required. It must release once the core is biased.
 - **PTAT branch:** a separate mirrored copy of the PTAT core current into its own resistor
   (not a tap on the core), so the ADC input mux doesn't load the core. Target
-  VPTAT ≈ 0.6 V at 27 °C with a slope of ≈ 2 mV/°C, within the ADC range for VREF = 1.25 V.
+  VPTAT ≈ 0.6 V at 27 °C with a slope of ≈ 2 mV/°C, within the ADC range for VREF = 1.215 V.
+- **RC low-pass filter** (≈ 1 MΩ + ≈ 4 pF) between `vbg` and the VREF buffer input, decided 2026-11-07,
+  for PSRR at 1 MHz and noise. Part of stage 5.
 - Power-down input `bg_pd` (`ui[3]`).
 - Alternative if 1.62 V headroom is a problem in Phase 2: a current-mode (Banba)
   bandgap with an output of about 0.6–0.9 V. Decide after Phase 1.
 
 ## Specification
 
-B1 moved from 1.20 V to 1.25 V on 2026-11-01: stage 0 showed that the zero-TC point of the
-sky130 PNP is ≈ 1.253 V (`sim/devices/README.md`).
+B1 history: 1.20 V → 1.25 V (2026-11-01, stage 0 ideal-PNP estimate) → **1.215 V** (2026-11-07,
+stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.2154 V at tt;
+`sim/bandgap/README.md`). The ±3 % window matches B6.
 
 | # | Parameter | Condition | Min | Typ | Max | Unit | Phase |
 |---|---|---|---|---|---|---|---|
-| B1 | Output voltage VBG | tt, 27 °C, 1.8 V | 1.21 | 1.25 | 1.29 | V | 1 |
+| B1 | Output voltage VBG | tt, 27 °C, 1.8 V | 1.18 | 1.215 | 1.25 | V | 1 |
 | B2 | Supply current | tt, 27 °C, 1.8 V, enabled | | 20 | 50 | µA | 1 |
 | B3 | Startup time (VBG within 1 % of final value) | VDPWR ramp 0→1.8 V in 1 µs | | | 20 | µs | 1 |
 | B4 | Line regulation | VDPWR 1.62–1.98 V | | | 10 | mV/V | 2 |
 | B5 | Temperature coefficient | −40 … 125 °C, tt | | 30 | 50 | ppm/°C | 2 |
 | B6 | VBG spread | all corners, untrimmed | | | ±3 | % | 2 |
-| B7 | PSRR | DC / 1 MHz | 40 / 20 | | | dB | 2 |
+| B7 | PSRR (at the filtered VREF buffer input, `vbg_f`) | DC / 1 MHz | 40 / 20 | | | dB | 2 |
 | B8 | Power-down current | `bg_pd` = 1 | | | 1 | µA | 2 |
 | B9 | Area (core + PTAT branch + startup + VREF buffer) | layout | | | 9 500 | µm² | layout |
 | B10 | VPTAT | tt, 27 °C, 1.8 V | 0.5 | 0.6 | 0.7 | V | 1 |
 | B11 | VPTAT slope | −40 … 125 °C | 1.8 | 2.0 | | mV/°C | 2 |
-| B12 | Temperature-sensor resolution (via 8-bit ADC, VREF = 1.25 V) | | | 2.4 | 2.7 | °C/LSB | 2 |
+| B12 | Temperature-sensor resolution (via 8-bit ADC, VREF = 1.215 V) | | | 2.4 | 2.7 | °C/LSB | 2 |
 | B13 | Temperature-sensor accuracy, untrimmed (1-point calibration in firmware) | −40 … 125 °C | | ±3 | ±5 | °C | 2 |
 
 ## Testbenches (to be written in `sim/bandgap/`)
@@ -60,10 +63,10 @@ sky130 PNP is ≈ 1.253 V (`sim/devices/README.md`).
 
 | # | Result | Phase | Date | Notes |
 |---|---|---|---|---|
-| B1 | 1.2154 V | 1 (tt) | 2026-11-01 | Passes, but only 5 mV above the minimum; zero-TC point of this circuit. B1 change proposed in `sim/bandgap/README.md` |
+| B1 | 1.2154 V | 1 (tt) | 2026-11-01 | ✅ against the new 1.18–1.25 V window (the old 1.21–1.29 V window passed by only 5 mV) |
 | B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-01 | core 13.6 µA |
 | B3 | 0.34 µs after a 1 µs ramp | 1 | 2026-11-01 | also starts on a 100 µs ramp |
 | B4 | 6.1 mV/V | early, tt only | 2026-11-01 | |
 | B5 | 22 ppm/°C | early, tt only | 2026-11-01 | R2/R1 = 19/2 |
-| B7 | 45.8 dB DC / −9.8 dB at 1 MHz | early, tt only | 2026-11-01 | ❌ at 1 MHz; RC filter before the VREF buffer proposed |
+| B7 | 45.8 dB DC / −9.8 dB at 1 MHz (raw `vbg`) | early, tt only | 2026-11-01 | ❌ raw; B7 is now specified after the RC filter (stage 5) |
 | B8 | 1.4 nA | early, tt only | 2026-11-01 | incl. bias_gen |

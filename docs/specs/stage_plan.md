@@ -59,7 +59,7 @@ the specs only define what the final system must do.
 - **Depends on:** 1.
 
 ### Stage 3 — Bandgap core + startup
-- **Goal:** VBG ≈ 1.25 V.
+- **Goal:** VBG ≈ 1.215 V (B1 after 2026-11-07).
 - **Cells:** `bandgap_core` (PNP 1:8 array, resistors, OTA from stage 2, startup).
 - **Specs:** B1, B2, B3 in Phase 1; B4–B8 in Phase 2; B9 at layout.
 - **Testbenches:** `tb_bg_op`, `tb_bg_startup`, `tb_bg_line`, `tb_bg_temp`, `tb_bg_psrr`.
@@ -73,13 +73,16 @@ the specs only define what the final system must do.
 - **Testbenches:** `tb_bg_ptat`, plus a check that loading VPTAT changes VBG by < 0.1 mV.
 - **Depends on:** 3.
 
-### Stage 5 — VREF buffer
-- **Goal:** drive the DAC reference and (optionally) the `ua[1]` pad from VBG.
-- **Cells:** `vref_buf` (unity-gain, based on the stage 2 OTA or a variant of it), `vref_sel`
-  (internal/external selection + output switch, controlled by `REF_SEL` and `VREF_OE`).
+### Stage 5 — VREF filter + buffer + reference select
+- **Goal:** drive the DAC reference and (optionally) the `ua[1]` pad from a filtered VBG.
+- **Cells:** `vref_filt` (RC low-pass on `vbg` → `vbg_f`: ≈ 1 MΩ xhigh_po + ≈ 4 pF MOS cap, decided
+  2026-11-07 for PSRR at 1 MHz), `vref_buf` (unity-gain, based on the stage 2 OTA or a variant),
+  `vref_sel` (internal/external selection + output switch, controlled by `REF_SEL` and `VREF_OE`).
+- **Specs:** B7 measured at `vbg_f` (DC ≥ 40 dB, 1 MHz ≥ 20 dB).
 - **Targets†:** VREF settles to within 0.5 LSB (2.4 mV) by the end of each bit cycle while driving the DAC
-  (2.5 pF switched); stable driving pad + probe (5 pF, 500 Ω, plus 10 pF probe); phase margin ≥ 45 °.
-- **Testbenches:** `tb_vref_step` (DAC-like load steps), `tb_vref_pad` (stability with pad), `tb_vref_sel`.
+  (2.4 pF switched); stable driving pad + probe (5 pF, 500 Ω, plus 10 pF probe); phase margin ≥ 45 °;
+  filter startup (τ ≈ 4 µs) still meets B3-like startup (VREF within 1 % in ≤ 40 µs).
+- **Testbenches:** `tb_vref_psrr`, `tb_vref_step` (DAC-like load steps), `tb_vref_pad` (stability with pad), `tb_vref_sel`.
 - **Depends on:** 2 (topology), 3 (input).
 
 ### Stage 6 — Comparator
@@ -144,7 +147,7 @@ pass through simulation, layout and LVS on a small block.
 
 | Stage | a | b | c | d | e | f | g | Notes |
 |---|---|---|---|---|---|---|---|---|
-| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: zero-TC VBG ≈ 1.25 V (B1 moved to 1.25 V), tight headroom at 1.62 V |
+| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: ideal zero-TC VBG ≈ 1.25 V (stage 3 later found 1.215 V for the real circuit), tight headroom at 1.62 V |
 | 1 Bias | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps |
 | 2 OTA | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/ota/README.md`: two-stage, 80.4 dB, PM 81° (0.5 pF load, CC 0.7 pF), 5.8 µA; Monte Carlo offset in Phase 2 |
 | 3 Bandgap | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bandgap/README.md`: VBG 1.215 V (B1 margin), 15.7 µA, PM 66°, 22 ppm/°C at tt; PSRR at 1 MHz fails |
