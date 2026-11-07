@@ -1,0 +1,32 @@
+* Stage 5 — vref_buf alone with an ideal input: step response with the reservoir cap only (xa) and
+* with the pad connected through the TG (xb + xsb, VREF_OE = 1). 10 mV input step. tt, 27 C, 1.8 V.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/vref_buf.spice
+.include ../out/netlist/vref_sel.spice
+.temp 27
+VDD vdd 0 1.8
+VPD pd 0 0
+VZ  z  0 0
+VON on 0 1.8
+xb  vdd 0 pd nbias pbias bias_gen
+VIN in 0 dc 1.215 pulse(1.215 1.225 2u 1n 1n 5u 10u)
+xa  vdd 0 nbias on in vrefa vref_buf
+xbb vdd 0 nbias on in vrefb vref_buf
+xsb vdd 0 z on z vrefb padb enb vref_sel
+CPAD padb 0 5p
+RPAD padb pinb 500
+CPRB pinb 0 10p
+RPRB pinb 0 1meg
+.control
+set wr_singlescale
+set wr_vecnames
+tran 1n 12u
+wrdata ../out/vref/step.dat v(vrefa) v(vrefb) v(in)
+meas tran pka max v(vrefa) from=2u to=7u
+meas tran fina find v(vrefa) at=6.9u
+meas tran pkb max v(vrefb) from=2u to=7u
+meas tran finb find v(vrefb) at=6.9u
+quit
+.endc
+.end

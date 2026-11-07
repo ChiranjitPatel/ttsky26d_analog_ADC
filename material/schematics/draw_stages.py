@@ -262,4 +262,60 @@ s.w((4, 1.5), (4, GND)); s.dot((4, GND))
 s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, vgp (in), vptat (out).   Only a gate touches the core, so loading vptat can't disturb VBG.   "
         "Power-down: vgp = VDPWR → MPP off → vptat = 0 V.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage4_ptat_out.png")
+
+# =================================================================== stage 5: vref_filt + vref_buf + vref_sel
+import schemdraw.logic as logic
+s = Sch()
+VDD, GND = 11.0, 0.0
+s.title(0, 13.2, "Stage 5 — VREF chain: vref_filt → vref_buf → vref (+ vref_sel to ua[1])",
+        "all L in µm; W/L shown as W/L ×mult; body of NMOS = VGND, PMOS = VDPWR")
+s.rail(VDD, 0, 30, "VDPWR")
+s.rail(GND, 0, 30, "VGND")
+# filter
+s.d.add(elm.Label().at((0.3, 12.0)).label("vref_filt", halign="left", fontsize=11, color=DEVC))
+s.d.add(elm.Dot(open=True).at((0.5, 6.0))); s.net((0.5, 6.0), "vbg", "above")
+s.d.add(elm.Resistor().right().at((0.5, 6.0)).to((4.0, 6.0)).label("RF ≈ 1.04 MΩ\n9 × xhigh 0.35/20", loc="top", fontsize=8))
+s.dot((4.0, 6.0)); s.net((4.0, 6.0), "vbg_f", "above")
+s.d.add(elm.Capacitor().down().at((4.0, 6.0)).to((4.0, GND)).label("CF ≈ 3.9 pF\nnfet gate 10/10 ×5", loc="bottom", fontsize=8))
+s.dot((4.0, GND))
+# buffer
+s.d.add(elm.Label().at((6.5, 12.0)).label("vref_buf (follower, 10 µA)", halign="left", fontsize=11, color=DEVC))
+m3 = s.fet("p", 8, VDD, "right", "M3", "pfet_lvt 4/1")
+m4 = s.fet("p", 12, VDD, "left", "M4", "pfet_lvt 4/1")
+s.w(m3["gate"], m4["gate"]); gx = m3["gate"][0] + 0.4
+s.dot((gx, m3["gate"][1])); s.w((gx, m3["gate"][1]), (gx, 8.6), (8, 8.6)); s.dot((8, 8.6))
+s.dot((8, VDD)); s.dot((12, VDD)); s.net((8, 8.0), "dm", "left")
+TY = 3.2
+m1 = s.fet("n", 8, TY, "left", "M1", "nfet 4/1")
+m2 = s.fet("n", 12, TY, "right", "M2", "nfet 4/1")
+s.w(m3["drain"], m1["drain"]); s.w(m4["drain"], m2["drain"])
+s.w((4.0, 6.0), (5.4, 6.0), (5.4, m1["gate"][1]), m1["gate"])
+s.w(m1["source"], (8, TY - 0.3), (12, TY - 0.3), m2["source"]); s.dot((10, TY - 0.3)); s.net((10, TY - 0.3), "tail", "below")
+msw = s.fet("n", 10, 1.0, "right", "MSW", "nfet 4/0.15")
+s.w((10, TY - 0.3), msw["drain"]); s.net(msw["gate"], "en", "right")
+s.d.add(elm.Label().at((10.3, 0.35)).label("(MSW source → MT nfet 2/2 ×10, gate nbias, 10 µA → VGND)", halign="left", fontsize=8, color=DEVC))
+s.w(msw["source"], (10, GND)); s.dot((10, GND))
+VR = (12, 6.6)
+s.dot(VR); s.w(m2["gate"], (m2["gate"][0] + 0.6, m2["gate"][1]), (m2["gate"][0] + 0.6, 6.6), VR)
+s.w(VR, (16, 6.6)); s.dot((16, 6.6))
+s.d.add(elm.Capacitor().down().at((16, 6.6)).to((16, GND)).label("CRES ≈ 5.4 pF\nnfet gate 10/10 ×7", loc="bottom", fontsize=8)); s.dot((16, GND))
+s.w((16, 6.6), (18.5, 6.6)); s.d.add(elm.Dot(open=True).at((18.5, 6.6))); s.net((18.5, 6.6), "vref → DAC", "above")
+s.d.add(elm.Label().at((12.6, 9.0)).label("MPU pfet 0.42/0.15: pulls dm to VDPWR\nwhen en = 0 → output high-Z", halign="left", fontsize=8, color=DEVC))
+# selection
+s.d.add(elm.Label().at((20.0, 12.0)).label("vref_sel", halign="left", fontsize=11, color=DEVC))
+s.d.add(logic.Nor(inputs=2).at((21.0, 9.6)).anchor("in1").right())
+s.d.add(elm.Label().at((20.9, 9.6)).label("ref_sel", halign="right", color=NETC, fontsize=9))
+s.d.add(elm.Label().at((20.9, 8.6)).label("bg_pd", halign="right", color=NETC, fontsize=9))
+s.d.add(elm.Label().at((24.7, 9.1)).label("en_buf (→ en)", halign="left", color=NETC, fontsize=9))
+s.d.add(logic.Or(inputs=2).at((21.0, 5.6)).anchor("in1").right())
+s.d.add(elm.Label().at((20.9, 5.6)).label("ref_sel", halign="right", color=NETC, fontsize=9))
+s.d.add(elm.Label().at((20.9, 4.6)).label("vref_oe", halign="right", color=NETC, fontsize=9))
+s.d.add(elm.Label().at((24.7, 5.1)).label("en_pad", halign="left", color=NETC, fontsize=9))
+# TG drawn as a switch
+s.d.add(elm.Dot(open=True).at((21.5, 2.4))); s.net((21.5, 2.4), "vref", "left")
+s.d.add(elm.Switch().right().at((21.5, 2.4)).to((24.5, 2.4)).label("TG: nfet 10/0.15 + pfet_lvt 20/0.35\non when en_pad = 1", loc="top", fontsize=8))
+s.d.add(elm.Dot(open=True).at((24.5, 2.4))); s.net((24.5, 2.4), "pad → ua[1]", "right")
+s.d.add(elm.Label().at((0, -1.4)).label("Internal ref (REF_SEL = 0): buffer on, vref ≈ 1.214 V. External ref (REF_SEL = 1): buffer off, ua[1] drives vref through the TG. "
+        "DMM readout: REF_SEL = 0, VREF_OE = 1.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage5_vref.png")
 print("ok")

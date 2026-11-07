@@ -152,7 +152,7 @@ pass through simulation, layout and LVS on a small block.
 | 2 OTA | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/ota/README.md`: two-stage, 80.4 dB, PM 81° (0.5 pF load, CC 0.7 pF), 5.8 µA; Monte Carlo offset in Phase 2 |
 | 3 Bandgap | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bandgap/README.md`: VBG 1.215 V (B1 margin), 15.7 µA, PM 66°, 22 ppm/°C at tt; PSRR at 1 MHz fails |
 | 4 PTAT | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/ptat/README.md`: 0.599 V, 2.00 mV/°C, VBG unaffected, loop PM 64° |
-| 5 VREF buffer | | | | | | | | |
+| 5 VREF chain | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/vref/README.md`: B7 met at vbg_f, DAC-load error 23 µV, stable with pad, external-ref mode works |
 | 6 Comparator | | | | | | | | |
 | 7 Switch + mux | | | | | | | | |
 | 8 Cap DAC | | | | | | | | |

@@ -1,0 +1,53 @@
+* Stage 5 — vref_sel static configurations (ideal input 1.215 V on the buffer). tt, 27 C, 1.8 V.
+*  A: internal, pad off          (ref_sel=0, vref_oe=0, bg_pd=0)
+*  B: internal, DMM readout      (ref_sel=0, vref_oe=1)  probe 10 pF || 1 MOhm on the pin
+*  C: external 1.5 V reference   (ref_sel=1)  source behind the 500 Ohm pad path
+*  D: bandgap/buffer powered down (bg_pd=1)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/vref_buf.spice
+.include ../out/netlist/vref_sel.spice
+.temp 27
+VDD vdd 0 1.8
+VPD pd 0 0
+xb  vdd 0 pd nbias pbias bias_gen
+VIN in 0 1.215
+VHI hi 0 1.8
+VLO lo 0 0
+* A
+VDA vda 0 1.8
+xba vda 0 nbias ena in vrefa vref_buf
+xsa vda 0 lo lo lo vrefa pada ena vref_sel
+RPA pada pina 500
+CPA pada 0 5p
+* B
+VDB vdb 0 1.8
+xbb vdb 0 nbias enb in vrefb vref_buf
+xsb vdb 0 lo hi lo vrefb padb enb vref_sel
+RPB padb pinb 500
+RPRB pinb 0 1meg
+* C
+VDC vdc 0 1.8
+xbc vdc 0 nbias enc in vrefc vref_buf
+xsc vdc 0 hi lo lo vrefc padc enc vref_sel
+RPC padc pinc 500
+VEXT pinc 0 1.5
+* D
+VDD4 vdd4 0 1.8
+xbd vdd4 0 nbias end in vrefd vref_buf
+xsd vdd4 0 lo lo hi vrefd padd end vref_sel
+RPD padd pind 500
+.control
+op
+let ia = -i(VDA)
+let ib = -i(VDB)
+let ic = -i(VDC)
+let id = -i(VDD4)
+let iext = -i(VEXT)
+print v(ena) v(vrefa) v(pada) ia
+print v(enb) v(vrefb) v(pinb) ib
+print v(enc) v(vrefc) ic iext
+print v(end) v(vrefd) id
+quit
+.endc
+.end

@@ -1,0 +1,62 @@
+* Stage 5 — full VREF chain: bias_gen -> bandgap_core -> vref_filt -> vref_buf (+ vref_sel), tt, 27 C, 1.8 V
+* ua[1] pad model (CLAUDE.md rule 2): 5 pF on the chip side, 500 Ohm to the pin, 10 pF + 1 MOhm probe.
+* DAC-like load: CDAC (1.2 pF = MSB half of the DAC) is connected to vref at the start of every
+* 1 us bit cycle (S1, 0 -> 0.88 us) and discharged afterwards (S2, 0.9 -> 0.99 us), with 20 ns /
+* 10 ns dead time (break-before-make, as a real DAC switch driver). Load starts at 60 us, after startup.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.include ../out/netlist/vref_filt.spice
+.include ../out/netlist/vref_buf.spice
+.include ../out/netlist/vref_sel.spice
+.temp 27
+VDD  vdd 0 dc 1.8 ac 1
+VMBUF vdd vddbuf 0
+VPD  pd  0 0
+VRS  rs  0 0
+VOE  oe  0 0
+xb   vdd 0 pd nbias pbias bias_gen
+xbg  vdd 0 pbias pd vbg vgp bandgap_core
+xf   0 vbg vbg_f vref_filt
+xbuf vddbuf 0 nbias en_buf vbg_f vref vref_buf
+xsel vdd 0 rs oe pd vref pad en_buf vref_sel
+CPAD pad 0 5p
+RPAD pad pin 500
+CPRB pin 0 10p
+RPRB pin 0 1meg
+* switched DAC-like load
+CDAC cl 0 1.2p
+S1 vref cl c1 0 swm
+S2 cl 0 c2 0 swm
+VC1 c1 0 dc 0 pulse(0 1.8 60u 1n 1n 0.88u 1u)
+VC2 c2 0 dc 0 pulse(0 1.8 60.9u 1n 1n 0.09u 1u)
+.model swm sw vt=0.9 vh=0.1 ron=200 roff=1e12
+.control
+set wr_singlescale
+set wr_vecnames
+echo "=== OP"
+op
+let ibuf = i(VMBUF)
+let itot = -i(VDD)
+let offs = v(vref) - v(vbg_f)
+print v(vbg) v(vbg_f) v(vref) offs v(en_buf) ibuf itot
+echo "=== PSRR"
+ac dec 40 1 1e8
+let psrr_vbg = -db(v(vbg))
+let psrr_f = -db(v(vbg_f))
+let psrr_ref = -db(v(vref))
+wrdata ../out/vref/psrr.dat psrr_vbg psrr_f psrr_ref
+meas ac pf_dc find psrr_f at=1
+meas ac pf_1m find psrr_f at=1e6
+meas ac pr_dc find psrr_ref at=1
+meas ac pr_1m find psrr_ref at=1e6
+echo "=== Startup + DAC-like load (1 us ramp from 0 V, load starts at 60 us)"
+alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
+tran 2n 70u uic
+wrdata ../out/vref/tran.dat v(vref) v(vbg_f) v(vbg) v(cl)
+meas tran vref_pre find v(vref) at=59.9u
+meas tran vref_end find v(vref) at=69.87u
+meas tran vref_min min v(vref) from=69u to=69.88u
+quit
+.endc
+.end
