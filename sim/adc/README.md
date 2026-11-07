@@ -7,7 +7,11 @@ vcm_gen + sar_logic (Yosys → `tools/gl2spice.py` → sky130_fd_sc_hd SPICE cel
 |---|---|
 | `make_tb.py [--real-ref] [--debug] name vin…` / `--sine N M amp offset` | builds `tb_<name>.spice` (I2: ideal VREF; I3: bandgap → filter → buffer) |
 | `decode.py name` | reads D[7:0] 0.2 µs after each EOC and compares with floor(256·VIN/VREF) |
-| `run_long.sh` | I3 quick, I2 code-edge test, I2 64-point sine (hours; run detached) |
+| `run_long.sh` | I3 quick, I2 code-edge test, I2 64-point sine, in parallel |
+
+**In this cloud session**, processes detached with `nohup setsid` were killed a few minutes after the
+turn ended (twice). Run long jobs as tool background tasks instead (2 h limit): split them into pieces
+(`edges_a/_b`, sine in chunks) that each finish within 2 h.
 
 Speed: ≈ 1–4 µs of simulated time per minute (≈ 1700 transistors incl. the std cells, reltol 1e-5),
 i.e. ~3–10 minutes per conversion.
