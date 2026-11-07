@@ -158,7 +158,7 @@ pass through simulation, layout and LVS on a small block.
 | 8 Cap DAC | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/dac/README.md`: all 256 codes, DNL 0.001 / INL 0.0007 LSB (ideal caps), 0.6 pA top-plate leak; MC in Phase 2 |
 | 9 SAR logic | ✅ 2026-11-07 (Verilog) | ✅ RTL + gate-level | | | | | | `src/sar/README.md`: 0 errors in 2764 conversions; 136 cells, 1217 µm²; SPICE check in I2 |
 | I1 Analog core | — | — | | | | | | merged into I2: the real SAR logic was verified first, so I2 uses it directly |
-| I2 Full ADC | ✅ 2026-11-07 | ✅ 5/5 + 18/18 code edges; sine running | | | | | | `sim/adc/README.md`: 5/5 exact codes after two fixes (smpt glitch, comparator preamp); edges + sine running |
+| I2 Full ADC | ✅ 2026-11-07 | ✅ 5/5, 18/18 edges, ENOB 8.04 | | | | | | `sim/adc/README.md`: 5/5 exact codes after two fixes (smpt glitch, comparator preamp); edges + sine running |
 | I3 Self-referenced | ✅ 2026-11-07 | ✅ 5/5 exact | | | | | | real bandgap → filter → buffer reference (1.2143 V) |
 | I4 Top level | | | | | | | | |
 

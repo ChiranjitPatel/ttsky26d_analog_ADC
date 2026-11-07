@@ -75,4 +75,7 @@ loose compared to the LSB.
 | A9 | VIN −0.01 mV after 1 µs; VPTAT/VBG < 1 µV after 10 µs | 1 | 2026-11-07 | stage 7, `sim/inmux/` |
 | A14 | < 1 µV | 1 | 2026-11-07 | stage 7 |
 | A10 | 0.44 ns at 1 mV | 1 | 2026-11-07 | stage 6, `sim/comparator/` |
-| A4/A5 (DAC only) | DNL 0.001 / INL 0.0007 LSB | 1 | 2026-11-07 | stage 8, ideal caps; full-ADC values in I2 |
+| A4/A5 (DAC only) | DNL 0.001 / INL 0.0007 LSB | 1 | 2026-11-07 | stage 8, ideal caps |
+| A4/A5 (full ADC, transistor level) | all 18 major-transition edges within ±0.2 LSB; sine: transitions within ~0.06 LSB | 1 | 2026-11-07 | I2, `sim/adc/`; a full code-density DNL/INL needs a longer run (Phase 2) |
+| A6 | ENOB 8.04 (SNDR 50.2 dB), 64-point sine | 1 | 2026-11-07 | I2; ideal quantizer on the same samples 8.20 |
+| A3 | 10 clocks / conversion → 100 kS/s at 1 MHz | 1 | 2026-11-07 | I2 |

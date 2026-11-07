@@ -33,4 +33,4 @@ fixed number of *samples* after EOC (adaptive timestep → wrong time; now 0.2 �
 | I2, ideal VREF, 5 inputs (0.1 / 0.3 / 0.6 / 0.9 / 1.15 V) | codes 21 / 63 / 126 / 189 / 242 = ideal, **error 0** |
 | I3, real reference chain (bandgap → filter → buffer), same inputs | VREF = 1.2143 V; codes 21 / 63 / 126 / 189 / 242, **error 0** |
 | I2, code edges ±0.2 LSB around 1, 32, 63/64, 127/128, 191/192, 254 | **18/18 correct**: every major transition within 0.2 LSB of ideal (offset/gain < 0.2 LSB, DNL < 0.4 LSB there) |
-| I2, 64-point coherent sine (7 cycles) | running (SNDR/ENOB) |
+| I2, 64-point coherent sine (7 cycles, 4 chunks of 16) | **SNDR 50.2 dB, ENOB 8.04** (ideal 8-bit quantizer on the same samples: 51.1 dB / 8.20). 4 of 64 codes differ by +1 LSB; all 4 are inputs 0.02–0.06 LSB below a code edge, so the transitions are within ~0.06 LSB of ideal (`results_sine.md`) |
