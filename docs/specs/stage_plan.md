@@ -156,7 +156,7 @@ pass through simulation, layout and LVS on a small block.
 | 6 Comparator | | | | | | | | |
 | 7 Switch + mux | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/inmux/README.md`: A9/A14 met; VPTAT/VBG need clk ≤ 100 kHz (decided) |
 | 8 Cap DAC | | | | | | | | |
-| 9 SAR logic | | | | | | | | |
+| 9 SAR logic | ✅ 2026-11-07 (Verilog) | ✅ RTL + gate-level | | | | | | `src/sar/README.md`: 0 errors in 2764 conversions; 136 cells, 1217 µm²; SPICE check in I2 |
 | I1 Analog core | | | | | | | | |
 | I2 Full ADC | | | | | | | | |
 | I3 Self-referenced | | | | | | | | |

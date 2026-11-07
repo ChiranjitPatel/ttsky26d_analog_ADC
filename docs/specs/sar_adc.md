@@ -26,8 +26,8 @@ decisions + 1 EOC). It runs in two modes:
 - **Comparator:** StrongARM latch followed by an SR latch. Kickback onto the DAC top plate must be
   checked in simulation (TT06 silicon showed harmonics attributed to kickback/interference); add
   a preamp only if needed and if area allows. Shield the top-plate routing.
-- **SAR logic:** 8-bit successive-approximation register plus a sequencer, built from
-  sky130_fd_sc_hd standard cells (implementation method TBD).
+- **SAR logic:** 8-bit successive-approximation register plus a sequencer in Verilog (`src/sar/sar_logic.v`),
+  synthesized with Yosys to sky130_fd_sc_hd standard cells (136 cells, ≈ 1200 µm²).
 - **Reference:** `vref` = buffered, RC-filtered bandgap (≈ 1.215 V) or external VREF on `ua[1]` (1.0–1.8 V), selected by `REF_SEL`.
 
 ## Specification

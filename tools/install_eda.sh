@@ -40,7 +40,9 @@ step_deps() {
   DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
     build-essential git m4 csh tcsh gawk bison flex autoconf automake libtool pkg-config \
     tcl-dev tk-dev libx11-dev libxpm-dev libxaw7-dev libxext-dev libxrender-dev libcairo2-dev \
-    libreadline-dev libncurses-dev libfftw3-dev zlib1g-dev python3 python3-pip curl xvfb >/dev/null
+    libreadline-dev libncurses-dev libfftw3-dev zlib1g-dev python3 python3-pip curl xvfb \
+    iverilog yosys >/dev/null
+  pip install -q --break-system-packages matplotlib numpy schemdraw 2>/dev/null || pip install -q matplotlib numpy schemdraw
 }
 
 step_magic() {

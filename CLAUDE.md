@@ -29,6 +29,13 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
   supply 1.62/1.80/1.98 V, plus Monte Carlo mismatch on matched structures
   (comparator input pair, cap DAC, bandgap core).
 - **Phase 3:** repeat the key tests on the extracted (post-layout) netlist.
+- **Simulator accuracy (learned in stages 6–8):**
+  - Precision transients (anything judged against the LSB, 4.75 mV) need
+    `.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17`. The default reltol (1e-3)
+    lets node voltages wander by ~1 mV.
+  - Comparator decisions need a ≤ 5 ps max timestep (`tran 1n T 0 5p`). With 0.1 ns, 1 mV
+    decisions came out wrong in ~10 % of cycles.
+  - In long fine-step runs, `save` only the needed vectors (saving everything used 1.7 GB per run).
 - Every spec number in `docs/specs/` has a testbench that measures it. Record results in the
   spec's "Status" table, with the phase it was measured in.
 
