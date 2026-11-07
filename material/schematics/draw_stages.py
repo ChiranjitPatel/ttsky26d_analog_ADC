@@ -351,7 +351,7 @@ s.save(f"{OUT}/stage7_inmux_vcm.png")
 # =================================================================== stage 6: comparator
 s = Sch()
 VDD, GND = 12.0, 0.0
-s.title(0, 14.2, "Stage 6 — comparator: PMOS-input StrongARM + inverters + NAND SR latch",
+s.title(0, 14.2, "Stage 6 — comparator: preamp + PMOS-input StrongARM + inverters + NAND SR latch",
         "all L in µm; reset while clk = 0 (clkb = 1), evaluate while clk = 1; q = 1 when inp > inn")
 s.rail(VDD, 0, 24, "VDPWR")
 s.rail(GND, 0, 24, "VGND")
@@ -359,8 +359,8 @@ mt = s.fet("p", 6, VDD, "right", "MT", "pfet 4/0.15")
 s.net(mt["gate"], "clkb", "right"); s.dot((6, VDD))
 TS = 10.0
 s.w(mt["drain"], (6, TS)); s.w((3, TS), (9, TS)); s.dot((6, TS)); s.net((6, TS), "ts", "below")
-m1 = s.fet("p", 3, TS, "left", "M1", "pfet_lvt 4/0.5"); s.net(m1["gate"], "inp", "left")
-m2 = s.fet("p", 9, TS, "right", "M2", "pfet_lvt 4/0.5"); s.net(m2["gate"], "inn", "right")
+m1 = s.fet("p", 3, TS, "left", "M1", "pfet_lvt 4/0.5"); s.net(m1["gate"], "pap", "left")
+m2 = s.fet("p", 9, TS, "right", "M2", "pfet_lvt 4/0.5"); s.net(m2["gate"], "pan", "right")
 s.net((3, 8.1), "xn", "left"); s.net((9, 8.1), "xp", "right")
 m4 = s.fet("p", 3, 7.6, "left", "M4", "pfet 1/0.15")
 m3 = s.fet("p", 9, 7.6, "right", "M3", "pfet 1/0.15")
@@ -374,7 +374,8 @@ s.dot(ON); s.dot(OP); s.net((3, 4.6), "on", "left"); s.net((9, 4.6), "op", "righ
 # cross coupling: gates of M4/M6 to op, gates of M3/M5 to on
 for g, nm, side in ((m4["gate"], "op", "left"), (m6["gate"], "op", "left"), (m3["gate"], "on", "right"), (m5["gate"], "on", "right")):
     s.net(g, nm + "  (cross-coupled)", side)
-s.d.add(elm.Label().at((0.2, 12.9)).label("reset nfets 0.42/0.15 (gate clkb) pull xp, xn, op, on to VGND", halign="left", fontsize=8, color=DEVC))
+s.d.add(elm.Label().at((0.2, 12.9)).label("reset nfets 0.42/0.15 (gate clkb) pull xp, xn, op, on to VGND.   "
+        "Preamp (not drawn): pfet_lvt 4/0.5 pair, 4 µA tail (pbias), nfet 0.5/1 diode loads: inp → pan, inn → pap (gain ≈ 2)", halign="left", fontsize=8, color=DEVC))
 # output stage
 s.d.add(logic.Not().at((15.0, 7.0)).anchor("in1").right()); s.net((15.0, 7.0), "op", "left"); s.net((17.6, 7.0), "opb", "above")
 s.d.add(logic.Not().at((15.0, 3.0)).anchor("in1").right()); s.net((15.0, 3.0), "on", "left"); s.net((17.6, 3.0), "onb", "below")
