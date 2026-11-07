@@ -74,3 +74,4 @@ loose compared to the LSB.
 |---|---|---|---|---|
 | A9 | VIN −0.01 mV after 1 µs; VPTAT/VBG < 1 µV after 10 µs | 1 | 2026-11-07 | stage 7, `sim/inmux/` |
 | A14 | < 1 µV | 1 | 2026-11-07 | stage 7 |
+| A10 | 0.44 ns at 1 mV | 1 | 2026-11-07 | stage 6, `sim/comparator/` |

@@ -1,0 +1,24 @@
+* Stage 6 — comparator kickback and toggle point (tt, 27 C, 1.8 V), reltol 1e-5 (see tb_cmp).
+* xk: inp is a FLOATING 2.4 pF node (like the DAC top plate), initial 0.602 V, inn = 0.6 V.
+* xs: slow ramp on inp, 0.597 -> 0.603 V over 6 us, across inn = 0.6 V (toggle point / offset).
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/comparator.spice
+.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17
+.temp 27
+VDD vdd 0 1.8
+VCK clk 0 pulse(0 1.8 0.5u 0.2n 0.2n 0.5u 1u)
+VCM cm 0 0.6
+CK kin 0 2.4p
+.ic v(kin)=0.602
+xk vdd 0 clk kin cm qk qbk comparator
+VRP rp 0 pwl(0 0.597 6u 0.603)
+xs vdd 0 clk rp cm qs qbs comparator
+.control
+set wr_singlescale
+set wr_vecnames
+save v(clk) v(kin) v(qs) v(rp) v(xs.op) v(xs.on)
+tran 1n 7u uic
+wrdata ../out/comparator/kick.dat v(clk) v(kin) v(qs) v(rp) v(xs.op) v(xs.on)
+quit
+.endc
+.end

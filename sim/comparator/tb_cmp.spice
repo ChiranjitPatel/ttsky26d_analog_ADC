@@ -1,0 +1,36 @@
+* Stage 6 — comparator decisions (tt, 27 C, VDPWR 1.8 V). clk = 1 MHz, evaluate while high.
+* NOTE: tight tolerances (reltol 1e-5) are required. With the default reltol (1e-3) and a 0.1 ns
+* step ngspice resolved 1 mV decisions wrongly in ~10 % of cycles (numerical, not circuit) - see README.
+* xa/xb: inp = vcm +/- 1 mV (A10 decision time); xc..xf: common mode 0.2 V and 1.0 V.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/comparator.spice
+.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17
+.temp 27
+VDD vdd 0 1.8
+VDA vda 0 1.8
+VCK clk 0 pulse(0 1.8 0.5u 0.2n 0.2n 0.5u 1u)
+VCM cm 0 0.6
+VP1 p1 0 0.601
+VM1 m1 0 0.599
+VL0 l0 0 0.2
+VLP lp 0 0.201
+VLM lm 0 0.199
+VH0 h0 0 1.0
+VHP hp 0 1.001
+VHM hm 0 0.999
+xa vda 0 clk p1 cm qa qba comparator
+xb vdd 0 clk m1 cm qb qbb comparator
+xc vdd 0 clk lp l0 qc qbc comparator
+xd vdd 0 clk lm l0 qd qbd comparator
+xe vdd 0 clk hp h0 qe qbe comparator
+xf vdd 0 clk hm h0 qf qbf comparator
+.control
+set wr_singlescale
+set wr_vecnames
+save v(clk) v(xa.op) v(xa.on) v(xb.op) v(xb.on) v(qa) v(qb) v(qc) v(qd) v(qe) v(qf) i(VDA)
+tran 1n 12u
+meas tran ia_avg avg i(VDA) from=2u to=12u
+wrdata ../out/comparator/dec.dat v(clk) v(xa.op) v(xa.on) v(xb.op) v(xb.on) v(qa) v(qb) v(qc) v(qd) v(qe) v(qf)
+quit
+.endc
+.end

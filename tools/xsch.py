@@ -80,7 +80,9 @@ class Schematic:
             px, py = pins[pin]
             ax, ay = x + px, y + py
             # short wire stub pointing away from the symbol, label at its end
-            if abs(px) >= abs(py):
+            # box-symbol pins (|x| >= 40) always get horizontal stubs: on tall symbols, pins near the
+            # corners have |y| > |x| and vertical stubs along the same x would overlap and short
+            if abs(px) >= 40 or abs(px) >= abs(py):
                 if px < 0:
                     bx, by, flip = ax - 40, ay, 0
                 else:  # right side: go past the device's attribute text, text to the right

@@ -347,4 +347,41 @@ s.d.add(elm.Dot(open=True).at((12.5, 6.0))); s.net((12.5, 6.0), "vtop (DAC top p
 s.d.add(elm.Label().at((0, -1.4)).label("VIN is sampled at 1 MHz (settles in 0.3 µs). VPTAT/VBG have ≈ 250 kΩ source impedance: convert them with clk ≤ 100 kHz (settle in ≈ 4 µs). "
         "vcm cancels: top plate sampled to vcm and compared against the same node.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage7_inmux_vcm.png")
+
+# =================================================================== stage 6: comparator
+s = Sch()
+VDD, GND = 12.0, 0.0
+s.title(0, 14.2, "Stage 6 — comparator: PMOS-input StrongARM + inverters + NAND SR latch",
+        "all L in µm; reset while clk = 0 (clkb = 1), evaluate while clk = 1; q = 1 when inp > inn")
+s.rail(VDD, 0, 24, "VDPWR")
+s.rail(GND, 0, 24, "VGND")
+mt = s.fet("p", 6, VDD, "right", "MT", "pfet 4/0.15")
+s.net(mt["gate"], "clkb", "right"); s.dot((6, VDD))
+TS = 10.0
+s.w(mt["drain"], (6, TS)); s.w((3, TS), (9, TS)); s.dot((6, TS)); s.net((6, TS), "ts", "below")
+m1 = s.fet("p", 3, TS, "left", "M1", "pfet_lvt 4/0.5"); s.net(m1["gate"], "inp", "left")
+m2 = s.fet("p", 9, TS, "right", "M2", "pfet_lvt 4/0.5"); s.net(m2["gate"], "inn", "right")
+s.net((3, 8.1), "xn", "left"); s.net((9, 8.1), "xp", "right")
+m4 = s.fet("p", 3, 7.6, "left", "M4", "pfet 1/0.15")
+m3 = s.fet("p", 9, 7.6, "right", "M3", "pfet 1/0.15")
+s.w(m1["drain"], m4["source"]); s.w(m2["drain"], m3["source"])
+m6 = s.fet("n", 3, 1.5, "left", "M6", "nfet 1/0.15")
+m5 = s.fet("n", 9, 1.5, "right", "M5", "nfet 1/0.15")
+s.w(m4["drain"], m6["drain"]); s.w(m3["drain"], m5["drain"])
+s.w(m6["source"], (3, GND)); s.w(m5["source"], (9, GND)); s.dot((3, GND)); s.dot((9, GND))
+ON, OP = (3, 4.6), (9, 4.6)
+s.dot(ON); s.dot(OP); s.net((3, 4.6), "on", "left"); s.net((9, 4.6), "op", "right")
+# cross coupling: gates of M4/M6 to op, gates of M3/M5 to on
+for g, nm, side in ((m4["gate"], "op", "left"), (m6["gate"], "op", "left"), (m3["gate"], "on", "right"), (m5["gate"], "on", "right")):
+    s.net(g, nm + "  (cross-coupled)", side)
+s.d.add(elm.Label().at((0.2, 12.9)).label("reset nfets 0.42/0.15 (gate clkb) pull xp, xn, op, on to VGND", halign="left", fontsize=8, color=DEVC))
+# output stage
+s.d.add(logic.Not().at((15.0, 7.0)).anchor("in1").right()); s.net((15.0, 7.0), "op", "left"); s.net((17.6, 7.0), "opb", "above")
+s.d.add(logic.Not().at((15.0, 3.0)).anchor("in1").right()); s.net((15.0, 3.0), "on", "left"); s.net((17.6, 3.0), "onb", "below")
+s.d.add(logic.Nand(inputs=2).at((19.0, 7.3)).anchor("in1").right()); s.net((19.0, 7.3), "opb", "left"); s.net((19.0, 6.3), "qb", "left"); s.net((22.6, 6.8), "q", "right")
+s.d.add(logic.Nand(inputs=2).at((19.0, 3.3)).anchor("in1").right()); s.net((19.0, 3.3), "onb", "left"); s.net((19.0, 2.3), "q", "left"); s.net((22.6, 2.8), "qb", "right")
+s.d.add(elm.Label().at((14.5, 9.5)).label("identical inverters keep the latch load on op/on\nequal and independent of the stored state", halign="left", fontsize=8, color=DEVC))
+s.d.add(elm.Label().at((0, -1.4)).label("Evaluate: the side with the LOWER input conducts more; its node rises first and the latch regenerates. "
+        "op (on the inn side) goes high when inp > inn → q = 1.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage6_comparator.png")
 print("ok")

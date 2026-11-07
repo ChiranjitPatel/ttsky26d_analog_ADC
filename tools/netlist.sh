@@ -6,6 +6,10 @@ cd "$(dirname "$0")/../xschem"
 export PDK_ROOT=${PDK_ROOT:-/usr/local/share/pdk}
 out=../sim/out/netlist
 mkdir -p "$out"
+# Regenerate every schematic from its generator first, so a .sch can never drift from gen_*.py
+# (stage 3's parameter sweep once left a stale bandgap_core.sch behind; see sim/bandgap/README.md).
+for g in gen_*.py; do python3 "$g" > /dev/null || { echo "generator $g failed"; exit 1; }; done
+rm -rf ../tools/__pycache__
 for cell in "$@"; do
   timeout 120 xschem --rcfile xschemrc --no_x -q -n -s -o "$out" "$cell.sch" > "$out/$cell.xschem.log" 2>&1
   f="$out/$cell.spice"

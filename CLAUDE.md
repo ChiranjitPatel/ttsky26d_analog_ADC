@@ -33,8 +33,11 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
   - Precision transients (anything judged against the LSB, 4.75 mV) need
     `.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17`. The default reltol (1e-3)
     lets node voltages wander by ~1 mV.
-  - Comparator decisions need a ≤ 5 ps max timestep (`tran 1n T 0 5p`). With 0.1 ns, 1 mV
-    decisions came out wrong in ~10 % of cycles.
+  - Comparator decisions: with the default reltol, 1 mV decisions came out wrong in ~10 % of
+    cycles. reltol 1e-5 fixes it and lets the adaptive step do the work (32 s for 12 µs). A forced
+    5 ps max step also works, but is 10× slower.
+  - Use `set num_threads=1` in `.spiceinit`. With 4 threads, parallel runs oversubscribe the CPU
+    and slow down ~15× (OpenMP spin-waits).
   - In long fine-step runs, `save` only the needed vectors (saving everything used 1.7 GB per run).
 - Every spec number in `docs/specs/` has a testbench that measures it. Record results in the
   spec's "Status" table, with the phase it was measured in.
