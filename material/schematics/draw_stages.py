@@ -245,4 +245,21 @@ s.net(msd["drain"], "su", "above"); s.net(msd["gate"], "pd", "left"); s.w(msd["s
 s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, pbias (in), pd (in), vbg (out), vgp (out, for the PTAT branch).   "
         "Startup: while vbg is low, MSU2 pulls su high and MSU1 pulls vgp low; once vbg is up, MSU3 holds su low.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage3_bandgap_core.png")
+
+# =================================================================== stage 4: ptat_out
+s = Sch()
+VDD, GND = 9.0, 0.0
+s.title(0, 11.2, "Stage 4 — ptat_out (VPTAT = ΔVbe · R3/R1 ≈ 0.60 V, 2.0 mV/°C)",
+        "MPP copies the bandgap branch current I = ΔVbe/R1; R3 uses the same xhigh_po 0.35/2 unit as R1, so the resistor TC cancels")
+s.rail(VDD, 0, 12, "VDPWR")
+s.rail(GND, 0, 12, "VGND")
+mpp = s.fet("p", 4, VDD, "left", "MPP", "pfet 8/4  (≈ 2.26 µA)")
+s.net(mpp["gate"], "vgp  (from bandgap_core)", "left"); s.dot((4, VDD))
+s.w(mpp["drain"], (4, 6.0)); s.dot((4, 6.6))
+s.w((4, 6.6), (8, 6.6)); s.d.add(elm.Dot(open=True).at((8, 6.6))); s.net((8, 6.6), "vptat", "right")
+s.d.add(elm.Resistor().down().at((4, 6.0)).to((4, 1.5)).label("R3 = 22 units\n≈ 266 kΩ", loc="bottom", fontsize=8))
+s.w((4, 1.5), (4, GND)); s.dot((4, GND))
+s.d.add(elm.Label().at((0, -1.4)).label("Ports: VDPWR, VGND, vgp (in), vptat (out).   Only a gate touches the core, so loading vptat can't disturb VBG.   "
+        "Power-down: vgp = VDPWR → MPP off → vptat = 0 V.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage4_ptat_out.png")
 print("ok")

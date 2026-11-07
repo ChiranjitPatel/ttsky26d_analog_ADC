@@ -1,0 +1,33 @@
+* Stage 4 — bandgap loop gain with the PTAT branch's gate on vgp (Middlebrook, as tb_bandgap_loop)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core_brk.spice
+.include ../out/netlist/ptat_out.spice
+.temp 27
+VDD  vdd  0 dc 1.8
+VPD  pd   0 0
+xb   vdd  0 pd nbias pbias bias_gen
+xbg  vdd  0 pbias pd vbg vgp vo bandgap_core
+xpt  vdd  0 vgp vptat ptat_out
+VINJ vgp vo dc 0 ac 1
+IINJ 0 vgp dc 0 ac 0
+.control
+set wr_singlescale
+set wr_vecnames
+ac dec 40 1 1e9
+let tv = -v(vo)/v(vgp)
+alter @VINJ[acmag] = 0
+alter @IINJ[acmag] = 1
+ac dec 40 1 1e9
+let idrv = -i(VINJ)
+let ti = -idrv/(idrv + 1)
+let t = (ac1.tv*ti - 1)/(ac1.tv + ti + 2)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+wrdata ../out/ptat/loop.dat tdb tph
+meas ac t0 find tdb at=1
+meas ac fu when tdb=0
+meas ac phu find tph when tdb=0
+quit
+.endc
+.end

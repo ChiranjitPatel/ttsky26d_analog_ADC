@@ -70,3 +70,7 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 | B5 | 22 ppm/°C | early, tt only | 2026-11-01 | R2/R1 = 19/2 |
 | B7 | 45.8 dB DC / −9.8 dB at 1 MHz (raw `vbg`) | early, tt only | 2026-11-01 | ❌ raw; B7 is now specified after the RC filter (stage 5) |
 | B8 | 1.4 nA | early, tt only | 2026-11-01 | incl. bias_gen |
+| B10 | 0.5988 V | 1 | 2026-11-07 | stage 4, `sim/ptat/` |
+| B11 | 2.004 mV/°C | early, tt only | 2026-11-07 | |
+| B12 | 2.37 °C/LSB | early, tt only | 2026-11-07 | with LSB = 4.75 mV |
+| B13 | 0.5 °C (ideal-PTAT model, tt) | early, tt only | 2026-11-07 | mismatch/ADC errors not included yet |
