@@ -1,0 +1,32 @@
+* Stage 8 — vtop hold/leakage check: sample once, hold code 127 for 50 us (tt, 27 C)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/cap_dac.spice
+.temp 27
+.options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
+VDD vdd 0 1.8
+VREF vref 0 1.215
+VCM vcm 0 0.716
+VADC vadc 0 0
+VS smp 0 pwl(0 1.8 0.4u 1.8 0.4002u 0)
+VSB smpb 0 pwl(0 0 0.4u 0 0.4002u 1.8)
+VST smpt 0 pwl(0 1.8 0.39u 1.8 0.3902u 0)
+STOP vtop vcm smpt 0 swm
+.model swm sw vt=0.9 vh=0.1 ron=200 roff=1e12
+VB0 b0 0 1.8
+VB1 b1 0 1.8
+VB2 b2 0 1.8
+VB3 b3 0 1.8
+VB4 b4 0 1.8
+VB5 b5 0 1.8
+VB6 b6 0 1.8
+VB7 b7 0 0
+x1 vdd 0 vref vadc smp smpb b0 b1 b2 b3 b4 b5 b6 b7 vtop cap_dac
+.control
+set wr_singlescale
+set wr_vecnames
+tran 10n 50u
+let vd = v(vtop) - v(vcm)
+wrdata ../out/dac/hold.dat vd v(x1.bp6) v(x1.bp7) v(x1.bpt)
+quit
+.endc
+.end

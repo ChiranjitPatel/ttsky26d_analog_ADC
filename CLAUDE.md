@@ -31,7 +31,7 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
 - **Phase 3:** repeat the key tests on the extracted (post-layout) netlist.
 - **Simulator accuracy (learned in stages 6–8):**
   - Precision transients (anything judged against the LSB, 4.75 mV) need
-    `.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17`. The default reltol (1e-3)
+    `.options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16`. The default reltol (1e-3)
     lets node voltages wander by ~1 mV.
   - Comparator decisions: with the default reltol, 1 mV decisions came out wrong in ~10 % of
     cycles. reltol 1e-5 fixes it and lets the adaptive step do the work (32 s for 12 µs). A forced

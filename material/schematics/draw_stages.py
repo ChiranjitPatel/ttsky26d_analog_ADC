@@ -384,4 +384,40 @@ s.d.add(elm.Label().at((14.5, 9.5)).label("identical inverters keep the latch lo
 s.d.add(elm.Label().at((0, -1.4)).label("Evaluate: the side with the LOWER input conducts more; its node rises first and the latch regenerates. "
         "op (on the inn side) goes high when inp > inn → q = 1.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage6_comparator.png")
+
+# =================================================================== stage 8: cap_dac + dac_sw
+s = Sch()
+VDD, GND = 11.0, 0.0
+s.title(0, 13.2, "Stage 8 — cap_dac: 8-bit binary MIM DAC (256 × 9.3 fF) with one dac_sw per capacitor group",
+        "unit cap = cap_mim_m3_1 2 × 2 µm; top plate (c0) = vtop, bottom plate (c1, met3) = switched node bp_i")
+s.rail(VDD, 0, 26, "VDPWR")
+s.rail(GND, 0, 26, "VGND")
+# one switch cell, drawn with switches
+s.d.add(elm.Label().at((0.3, 12.0)).label("dac_sw (one per group)", halign="left", fontsize=11, color=DEVC))
+BP = (6.0, 5.5)
+s.d.add(elm.Dot(open=True).at((1.0, 8.5))); s.net((1.0, 8.5), "vadc", "left")
+s.d.add(elm.Switch().right().at((1.0, 8.5)).to((4.0, 8.5)).label("TG nfet 1/0.15 + pfet_lvt 2/0.35\non when smp = 1", loc="top", fontsize=8))
+s.d.add(elm.Dot(open=True).at((1.0, 5.5))); s.net((1.0, 5.5), "vref", "left")
+s.d.add(elm.Switch().right().at((1.0, 5.5)).to((4.0, 5.5)).label("pfet_lvt 4/0.35\non when smp = 0, b = 1", loc="top", fontsize=8))
+s.d.add(elm.Dot(open=True).at((1.0, 2.5))); s.net((1.0, 2.5), "VGND", "left")
+s.d.add(elm.Switch().right().at((1.0, 2.5)).to((4.0, 2.5)).label("nfet 1/0.15\non when smp = 0, b = 0", loc="top", fontsize=8))
+s.w((4.0, 8.5), (5.0, 8.5), (5.0, 2.5), (4.0, 2.5)); s.w((4.0, 5.5), BP); s.dot((5.0, 5.5))
+s.d.add(elm.Dot(open=True).at(BP)); s.net(BP, "bp_i", "right")
+s.d.add(elm.Label().at((0.3, 0.8)).label("gate drive: NOR(smp, b) → nfet; NAND(smpb, b) → pfet", halign="left", fontsize=8, color=DEVC))
+# array
+s.d.add(elm.Label().at((10.5, 12.0)).label("cap_dac", halign="left", fontsize=11, color=DEVC))
+TOP = 9.5
+s.w((11.0, TOP), (25.0, TOP)); s.d.add(elm.Dot(open=True).at((25.0, TOP))); s.net((25.0, TOP), "vtop → comparator inp", "above")
+for k, (lab, w) in enumerate((("b7", "128C"), ("b6", "64C"), ("b5", "32C"), ("…", ""), ("b0", "1C"), ("term.", "1C"))):
+    x = 12.0 + 2.4 * k
+    if lab == "…":
+        s.d.add(elm.Label().at((x, 6.0)).label("…", fontsize=14)); continue
+    s.dot((x, TOP))
+    s.d.add(elm.Capacitor().down().at((x, TOP)).to((x, 5.5)).label(w, loc="bottom", fontsize=8))
+    s.w((x, 5.5), (x, 4.6)); s.d.add(elm.Ic(pins=[elm.IcPin(name="", side="top")], size=(1.0, 0.8)).at((x - 0.5, 3.8)) if False else elm.Label().at((x, 4.2)).label("dac_sw", fontsize=8, color=DEVC))
+    s.net((x, 3.5), f"b = {lab if lab != 'term.' else 'VGND'}", "below")
+s.d.add(elm.Label().at((10.6, 1.5)).label("termination cap: b tied low (VGND during conversion, vadc while sampling)", halign="left", fontsize=8, color=DEVC))
+s.d.add(elm.Label().at((0, -1.4)).label("Sample: top = vcm (MTOP), bottoms = vadc. Convert: MSB → vref, others → VGND, so vtop = vcm + VREF·code/256 − Vin; "
+        "the SAR keeps each bit while vtop < vcm.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage8_cap_dac.png")
 print("ok")

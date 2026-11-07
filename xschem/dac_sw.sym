@@ -1,0 +1,36 @@
+v {xschem version=3.4.8RC file_version=1.2}
+G {}
+K {type=subcircuit
+format="@name @pinlist @symname"
+template="name=x1"
+}
+V {}
+S {}
+E {}
+B 4 -60 -90 60 90 {}
+T {@symname} -55 -110 0 0 0.25 0.25 {}
+T {@name} -55 95 0 0 0.25 0.25 {}
+L 4 -80 -70 -60 -70 {}
+B 5 -82.5 -72.5 -77.5 -67.5 {name=VDPWR dir=inout}
+T {VDPWR} -55 -76 0 0 0.2 0.2 {}
+L 4 -80 -50 -60 -50 {}
+B 5 -82.5 -52.5 -77.5 -47.5 {name=VGND dir=inout}
+T {VGND} -55 -56 0 0 0.2 0.2 {}
+L 4 -80 -30 -60 -30 {}
+B 5 -82.5 -32.5 -77.5 -27.5 {name=vref dir=inout}
+T {vref} -55 -36 0 0 0.2 0.2 {}
+L 4 -80 -10 -60 -10 {}
+B 5 -82.5 -12.5 -77.5 -7.5 {name=vadc dir=inout}
+T {vadc} -55 -16 0 0 0.2 0.2 {}
+L 4 -80 10 -60 10 {}
+B 5 -82.5 7.5 -77.5 12.5 {name=smp dir=in}
+T {smp} -55 4 0 0 0.2 0.2 {}
+L 4 -80 30 -60 30 {}
+B 5 -82.5 27.5 -77.5 32.5 {name=smpb dir=in}
+T {smpb} -55 24 0 0 0.2 0.2 {}
+L 4 -80 50 -60 50 {}
+B 5 -82.5 47.5 -77.5 52.5 {name=b dir=in}
+T {b} -55 44 0 0 0.2 0.2 {}
+L 4 -80 70 -60 70 {}
+B 5 -82.5 67.5 -77.5 72.5 {name=bp dir=inout}
+T {bp} -55 64 0 0 0.2 0.2 {}

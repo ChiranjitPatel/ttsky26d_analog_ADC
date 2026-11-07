@@ -1,0 +1,11 @@
+# I4 — synthesize the top-level digital block adc_digital (sar_logic + pin decoding) to sky130_fd_sc_hd (tt_025C_1v80), Yosys
+# (run tools/filter_liberty.py first; see src/sar/README.md)
+read_verilog src/sar/sar_logic.v src/sar/adc_digital.v
+synth -top adc_digital -flatten
+dfflibmap -liberty sim/out/sar/hd_tt_filtered.lib
+abc -liberty sim/out/sar/hd_tt_filtered.lib
+opt_clean
+setundef -zero
+hilomap -hicell sky130_fd_sc_hd__conb_1 HI -locell sky130_fd_sc_hd__conb_1 LO
+stat -liberty sim/out/sar/hd_tt_filtered.lib
+write_verilog -noattr -noexpr sim/out/sar/adc_digital_gl.v

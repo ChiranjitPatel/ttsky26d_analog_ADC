@@ -4,7 +4,7 @@
 * xa/xb: inp = vcm +/- 1 mV (A10 decision time); xc..xf: common mode 0.2 V and 1.0 V.
 .lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
 .include ../out/netlist/comparator.spice
-.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17
+.options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
 .temp 27
 VDD vdd 0 1.8
 VDA vda 0 1.8
