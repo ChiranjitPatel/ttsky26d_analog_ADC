@@ -3,10 +3,13 @@
 * step ngspice resolved 1 mV decisions wrongly in ~10 % of cycles (numerical, not circuit) - see README.
 * xa/xb: inp = vcm +/- 1 mV (A10 decision time); xc..xf: common mode 0.2 V and 1.0 V.
 .lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
 .include ../out/netlist/comparator.spice
 .options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
 .temp 27
 VDD vdd 0 1.8
+VPD pd 0 0
+xbias vdd 0 pd nbias pbias bias_gen
 VDA vda 0 1.8
 VCK clk 0 pulse(0 1.8 0.5u 0.2n 0.2n 0.5u 1u)
 VCM cm 0 0.6
@@ -18,12 +21,12 @@ VLM lm 0 0.199
 VH0 h0 0 1.0
 VHP hp 0 1.001
 VHM hm 0 0.999
-xa vda 0 clk p1 cm qa qba comparator
-xb vdd 0 clk m1 cm qb qbb comparator
-xc vdd 0 clk lp l0 qc qbc comparator
-xd vdd 0 clk lm l0 qd qbd comparator
-xe vdd 0 clk hp h0 qe qbe comparator
-xf vdd 0 clk hm h0 qf qbf comparator
+xa vda 0 pbias clk p1 cm qa qba comparator
+xb vdd 0 pbias clk m1 cm qb qbb comparator
+xc vdd 0 pbias clk lp l0 qc qbc comparator
+xd vdd 0 pbias clk lm l0 qd qbd comparator
+xe vdd 0 pbias clk hp h0 qe qbe comparator
+xf vdd 0 pbias clk hm h0 qf qbf comparator
 .control
 set wr_singlescale
 set wr_vecnames

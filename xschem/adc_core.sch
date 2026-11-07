@@ -141,66 +141,68 @@ C {lab_pin.sym} 580 300 0 0 {name=p51 sig_type=std_logic lab=b6}
 N 620 320 580 320 {lab=b7}
 C {lab_pin.sym} 580 320 0 0 {name=p52 sig_type=std_logic lab=b7}
 C {comparator.sym} 1400 200 0 0 {name=xcmp}
-N 1320 160 1280 160 {lab=VDPWR}
-C {lab_pin.sym} 1280 160 0 0 {name=p53 sig_type=std_logic lab=VDPWR}
-N 1320 180 1280 180 {lab=VGND}
-C {lab_pin.sym} 1280 180 0 0 {name=p54 sig_type=std_logic lab=VGND}
-N 1320 200 1280 200 {lab=cmp_clk}
-C {lab_pin.sym} 1280 200 0 0 {name=p55 sig_type=std_logic lab=cmp_clk}
-N 1320 220 1280 220 {lab=vtop}
-C {lab_pin.sym} 1280 220 0 0 {name=p56 sig_type=std_logic lab=vtop}
-N 1320 240 1280 240 {lab=vcm}
-C {lab_pin.sym} 1280 240 0 0 {name=p57 sig_type=std_logic lab=vcm}
-N 1480 160 1590 160 {lab=q}
-C {lab_pin.sym} 1590 160 0 1 {name=p58 sig_type=std_logic lab=q}
-N 1480 180 1590 180 {lab=qb}
-C {lab_pin.sym} 1590 180 0 1 {name=p59 sig_type=std_logic lab=qb}
+N 1320 150 1280 150 {lab=VDPWR}
+C {lab_pin.sym} 1280 150 0 0 {name=p53 sig_type=std_logic lab=VDPWR}
+N 1320 170 1280 170 {lab=VGND}
+C {lab_pin.sym} 1280 170 0 0 {name=p54 sig_type=std_logic lab=VGND}
+N 1320 190 1280 190 {lab=pbias}
+C {lab_pin.sym} 1280 190 0 0 {name=p55 sig_type=std_logic lab=pbias}
+N 1320 210 1280 210 {lab=cmp_clk}
+C {lab_pin.sym} 1280 210 0 0 {name=p56 sig_type=std_logic lab=cmp_clk}
+N 1320 230 1280 230 {lab=vtop}
+C {lab_pin.sym} 1280 230 0 0 {name=p57 sig_type=std_logic lab=vtop}
+N 1320 250 1280 250 {lab=vcm}
+C {lab_pin.sym} 1280 250 0 0 {name=p58 sig_type=std_logic lab=vcm}
+N 1480 150 1590 150 {lab=q}
+C {lab_pin.sym} 1590 150 0 1 {name=p59 sig_type=std_logic lab=q}
+N 1480 170 1590 170 {lab=qb}
+C {lab_pin.sym} 1590 170 0 1 {name=p60 sig_type=std_logic lab=qb}
 C {vcm_gen.sym} 2100 200 0 0 {name=xvcm}
 N 2020 160 1980 160 {lab=VDPWR}
-C {lab_pin.sym} 1980 160 0 0 {name=p60 sig_type=std_logic lab=VDPWR}
+C {lab_pin.sym} 1980 160 0 0 {name=p61 sig_type=std_logic lab=VDPWR}
 N 2020 180 1980 180 {lab=VGND}
-C {lab_pin.sym} 1980 180 0 0 {name=p61 sig_type=std_logic lab=VGND}
+C {lab_pin.sym} 1980 180 0 0 {name=p62 sig_type=std_logic lab=VGND}
 N 2020 200 1980 200 {lab=pbias}
-C {lab_pin.sym} 1980 200 0 0 {name=p62 sig_type=std_logic lab=pbias}
+C {lab_pin.sym} 1980 200 0 0 {name=p63 sig_type=std_logic lab=pbias}
 N 2020 220 1980 220 {lab=smpt}
-C {lab_pin.sym} 1980 220 0 0 {name=p63 sig_type=std_logic lab=smpt}
+C {lab_pin.sym} 1980 220 0 0 {name=p64 sig_type=std_logic lab=smpt}
 N 2020 240 1980 240 {lab=vtop}
-C {lab_pin.sym} 1980 240 0 0 {name=p64 sig_type=std_logic lab=vtop}
+C {lab_pin.sym} 1980 240 0 0 {name=p65 sig_type=std_logic lab=vtop}
 N 2180 160 2290 160 {lab=vcm}
-C {lab_pin.sym} 2290 160 0 1 {name=p65 sig_type=std_logic lab=vcm}
+C {lab_pin.sym} 2290 160 0 1 {name=p66 sig_type=std_logic lab=vcm}
 C {sky130_fd_pr/pfet_01v8.sym} 0 800 0 0 {name=MIP model=pfet_01v8 spiceprefix=X W=1.68 L=0.15 nf=1 mult=1}
 N 20 830 20 870 {lab=smpb}
-C {lab_pin.sym} 20 870 0 0 {name=p66 sig_type=std_logic lab=smpb}
+C {lab_pin.sym} 20 870 0 0 {name=p67 sig_type=std_logic lab=smpb}
 N -20 800 -60 800 {lab=smp}
-C {lab_pin.sym} -60 800 0 0 {name=p67 sig_type=std_logic lab=smp}
+C {lab_pin.sym} -60 800 0 0 {name=p68 sig_type=std_logic lab=smp}
 N 20 770 20 730 {lab=VDPWR}
-C {lab_pin.sym} 20 730 0 0 {name=p68 sig_type=std_logic lab=VDPWR}
+C {lab_pin.sym} 20 730 0 0 {name=p69 sig_type=std_logic lab=VDPWR}
 N 20 800 130 800 {lab=VDPWR}
-C {lab_pin.sym} 130 800 0 1 {name=p69 sig_type=std_logic lab=VDPWR}
+C {lab_pin.sym} 130 800 0 1 {name=p70 sig_type=std_logic lab=VDPWR}
 C {sky130_fd_pr/nfet_01v8.sym} 700 800 0 0 {name=MIN model=nfet_01v8 spiceprefix=X W=0.84 L=0.15 nf=1 mult=1}
 N 720 770 720 730 {lab=smpb}
-C {lab_pin.sym} 720 730 0 0 {name=p70 sig_type=std_logic lab=smpb}
+C {lab_pin.sym} 720 730 0 0 {name=p71 sig_type=std_logic lab=smpb}
 N 680 800 640 800 {lab=smp}
-C {lab_pin.sym} 640 800 0 0 {name=p71 sig_type=std_logic lab=smp}
+C {lab_pin.sym} 640 800 0 0 {name=p72 sig_type=std_logic lab=smp}
 N 720 830 720 870 {lab=VGND}
-C {lab_pin.sym} 720 870 0 0 {name=p72 sig_type=std_logic lab=VGND}
+C {lab_pin.sym} 720 870 0 0 {name=p73 sig_type=std_logic lab=VGND}
 N 720 800 830 800 {lab=VGND}
-C {lab_pin.sym} 830 800 0 1 {name=p73 sig_type=std_logic lab=VGND}
+C {lab_pin.sym} 830 800 0 1 {name=p74 sig_type=std_logic lab=VGND}
 C {sky130_fd_pr/pfet_01v8.sym} 1400 800 0 0 {name=MBP model=pfet_01v8 spiceprefix=X W=1.68 L=0.15 nf=1 mult=1}
 N 1420 830 1420 870 {lab=cmp_out}
-C {lab_pin.sym} 1420 870 0 0 {name=p74 sig_type=std_logic lab=cmp_out}
+C {lab_pin.sym} 1420 870 0 0 {name=p75 sig_type=std_logic lab=cmp_out}
 N 1380 800 1340 800 {lab=qb}
-C {lab_pin.sym} 1340 800 0 0 {name=p75 sig_type=std_logic lab=qb}
+C {lab_pin.sym} 1340 800 0 0 {name=p76 sig_type=std_logic lab=qb}
 N 1420 770 1420 730 {lab=VDPWR}
-C {lab_pin.sym} 1420 730 0 0 {name=p76 sig_type=std_logic lab=VDPWR}
+C {lab_pin.sym} 1420 730 0 0 {name=p77 sig_type=std_logic lab=VDPWR}
 N 1420 800 1530 800 {lab=VDPWR}
-C {lab_pin.sym} 1530 800 0 1 {name=p77 sig_type=std_logic lab=VDPWR}
+C {lab_pin.sym} 1530 800 0 1 {name=p78 sig_type=std_logic lab=VDPWR}
 C {sky130_fd_pr/nfet_01v8.sym} 2100 800 0 0 {name=MBN model=nfet_01v8 spiceprefix=X W=0.84 L=0.15 nf=1 mult=1}
 N 2120 770 2120 730 {lab=cmp_out}
-C {lab_pin.sym} 2120 730 0 0 {name=p78 sig_type=std_logic lab=cmp_out}
+C {lab_pin.sym} 2120 730 0 0 {name=p79 sig_type=std_logic lab=cmp_out}
 N 2080 800 2040 800 {lab=qb}
-C {lab_pin.sym} 2040 800 0 0 {name=p79 sig_type=std_logic lab=qb}
+C {lab_pin.sym} 2040 800 0 0 {name=p80 sig_type=std_logic lab=qb}
 N 2120 830 2120 870 {lab=VGND}
-C {lab_pin.sym} 2120 870 0 0 {name=p80 sig_type=std_logic lab=VGND}
+C {lab_pin.sym} 2120 870 0 0 {name=p81 sig_type=std_logic lab=VGND}
 N 2120 800 2230 800 {lab=VGND}
-C {lab_pin.sym} 2230 800 0 1 {name=p81 sig_type=std_logic lab=VGND}
+C {lab_pin.sym} 2230 800 0 1 {name=p82 sig_type=std_logic lab=VGND}

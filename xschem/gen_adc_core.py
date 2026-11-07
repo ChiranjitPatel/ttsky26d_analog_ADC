@@ -44,7 +44,7 @@ s.dev("sar_logic.sym", "xsar", conn)
 dac = {"VDPWR": "VDPWR", "VGND": "VGND", "vref": "vref", "vadc": "vadc", "smp": "smp", "smpb": "smpb", "vtop": "vtop"}
 dac.update({f"b{i}": f"b{i}" for i in range(8)})
 s.dev("cap_dac.sym", "xdac", dac)
-s.dev("comparator.sym", "xcmp", {"VDPWR": "VDPWR", "VGND": "VGND", "clk": "cmp_clk", "inp": "vtop", "inn": "vcm", "q": "q", "qb": "qb"})
+s.dev("comparator.sym", "xcmp", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "clk": "cmp_clk", "inp": "vtop", "inn": "vcm", "q": "q", "qb": "qb"})
 s.dev("vcm_gen.sym", "xvcm", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "smp": "smpt", "vtop": "vtop", "vcm": "vcm"})
 s.dev(PF, "MIP", {"D": "smpb", "G": "smp", "S": "VDPWR", "B": "VDPWR"}, model="pfet_01v8", spiceprefix="X", W=1.68, L=0.15, nf=1, mult=1)
 s.dev(NF, "MIN", {"D": "smpb", "G": "smp", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=0.84, L=0.15, nf=1, mult=1)

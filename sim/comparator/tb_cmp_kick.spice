@@ -2,17 +2,20 @@
 * xk: inp is a FLOATING 2.4 pF node (like the DAC top plate), initial 0.602 V, inn = 0.6 V.
 * xs: slow ramp on inp, 0.597 -> 0.603 V over 6 us, across inn = 0.6 V (toggle point / offset).
 .lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
 .include ../out/netlist/comparator.spice
 .options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
 .temp 27
 VDD vdd 0 1.8
+VPD pd 0 0
+xbias vdd 0 pd nbias pbias bias_gen
 VCK clk 0 pulse(0 1.8 0.5u 0.2n 0.2n 0.5u 1u)
 VCM cm 0 0.6
 CK kin 0 2.4p
 .ic v(kin)=0.602
-xk vdd 0 clk kin cm qk qbk comparator
+xk vdd 0 pbias clk kin cm qk qbk comparator
 VRP rp 0 pwl(0 0.597 6u 0.603)
-xs vdd 0 clk rp cm qs qbs comparator
+xs vdd 0 pbias clk rp cm qs qbs comparator
 .control
 set wr_singlescale
 set wr_vecnames

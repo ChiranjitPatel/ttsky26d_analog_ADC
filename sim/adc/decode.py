@@ -20,7 +20,7 @@ rows = []
 for i, k in enumerate(rise):
     if i >= len(vins):
         break
-    kk = min(k + 20, len(t) - 1)
+    kk = int(np.argmin(abs(t - (t[k] + 0.2e-6))))   # 0.2 us after EOC rises (adaptive steps: don't count samples)
     code = int(sum(int(bits[kk, b] > 0.9) << b for b in range(8)))
     vref = 1.215
     if vref_col is not None:

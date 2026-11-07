@@ -8,7 +8,11 @@ out=../sim/out/netlist
 mkdir -p "$out"
 # Regenerate every schematic from its generator first, so a .sch can never drift from gen_*.py
 # (stage 3's parameter sweep once left a stale bandgap_core.sch behind; see sim/bandgap/README.md).
-for g in gen_*.py; do python3 "$g" > /dev/null || { echo "generator $g failed"; exit 1; }; done
+# Leaf cells first: hierarchical generators read the symbols of the cells they instantiate.
+order="bias_gen ota bandgap_core ptat_out vref_filt vref_buf vref_sel comparator inmux vcm_gen dac adc_core top"
+gens=""; for c in $order; do gens="$gens gen_$c.py"; done
+for g in gen_*.py; do case " $gens " in *" $g "*) ;; *) gens="$gens $g";; esac; done
+for g in $gens; do python3 "$g" > /dev/null || { echo "generator $g failed"; exit 1; }; done
 rm -rf ../tools/__pycache__
 for cell in "$@"; do
   timeout 120 xschem --rcfile xschemrc --no_x -q -n -s -o "$out" "$cell.sch" > "$out/$cell.xschem.log" 2>&1
