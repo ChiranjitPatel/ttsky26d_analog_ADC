@@ -108,9 +108,9 @@ they're measured only through the ADC (`INSEL`). This decision saves the area of
 | Scenario | Settings | What it shows |
 |---|---|---|
 | Normal ADC | MODE=0, REF_SEL=0, INSEL=00 | VIN digitized against the internal bandgap |
-| Temperature sensor | MODE=0, REF_SEL=0, INSEL=01 | Code proportional to absolute temperature |
+| Temperature sensor | MODE=0, REF_SEL=0, INSEL=01, **clk ≤ 100 kHz** | Code proportional to absolute temperature |
 | VREF check (DMM) | MODE=0, REF_SEL=0, VREF_OE=1 | Buffered VREF on `ua[1]` |
-| Bandgap check (ADC) | MODE=0, REF_SEL=1 (known VREF on `ua[1]`), INSEL=10 | VBG digitized against a known reference |
+| Bandgap check (ADC) | MODE=0, REF_SEL=1 (known VREF on `ua[1]`), INSEL=10, **clk ≤ 100 kHz** | VBG digitized against a known reference |
 | Bandgap fallback | MODE=0, REF_SEL=1, INSEL=00 | ADC works even if the bandgap is dead |
 | Analog core debug | MODE=1 | RP2040 runs the SAR algorithm itself |
 

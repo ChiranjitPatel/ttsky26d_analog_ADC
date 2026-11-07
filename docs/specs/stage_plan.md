@@ -154,7 +154,7 @@ pass through simulation, layout and LVS on a small block.
 | 4 PTAT | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/ptat/README.md`: 0.599 V, 2.00 mV/°C, VBG unaffected, loop PM 64° |
 | 5 VREF chain | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/vref/README.md`: B7 met at vbg_f, DAC-load error 23 µV, stable with pad, external-ref mode works |
 | 6 Comparator | | | | | | | | |
-| 7 Switch + mux | | | | | | | | |
+| 7 Switch + mux | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/inmux/README.md`: A9/A14 met; VPTAT/VBG need clk ≤ 100 kHz (decided) |
 | 8 Cap DAC | | | | | | | | |
 | 9 SAR logic | | | | | | | | |
 | I1 Analog core | | | | | | | | |

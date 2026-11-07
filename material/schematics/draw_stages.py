@@ -318,4 +318,33 @@ s.d.add(elm.Dot(open=True).at((24.5, 2.4))); s.net((24.5, 2.4), "pad → ua[1]",
 s.d.add(elm.Label().at((0, -1.4)).label("Internal ref (REF_SEL = 0): buffer on, vref ≈ 1.214 V. External ref (REF_SEL = 1): buffer off, ua[1] drives vref through the TG. "
         "DMM readout: REF_SEL = 0, VREF_OE = 1.", halign="left", fontsize=9))
 s.save(f"{OUT}/stage5_vref.png")
+
+# =================================================================== stage 7: inmux + vcm_gen
+s = Sch()
+VDD, GND = 11.0, 0.0
+s.title(0, 13.2, "Stage 7 — inmux (4:1 TG mux) and vcm_gen (common mode + top-plate switch)",
+        "TG = nfet 4/0.15 + pfet_lvt 8/0.35; decoder: static NOR2/INV on INSEL[1:0] (uio[7:6]) → one-hot en0..en3")
+s.rail(VDD, 0, 22, "VDPWR")
+s.rail(GND, 0, 22, "VGND")
+BUS = 7.0
+for k, (name, y) in enumerate((("vin (ua[0])", 8.5), ("vptat", 6.5), ("vbg", 4.5), ("VGND", 2.5))):
+    s.d.add(elm.Dot(open=True).at((1.0, y))); s.net((1.0, y), name, "left")
+    s.d.add(elm.Switch().right().at((1.0, y)).to((4.0, y)).label(f"en{k}  (INSEL = {k:02b})", loc="top", fontsize=8))
+    s.w((4.0, y), (5.0, y), (5.0, 2.5) if k == 3 else (5.0, y)); s.dot((5.0, y))
+s.w((5.0, 8.5), (5.0, 2.5)); s.w((5.0, 5.5), (BUS, 5.5)); s.d.add(elm.Dot(open=True).at((BUS, 5.5))); s.net((BUS, 5.5), "vadc → DAC bottom-plate bus", "below")
+s.d.add(elm.Dot().at((5.0, 5.5)))
+# vcm_gen
+mb = s.fet("p", 16, VDD, "right", "MB", "pfet_lvt 2/2 ×10 (10 µA)")
+s.net(mb["gate"], "pbias", "right"); s.dot((16, VDD))
+md_ = s.fet("n", 16, 1.5, "right", "MD", "nfet 4/1 (diode)")
+s.w(mb["drain"], md_["drain"]); s.w(md_["source"], (16, GND)); s.dot((16, GND))
+s.w(md_["gate"], (md_["gate"][0], 4.6), (16, 4.6)); s.dot((16, 4.6)); s.dot(md_["gate"])
+VC = (16, 6.0); s.dot(VC)
+s.w(VC, (19.5, 6.0)); s.dot((19.5, 6.0)); s.net((19.5, 6.6), "vcm ≈ 0.72 V (→ comparator inn)", "right")
+s.d.add(elm.Capacitor().down().at((19.5, 6.0)).to((19.5, GND)).label("CV ≈ 2 pF\nnfet gate 8/8 ×4", loc="bottom", fontsize=8)); s.dot((19.5, GND))
+s.d.add(elm.Switch().left().at((16, 6.0)).to((12.5, 6.0)).label("MTOP nfet 1/0.15\n(on while smp = 1)", loc="top", fontsize=8))
+s.d.add(elm.Dot(open=True).at((12.5, 6.0))); s.net((12.5, 6.0), "vtop (DAC top plate)", "left")
+s.d.add(elm.Label().at((0, -1.4)).label("VIN is sampled at 1 MHz (settles in 0.3 µs). VPTAT/VBG have ≈ 250 kΩ source impedance: convert them with clk ≤ 100 kHz (settle in ≈ 4 µs). "
+        "vcm cancels: top plate sampled to vcm and compared against the same node.", halign="left", fontsize=9))
+s.save(f"{OUT}/stage7_inmux_vcm.png")
 print("ok")

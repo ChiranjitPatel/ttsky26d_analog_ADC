@@ -1,0 +1,38 @@
+* Stage 7 — inmux DC tests (tt, 27 C, VDPWR 1.8 V)
+* x0..x3: INSEL = 00, 01, 10, 11 with vin = 0.3, vptat = 0.6, vbg = 1.2 V -> vadc must follow the selected one.
+* xr: INSEL = 00; vadc loaded by 10 kOhm to 0.6 V; sweeping vin gives the TG on-resistance.
+* xx: INSEL = 00, vin = 0.6 V behind 500 Ohm (pad); sweeping the UNselected vbg 0 -> 1.2 V gives crosstalk.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/inmux.spice
+.temp 27
+VDD vdd 0 1.8
+VA vina 0 0.3
+VP vpt 0 0.6
+VB vbgg 0 1.2
+VH hi 0 1.8
+VL lo 0 0
+x0 vdd 0 lo lo vina vpt vbgg o0 inmux
+x1 vdd 0 hi lo vina vpt vbgg o1 inmux
+x2 vdd 0 lo hi vina vpt vbgg o2 inmux
+x3 vdd 0 hi hi vina vpt vbgg o3 inmux
+VR vr 0 0.6
+xr vdd 0 lo lo vr vpt vbgg orr inmux
+RL orr mid 10k
+VMID mid 0 0.6
+VX vx 0 0.6
+RS vx vxs 500
+VXB vxb 0 0
+xx vdd 0 lo lo vxs vxb vxb ox inmux
+.control
+set wr_singlescale
+set wr_vecnames
+op
+print v(o0) v(o1) v(o2) v(o3)
+dc VR 0 1.2 0.05
+let ron = (v(vr) - v(orr)) / ((v(orr) - 0.6)/10k + 1e-15)
+wrdata ../out/inmux/ron.dat ron
+dc VXB 0 1.2 0.05
+wrdata ../out/inmux/xtalk.dat v(ox)
+quit
+.endc
+.end

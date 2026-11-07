@@ -1,0 +1,75 @@
+* Stage 7 — sampling settling (A9) through the real input path (tt, 27 C, VDPWR 1.8 V)
+* Path: source -> inmux TG -> bottom-plate switch (RSW = 500 Ohm, stage 8 estimate) -> CDAC 2.4 pF -> vtop,
+* top plate held at vcm by vcm_gen's MTOP during sampling.
+* Before t0 = 30 us every bottom plate is held at the worst-case opposite voltage (SPRE); at t0 the
+* sample phase starts (SSMP closes). Errors are read 1 us and 10 us after t0.
+*  A: VIN full-scale step through the ua[0] pad model (pin -> 500 Ohm -> 5 pF chip node); bottom from 0 V.
+*  P: VPTAT from the real bias_gen + bandgap_core + ptat_out; bottom from 1.2 V.
+*  G: VBG from the same bandgap (separate instance); bottom from 0 V.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.include ../out/netlist/ptat_out.spice
+.include ../out/netlist/inmux.spice
+.include ../out/netlist/vcm_gen.spice
+.temp 27
+VDD vdd 0 1.8
+VPD pd 0 0
+VH hi 0 1.8
+VL lo 0 0
+xb vdd 0 pd nbias pbias bias_gen
+VCS cs 0 dc 0 pulse(0 1.8 30u 1n 1n 100u 200u)
+VCP cp 0 dc 1.8 pulse(1.8 0 29.99u 1n 1n 100u 200u)
+.model swm sw vt=0.9 vh=0.1 ron=1 roff=1e12
+* ---- A: VIN through pad
+VPIN pin 0 1.2
+RPAD pin ua0 500
+CPAD ua0 0 5p
+xma vdd 0 lo lo ua0 lo lo va inmux
+RSWA va vba_s 500
+SSA vba_s vba cs 0 swm
+SPA vba 0 cp 0 swm
+CDA vba vta 2.4p
+xva vdd 0 pbias hi vta vcma vcm_gen
+* ---- P: VPTAT
+xbgp vdd 0 pbias pd vbgp vgpp bandgap_core
+xptp vdd 0 vgpp vptp ptat_out
+xmp vdd 0 hi lo lo vptp lo vp inmux
+RSWP vp vbp_s 500
+SSP vbp_s vbp cs 0 swm
+VPRE pre 0 1.2
+SPP vbp pre cp 0 swm
+CDP vbp vtp 2.4p
+xvp vdd 0 pbias hi vtp vcmp vcm_gen
+* ---- G: VBG
+xbgg vdd 0 pbias pd vbgg vggg bandgap_core
+xmg vdd 0 lo hi lo lo vbgg vg inmux
+RSWG vg vbg_s 500
+SSG vbg_s vbgn cs 0 swm
+SPG vbgn 0 cp 0 swm
+CDG vbgn vtg 2.4p
+xvg vdd 0 pbias hi vtg vcmg vcm_gen
+.control
+set wr_singlescale
+set wr_vecnames
+tran 5n 45u
+* sampled value = v(bottom) - v(top) must equal (source - vcm) at the end of sampling
+let sa = v(vba) - v(vta)
+let sp = v(vbp) - v(vtp)
+let sg = v(vbgn) - v(vtg)
+wrdata ../out/inmux/sample.dat sa sp sg v(vptp) v(vbgg) v(vcma) v(vcmp)
+meas tran a_ref find sa at=29.9u
+meas tran a_1 find sa at=31u
+meas tran a_10 find sa at=40u
+meas tran p_ref find v(vptp) at=29.9u
+meas tran vcmp_ref find v(vcmp) at=29.9u
+meas tran p_1 find sp at=31u
+meas tran p_10 find sp at=40u
+meas tran g_ref find v(vbgg) at=29.9u
+meas tran vcmg_ref find v(vcmg) at=29.9u
+meas tran g_1 find sg at=31u
+meas tran g_10 find sg at=40u
+meas tran vcma_ref find v(vcma) at=29.9u
+quit
+.endc
+.end

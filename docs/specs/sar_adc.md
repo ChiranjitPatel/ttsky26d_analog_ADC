@@ -44,7 +44,7 @@ LSB = VREF / 256 ≈ 4.75 mV at VREF = 1.215 V.
 | A6 | ENOB | sine near Nyquist, tt 27 °C | 7.0 | 7.5 | | bit | 1 |
 | A7 | Comparator input offset (σ) | Monte Carlo | | | 10 | mV | 2 |
 | A8 | Comparator input-referred noise | | | | 1.19 (LSB/4) | mV rms | 2 |
-| A9 | Sampling settling error | including pad R + switch | | | 0.5 | LSB | 1 |
+| A9 | Sampling settling error | including pad R + switch; VIN at 1 MHz clock, VPTAT/VBG at ≤ 100 kHz | | | 0.5 | LSB | 1 |
 | A10 | Comparator decision time | 1 mV overdrive | | | 50 | ns | 1 |
 | A11 | Supply current (ADC + VREF buffer) | converting, 1 MHz | | 150 | 300 | µA | 1 |
 | A12 | Max clock (stretch) | tt 27 °C | 10 | | | MHz | 2 |
@@ -72,4 +72,5 @@ loose compared to the LSB.
 
 | # | Result | Phase | Date | Notes |
 |---|---|---|---|---|
-| — | not yet simulated | | | |
+| A9 | VIN −0.01 mV after 1 µs; VPTAT/VBG < 1 µV after 10 µs | 1 | 2026-11-07 | stage 7, `sim/inmux/` |
+| A14 | < 1 µV | 1 | 2026-11-07 | stage 7 |
