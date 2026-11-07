@@ -28,7 +28,7 @@ after 1 µs (full-scale step through the pad model).
 ## Decision: VBG and VPTAT are converted with a slow clock
 
 VPTAT (≈ 266 kΩ source) and VBG (≈ 240 kΩ) can't charge the 2.4 pF DAC within a 1 µs sample phase
-(errors +135 mV / −261 mV after 1 µs). They settle to 0.5 LSB in 3.7 µs / 4.1 µs, and are exact
+(errors +134 mV / −188 mV after 1 µs). They settle to 0.5 LSB in 3.7 µs / 3.7 µs, and are exact
 (< 1 µV) after 10 µs. **Rule: for INSEL = 01/10, run the ADC clock at ≤ 100 kHz** (10 µs sample
 phase, ≥ 2.5× margin). The temperature sensor and bandgap check don't need speed, and this saves a
 buffer (area and current). This goes in the test procedure (`docs/info.md`) and the RP2040 firmware.

@@ -15,6 +15,8 @@ for cell in "$@"; do
   f="$out/$cell.spice"
   if grep -q "IS MISSING" "$f"; then echo "netlist $cell: missing symbols"; grep "IS MISSING" "$f"; exit 1; fi
   # xschem writes the top cell's .subckt/.ends commented out; enable them
-  sed -i -e 's/^\*\*\.subckt /.subckt /' -e 's/^\*\*\.ends/.ends/' -e '/^\.end$/d' "$f"
+  # (long port lists continue on '*+' lines, which must be enabled too)
+  awk 'BEGIN{h=0} /^\*\*\.subckt /{sub(/^\*\*/,""); h=1; print; next}
+       h && /^\*\+/{sub(/^\*/,""); print; next} {h=0} /^\*\*\.ends/{sub(/^\*\*/,"")} !/^\.end$/{print}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
   echo "netlist: $f"
 done

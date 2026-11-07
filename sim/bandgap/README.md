@@ -18,7 +18,7 @@ testbenches in parallel, writes `results.md` and `plots/bandgap.png`).
 
 ## Phase 1 results (tt, 27 °C, 1.8 V)
 
-See `results.md`. B1, B2, B3 pass; the loop is stable with 66° phase margin; startup works on a
+See `results.md`. B1, B2, B3 pass; the loop is stable with 82.5° phase margin; startup works on a
 1 µs and a 100 µs supply ramp.
 
 ## Findings and decisions
@@ -30,8 +30,9 @@ See `results.md`. B1, B2, B3 pass; the loop is stable with 66° phase margin; st
    the minimum. Corners will push it outside. **Proposal (needs sign-off):** set B1 to
    1.215 V typ, 1.18–1.25 V (±3 %, same as B6). The ADC LSB becomes 4.75 mV.
 3. **OTA Miller cap raised from 0.5 pF to 0.7 pF** (stage 2 re-run: still 80 dB, 81° PM at 0.5 pF).
-   The real load (three 8/4 PMOS gates ≈ 0.8 pF) is heavier than stage 2's estimate. The bandgap
-   loop margin went from 56° to 66°.
+   The 56° measured with 0.5 pF turned out to include a stray 2.4 pF cap (see note 8), so the raise may
+   not be needed. Without that cap the loop has 82.5° at 0.7 pF. **Area option (Phase 2):** go back to
+   0.5 pF (saves ≈ 100 µm²) if corners keep ≥ 60°.
 4. **Loop-gain method:** an L/C break at the OTA output gives wrong results here, because all the
    gate load ends up on the source-driven side. `tb_bandgap_loop` uses Middlebrook double injection
    (voltage + current), which is exact for any loading.
@@ -47,3 +48,9 @@ See `results.md`. B1, B2, B3 pass; the loop is stable with 66° phase margin; st
    a slower clock or a sample-extend mode) or a buffer. To be decided in stage 7.
 7. **Headroom:** VBG starts dropping below VDPWR ≈ 1.6 V at tt (see the line plot). Check at
    ss/−40 °C in Phase 2. The current-mode bandgap fallback stays open.
+8. **Correction (2026-11-07): stale schematic.** The PSRR-cap sweep in this stage overwrote
+   `xschem/bandgap_core.sch` with CPS_W = 14 (a 2.4 pF MOS cap from `vgp` to VDPWR). The generator
+   was reset to CPS_W = 0, but the schematic wasn't regenerated, so the committed schematic and every
+   result in stages 3, 4, 5 and 7 included that cap. All four stages were rerun without it. Everything
+   still passes; phase margin 65.7° → 82.5°, PSRR at 1 MHz −9.8 → −8.9 dB (raw `vbg`).
+   `tools/netlist.sh` now regenerates every schematic from its generator before netlisting.

@@ -12,7 +12,7 @@ resistor TC cancels and VPTAT is proportional to absolute temperature.
 ## Phase 1 results (tt, 27 °C, 1.8 V)
 
 See `results.md`: VPTAT = 0.599 V (B10). Adding the branch, or loading `vptat` with 100 kΩ, changes
-VBG by nanovolts. The bandgap loop phase margin with the extra gate on `vgp` is 64° (was 66°).
+VBG by nanovolts. The bandgap loop phase margin with the extra gate on `vgp` is 79.9° (82.5° without it).
 Early tt-only temperature checks: 2.00 mV/°C (B11), 2.37 °C/LSB (B12).
 
 ## Notes for Phase 2 and later stages

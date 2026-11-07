@@ -13,6 +13,8 @@
 .include ../out/netlist/inmux.spice
 .include ../out/netlist/vcm_gen.spice
 .temp 27
+* precision transient: ngspice default reltol (1e-3) lets node voltages wander by ~1 mV (0.2 LSB)
+.options reltol=1e-5 abstol=1e-14 vntol=1e-8 chgtol=1e-17
 VDD vdd 0 1.8
 VPD pd 0 0
 VH hi 0 1.8

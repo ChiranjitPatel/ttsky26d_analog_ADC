@@ -65,10 +65,10 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 |---|---|---|---|---|
 | B1 | 1.2154 V | 1 (tt) | 2026-11-01 | ✅ against the new 1.18–1.25 V window (the old 1.21–1.29 V window passed by only 5 mV) |
 | B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-01 | core 13.6 µA |
-| B3 | 0.34 µs after a 1 µs ramp | 1 | 2026-11-01 | also starts on a 100 µs ramp |
+| B3 | 0.47 µs after a 1 µs ramp | 1 | 2026-11-07 | also starts on a 100 µs ramp (rerun without the stray MCPS cap) |
 | B4 | 6.1 mV/V | early, tt only | 2026-11-01 | |
 | B5 | 22 ppm/°C | early, tt only | 2026-11-01 | R2/R1 = 19/2 |
-| B7 | 45.8 dB DC / 20.0 dB at 1 MHz at `vbg_f` | early, tt only | 2026-11-07 | ✅ with the stage 5 RC filter (raw `vbg`: −9.8 dB at 1 MHz) |
+| B7 | 45.8 dB DC / 20.9 dB at 1 MHz at `vbg_f` | early, tt only | 2026-11-07 | ✅ with the stage 5 RC filter (raw `vbg`: −8.9 dB at 1 MHz) |
 | B8 | 1.4 nA | early, tt only | 2026-11-01 | incl. bias_gen |
 | B10 | 0.5988 V | 1 | 2026-11-07 | stage 4, `sim/ptat/` |
 | B11 | 2.004 mV/°C | early, tt only | 2026-11-07 | |

@@ -5,12 +5,12 @@ tt, 27 °C, VDPWR 1.80 V. Pad model: 5 pF + 500 Ω, probe 10 pF ∥ 1 MΩ. Gener
 | Spec | Quantity | Result | Target | | Phase |
 |---|---|---|---|---|---|
 | — | VREF (internal) | 1.2143 V (buffer offset -1.09 mV) | ≈ VBG |  | 1 |
-| B7 | PSRR at vbg_f, DC / 1 MHz | 45.8 / 20.0 dB | ≥ 40 / ≥ 20 dB | ✅ | early, tt |
-| — | PSRR at vref, DC / 1 MHz | 33.6 / 19.9 dB | — |  | early, tt |
+| B7 | PSRR at vbg_f, DC / 1 MHz | 45.8 / 20.9 dB | ≥ 40 / ≥ 20 dB | ✅ | early, tt |
+| — | PSRR at vref, DC / 1 MHz | 33.6 / 20.6 dB | — |  | early, tt |
 | — | DAC-like load: droop when 1.2 pF connects | 220 mV | — |  | 1 |
-| — | DAC-like load: worst error at end of bit cycle | 22.7 µV | ≤ 0.5 LSB = 2.4 mV | ✅ | 1 |
-| — | Startup: vref within 1 % (after a 1 µs ramp) | 20.8 µs | ≤ 40 µs | ✅ | 1 |
-| — | Follower step (10 mV): overshoot / 10–90 % rise, reservoir only | 0.0 % / 150 ns | stable | ✅ | 1 |
+| — | DAC-like load: worst error at end of bit cycle | 24.6 µV | ≤ 0.5 LSB = 2.4 mV | ✅ | 1 |
+| — | Startup: vref within 1 % (after a 1 µs ramp) | 22.6 µs | ≤ 40 µs | ✅ | 1 |
+| — | Follower step (10 mV): overshoot / 10–90 % rise, reservoir only | 0.0 % / 151 ns | stable | ✅ | 1 |
 | — | Same, with pad + probe via TG (VREF_OE = 1) | 0.0 % / 589 ns | stable | ✅ | 1 |
 | — | Buffer supply current | 9.63 µA | — |  | 1 |
 | — | Total (bias_gen + bandgap + VREF chain) | 25.4 µA | — |  | 1 |

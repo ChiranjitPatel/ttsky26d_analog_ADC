@@ -17,10 +17,10 @@ Drawing: `material/schematics/stage5_vref.png`. Run: `./run.sh`.
 
 ## Phase 1 results (tt, 27 °C, 1.8 V)
 
-See `results.md`. B7 is met at `vbg_f` (45.8 dB DC, 20.0 dB at 1 MHz). A 1.2 pF DAC-like load
-connected every 1 µs pulls `vref` down by 220 mV (charge sharing), and it recovers to within 23 µV by
+See `results.md`. B7 is met at `vbg_f` (45.8 dB DC, 20.9 dB at 1 MHz). A 1.2 pF DAC-like load
+connected every 1 µs pulls `vref` down by 220 mV (charge sharing), and it recovers to within 25 µV by
 the end of each bit cycle (target 2.4 mV). It's stable with and without the pad, and starts in
-21 µs (set by the filter). The external-reference and power-down modes work.
+23 µs (set by the filter). The external-reference and power-down modes work.
 
 ## Notes
 
