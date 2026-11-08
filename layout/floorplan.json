@@ -1,0 +1,184 @@
+{
+ "tile": [
+  161.0,
+  225.76
+ ],
+ "stripes": [
+  [
+   "VDPWR",
+   1.0,
+   3.0
+  ],
+  [
+   "VGND",
+   4.0,
+   6.0
+  ],
+  [
+   "VDPWR",
+   64.0,
+   66.0
+  ],
+  [
+   "VGND",
+   67.0,
+   69.0
+  ],
+  [
+   "VDPWR",
+   154.5,
+   156.5
+  ],
+  [
+   "VGND",
+   157.5,
+   159.5
+  ]
+ ],
+ "stripe_y": [
+  5.0,
+  217.0
+ ],
+ "blocks": {
+  "adc_digital": {
+   "rect": [
+    71,
+    186,
+    153,
+    216
+   ],
+   "milestone": "M2",
+   "note": "SAR logic + pin decoding, LibreLane macro under the top pins"
+  },
+  "bias_gen": {
+   "rect": [
+    8,
+    188,
+    30,
+    214
+   ],
+   "milestone": "M1",
+   "note": "1 uA reference; pbias/nbias to all analog blocks"
+  },
+  "ptat_out": {
+   "rect": [
+    34,
+    188,
+    62,
+    214
+   ],
+   "milestone": "M1",
+   "note": "PTAT branch, next to the bandgap's vgp"
+  },
+  "bandgap_core": {
+   "rect": [
+    8,
+    100,
+    62,
+    182
+   ],
+   "milestone": "M1",
+   "note": "incl. OTA, PNP 3x3 array, R1/R2 chains, startup"
+  },
+  "vref_filt": {
+   "rect": [
+    8,
+    60,
+    62,
+    94
+   ],
+   "milestone": "M1",
+   "note": "1 MOhm + 3.9 pF, directly under the bandgap that feeds it"
+  },
+  "reserve_left": {
+   "rect": [
+    8,
+    6,
+    62,
+    56
+   ],
+   "milestone": "\u2014",
+   "note": "spare: growth / relocation"
+  },
+  "reserve_right": {
+   "rect": [
+    72,
+    6,
+    116,
+    34
+   ],
+   "milestone": "\u2014",
+   "note": "spare, next to the DAC: e.g. a larger reservoir cap"
+  },
+  "comparator": {
+   "rect": [
+    86,
+    164,
+    114,
+    184
+   ],
+   "milestone": "M2",
+   "note": "directly above the DAC: short, shielded vtop"
+  },
+  "vcm_gen": {
+   "rect": [
+    116,
+    164,
+    150,
+    184
+   ],
+   "milestone": "M2",
+   "note": "next to the comparator's inn"
+  },
+  "cap_dac": {
+   "rect": [
+    76,
+    90,
+    148,
+    162
+   ],
+   "milestone": "M2",
+   "note": "16x16 MIM units + dummy ring (18x18 at 4 um pitch); no met4 stripe"
+  },
+  "dac_sw": {
+   "rect": [
+    76,
+    78,
+    148,
+    88
+   ],
+   "milestone": "M2",
+   "note": "9 bottom-plate switch cells, one under each column group"
+  },
+  "vref_buf": {
+   "rect": [
+    72,
+    38,
+    116,
+    74
+   ],
+   "milestone": "M1",
+   "note": "incl. 5.4 pF reservoir cap; vref to dac_sw is short"
+  },
+  "vref_sel": {
+   "rect": [
+    118,
+    6,
+    150,
+    20
+   ],
+   "milestone": "M1",
+   "note": "logic + TG; sits on the ua[1] pin (x = 132.9)"
+  },
+  "inmux": {
+   "rect": [
+    118,
+    24,
+    150,
+    50
+   ],
+   "milestone": "M2",
+   "note": "VIN from ua[0] (x = 152.3) up the right edge"
+  }
+ }
+}

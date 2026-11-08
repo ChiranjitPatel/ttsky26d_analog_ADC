@@ -59,7 +59,8 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
 6. Matched devices: common-centroid or interdigitated, with dummies, the same orientation, and guard rings.
 7. Every node that can start in a bad state (bandgap, biasing) needs a startup circuit,
    and a transient testbench that proves it starts from 0 V.
-8. Layout is frozen 3 weeks before the shuttle deadline; the remaining time is for DRC/LVS/precheck only.
+8. **Layout freeze: 2026-11-26** (TTSKY26d deadline 2026-12-01, agreed 2026-11-08). After the freeze, only
+   DRC/LVS/precheck fixes. Milestones and chunks: `docs/specs/layout_plan.md`.
 9. `docs/info.md` must contain the full test procedure before tapeout.
 10. **No met5** anywhere (TT power grid). Power = vertical met4 stripes ≥ 1.2 µm wide, from the bottom
     10 µm to the top 10 µm of the tile. Tie all unused digital outputs to VGND.

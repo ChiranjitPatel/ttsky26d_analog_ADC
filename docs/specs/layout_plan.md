@@ -1,8 +1,8 @@
 # Layout plan — milestones and chunks
 
 **Status: DRAFT (2026-11-08).** Deadline: **TTSKY26d, 2026-12-01.**
-Proposed layout freeze: **2026-11-26** (5 days for final DRC/LVS/precheck/submission). This replaces
-CLAUDE.md rule 8's "3 weeks before the deadline", which would have been 2026-11-10 — pending sign-off.
+Layout freeze: **2026-11-26** (agreed 2026-11-08; 5 days for final DRC/LVS/precheck/submission). It
+replaces CLAUDE.md rule 8's earlier "3 weeks before the deadline", which would have been 2026-11-10.
 
 Template: `tt_analog_1x2.def` from TinyTapeout/tt-support-tools (`tech/sky130A/def/analog/`; the
 `_3v3` variant is only for VAPWR designs). 161.00 × 225.76 µm; `ua[0]`/`ua[1]` on the bottom edge at
@@ -30,8 +30,8 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 
 | # | Chunk | Who | Target |
 |---|---|---|---|
-| **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | Nov 9–10 |
-| 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 |
+| **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | Nov 9–10 — built Nov 8 (DRC clean; CI precheck pending) |
+| 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 — draft Nov 8 (`docs/specs/floorplan.md`) |
 | 1a | bias_gen | designer | Nov 11 |
 | 1b | ota | designer | Nov 12 |
 | 1c | PNP 3×3 common-centroid array + R1/R2 unit-resistor chains (scripted) | Claude | Nov 11 |

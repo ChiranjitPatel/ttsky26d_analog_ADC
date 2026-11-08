@@ -420,7 +420,15 @@ MACRO /home/user/ttsky26d_analog_ADC/mag/tt_um_chiranjitpatel_sar_adc
     USE POWER ;
     PORT
       LAYER met4 ;
-        RECT 1.000 5.000 3.000 220.760 ;
+        RECT 1.000 5.000 3.000 217.000 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 64.000 5.000 66.000 217.000 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 154.500 5.000 156.500 217.000 ;
     END
   END VDPWR
   PIN VGND
@@ -428,13 +436,22 @@ MACRO /home/user/ttsky26d_analog_ADC/mag/tt_um_chiranjitpatel_sar_adc
     USE GROUND ;
     PORT
       LAYER met4 ;
-        RECT 4.000 5.000 6.000 220.760 ;
+        RECT 4.000 5.000 6.000 217.000 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 67.000 5.000 69.000 217.000 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 157.500 5.000 159.500 217.000 ;
     END
   END VGND
   OBS
       LAYER met3 ;
-        RECT 4.000 218.700 94.600 219.300 ;
+        RECT 4.000 219.200 94.600 219.800 ;
       LAYER met4 ;
+        RECT 4.000 224.360 30.270 224.760 ;
         RECT 31.370 224.360 33.030 224.760 ;
         RECT 34.130 224.360 35.790 224.760 ;
         RECT 36.890 224.360 38.550 224.760 ;
@@ -458,7 +475,10 @@ MACRO /home/user/ttsky26d_analog_ADC/mag/tt_um_chiranjitpatel_sar_adc
         RECT 86.570 224.360 88.230 224.760 ;
         RECT 89.330 224.360 90.990 224.760 ;
         RECT 92.090 224.360 93.750 224.760 ;
-        RECT 30.520 218.650 94.600 224.360 ;
+        RECT 4.000 217.400 94.600 224.360 ;
+        RECT 6.400 217.000 63.600 217.400 ;
+        RECT 66.400 217.000 66.600 217.400 ;
+        RECT 69.400 217.000 94.600 217.400 ;
   END
 END /home/user/ttsky26d_analog_ADC/mag/tt_um_chiranjitpatel_sar_adc
 END LIBRARY
