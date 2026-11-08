@@ -38,6 +38,12 @@ p("MP2", "pbias", "pbias", "VDPWR", W=2, L=2, nf=1, mult=1)
 n("MN1", "nbias", "nbias", "VGND", W=2, L=2, nf=1, mult=1)
 n("MN2", "pbias", "nbias", "nr", W=2, L=2, nf=1, mult=4)
 s.dev(RX, "R1", {"P": "nr", "M": "VGND", "B": "VGND"}, W=0.35, L=R1_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
+# layout dummies (all terminals on the rail): ends of the MN1/MN2 row and of the MP1/MP2 row.
+# netgen does not drop shorted devices, so they are part of the schematic.
+for nm in ("MDN1", "MDN2"):
+    n(nm, "VGND", "VGND", "VGND", W=2, L=2, nf=1, mult=1)
+for nm in ("MDP1", "MDP2"):
+    p(nm, "VDPWR", "VDPWR", "VDPWR", W=2, L=2, nf=1, mult=1)
 # startup
 # MS2: a 0.42/50 PMOS drawn as 5 series devices of L = 10 um (a 50 um gate doesn't fit the 22 x 26 um
 # outline); same function: weak pull-up, ~0.2 uA. Stack: sup -> ms2_1 -> ... -> ms2_4 -> su

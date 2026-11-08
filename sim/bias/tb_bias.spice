@@ -8,6 +8,9 @@
 * gear: trapezoidal integration left a slowly decaying 10 % error current in the unit mirror after
 * the fast startup ramp (all node voltages already at their DC values); gear does not
 .options method=gear
+* nodesets near the running state: at 1.98 V (tt, 27 C) the plain .op converged to a non-physical
+* solution (v(x1.nr) = 2e6 V, 0.32 uA); the DC sweep and both startup transients give 1.036 uA there
+.nodeset v(nbias)=0.64 v(pbias)=1.17 v(x1.nr)=0.06 v(x1.su)=0.013
 
 VDD  vdd 0 {vdd}
 VPD  pd  0 0
