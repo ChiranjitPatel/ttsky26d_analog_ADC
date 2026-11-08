@@ -196,12 +196,17 @@ box 74.78um 219.25um 75.18um 219.75um
 paint via3
 box 74.68um 219.15um 75.28um 219.85um
 paint met4
+box 151.81um 0um 152.70999999999998um 4um
+paint met4
+box 132.49um 0um 133.39um 4um
+paint met4
 select top cell
 drc on
 drc check
 drc catchup
 puts "DRC_COUNT [drc list count total]"
-save /home/user/ttsky26d_analog_ADC/mag/tt_um_chiranjitpatel_sar_adc.mag
+cd /home/user/ttsky26d_analog_ADC/mag
+save tt_um_chiranjitpatel_sar_adc
 gds write /home/user/ttsky26d_analog_ADC/gds/tt_um_chiranjitpatel_sar_adc.gds
 lef write /home/user/ttsky26d_analog_ADC/lef/tt_um_chiranjitpatel_sar_adc.lef -hide -pinonly
 quit -noprompt

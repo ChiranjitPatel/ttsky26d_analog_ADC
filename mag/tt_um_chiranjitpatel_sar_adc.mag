@@ -1,6 +1,6 @@
 magic
 tech sky130A
-timestamp 1794156421
+timestamp 1794156600
 << checkpaint >>
 rect -530 -630 16580 23206
 << metal3 >>
@@ -213,8 +213,8 @@ rect 5521 0 5611 100
 rect 7453 0 7543 100
 rect 9385 0 9475 100
 rect 11317 0 11407 100
-rect 13249 0 13339 100
-rect 15181 0 15271 100
+rect 13249 0 13339 400
+rect 15181 0 15271 400
 << labels >>
 flabel metal4 s 14383 22476 14413 22576 0 FreeSans 240 90 0 0 clk
 port 0 nsew signal input

@@ -51,9 +51,15 @@ for name, x, y in outs:
     L += [f"box {x - 0.15}um {TIE_BAR_Y - 0.3}um {x + 0.15}um {y - 0.5}um", "paint met4",
           f"box {x - 0.2}um {TIE_BAR_Y - 0.25}um {x + 0.2}um {TIE_BAR_Y + 0.25}um", "paint via3",
           f"box {x - 0.3}um {TIE_BAR_Y - 0.35}um {x + 0.3}um {TIE_BAR_Y + 0.35}um", "paint met4"]
+# used analog pins (info.yaml analog_pins = 2): a met4 stub on each, so the precheck sees them connected.
+# M1/M2 extend these into the vref_sel / inmux routes. Pins: 0.9 x 1.0 um at y = 0 ... 1.
+for name, x in (("ua[0]", 152.26), ("ua[1]", 132.94)):
+    L += [f"box {x - 0.45}um 0um {x + 0.45}um 4um", "paint met4"]
 L += ["select top cell", "drc on", "drc check", "drc catchup",
       'puts "DRC_COUNT [drc list count total]"',
-      f"save {ROOT}/mag/{TOP}.mag",
+      # save by name from inside mag/: with an absolute path Magic names the cell after the path,
+      # and the GDS/LEF cell name becomes '/home/.../tt_um_...' (precheck: top macro name mismatch)
+      f"cd {ROOT}/mag", f"save {TOP}",
       f"gds write {ROOT}/gds/{TOP}.gds",
       f"lef write {ROOT}/lef/{TOP}.lef -hide -pinonly", "quit -noprompt"]
 for d_ in ("mag", "gds", "lef"):
