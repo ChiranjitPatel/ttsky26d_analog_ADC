@@ -33,11 +33,11 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | **Done Nov 8**: TT precheck green in CI (gds run 46, commit 5849aa6) |
 | 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 — draft Nov 8 (`docs/specs/floorplan.md`) |
 | 1a | bias_gen | designer | Nov 11 — Phase 2 done and brief ready Nov 8 (`docs/specs/layout_briefs/bias_gen.md`) |
-| 1b | ota | designer | Nov 12 |
-| 1c | PNP 3×3 common-centroid array + R1/R2 unit-resistor chains (scripted) | Claude | Nov 11 — cells done Nov 8 (`pnp_array`, `bg_res`; DRC/LVS clean, `layout_briefs/scripted_cells.md`); bandgap Phase 2 open (mismatch, see `sim/bandgap/`) |
+| 1b | ota | designer | Nov 12 — resized + brief ready Nov 8 (`layout_briefs/ota.md`) |
+| 1c | PNP 3×3 common-centroid array + R1/R2 unit-resistor chains (scripted) | Claude | Nov 11 — cells done Nov 8 (`pnp_array`, `bg_res` regenerated with 0.69/4 units; DRC/LVS clean, `layout_briefs/scripted_cells.md`); bandgap Phase 2 done (corners 63/63; MC σ 17.6 mV, B6 decision open) |
 | 1d | bandgap_core assembly (1b + 1c + current sources + startup) | designer, Claude checks | Nov 13–14 |
-| 1e | ptat_out (one PMOS + resistor chain) | Claude | Nov 14 — layout done Nov 8 (DRC/LVS clean); Phase 2 follows the bandgap |
-| 1f | vref_filt (resistor chain + MOS cap, scripted) | Claude | Nov 14 — layout done Nov 8 (DRC/LVS clean) |
+| 1e | ptat_out (one PMOS + resistor chain) | Claude | Nov 14 — done Nov 8: Phase 2 (`sim/ptat/sensor.md`, B13 decision open) + layout (16/8 + 0.69/4, DRC/LVS clean) |
+| 1f | vref_filt (resistor chain + MOS cap, scripted) | Claude | Nov 14 — done Nov 8: 1.6 MΩ + 5.5 pF for B7, layout DRC/LVS clean; VREF-chain corners in `sim/vref/corners.md` |
 | 1g | vref_buf + reservoir cap | designer | Nov 15 |
 | 1h | vref_sel logic + `ua[1]` transmission gate | designer | Nov 16 |
 | **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Nov 17** |

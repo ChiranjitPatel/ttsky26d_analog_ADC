@@ -68,7 +68,7 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 | B3 | 2.4 µs after a 1 µs ramp (tt); 63/63 corner runs start on both ramps | 2 | 2026-11-08 | startup MSU1 0.42/1 → 0.42/4 fixed a limit cycle caused by the resize |
 | B4 | 2.2 mV/V (tt); worst 9.88 mV/V (fs, 125 °C) | 2 | 2026-11-08 | ✅ but marginal at fs/125 °C |
 | B5 | 23.5 ppm/°C (tt); worst corner 33.3 ppm/°C (ff) | 2 | 2026-11-08 | ✅ |
-| B7 | 55.7 dB DC / 22.2 dB at 1 MHz at `vbg_f` (tt) | early, tt only | 2026-11-08 | ✅ after the filter grew to 1.6 MΩ / 5.5 pF (was 16.0 dB after the resize) |
+| B7 | tt: 55.7 dB DC / 22.2 dB at 1 MHz at `vbg_f`. Corners: 1 MHz ≥ 20.3 dB ✅; DC ≥ 30.4 dB (40 dB not met in 7 of 45 runs, all at 1.62 V and −40/125 °C) | 2 | 2026-11-08 | filter grown to 1.6 MΩ / 5.5 pF; **open: see the B7 note** |
 | B8 | 0.08 nA (tt) | early, tt only | 2026-11-08 | incl. bias_gen |
 | B10 | 0.6005 V | 1 | 2026-11-08 | stage 4, after the resize |
 | B11 | 1.956 mV/°C | early, tt only | 2026-11-08 | |
@@ -96,3 +96,11 @@ The corners alone give ≤ 2.6 °C after a 1-point calibration at 27 °C. Mismat
 (e.g. 85 °C on a hot plate, or any second known temperature) brings every seed within 2.7 °C.
 Recommendation: keep the circuit, make the test procedure a 2-point calibration, and reword B13 to
 "±3 °C after a 2-point calibration; ±5 °C typical after 1 point".
+
+## B7 note — DC PSRR at the minimum supply (open, for the designer, 2026-11-08)
+
+The 1 MHz part of B7 passes in every corner (≥ 20.3 dB). DC PSRR is ≥ 40 dB except at 1.62 V with −40 °C or
+125 °C, where it is 30–37 dB (7 of 45 runs). The cause is headroom at 1.62 V (`sim/vref/corners.md`). Two cheap
+resizes didn't fix it. Effect: 0.3 mV of VREF change for 10 mV of supply ripple (0.07 LSB). B4 passes everywhere.
+Recommendation: reword B7 DC to "≥ 40 dB at 1.8 V, ≥ 30 dB at 1.62 V over temperature" and keep the circuit.
+The real fix is cascoded PMOS sources, which need a higher supply, so it isn't possible with VDPWR only.
