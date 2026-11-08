@@ -13,7 +13,8 @@ saves ≈ 0.55 V of headroom compared with pfet_01v8 at the same current (stage 
 `pfet_01v8_lvt W=2 L=2` with gate on `pbias` sources 1 µA. Use multiples (`mult`) of these unit
 devices, with the same L, for other currents.
 
-Startup: when no current flows, MS2 (weak PMOS, 0.42/50) pulls `su` high, MS1 pulls `pbias` low,
+Startup: when no current flows, MS2 (weak PMOS, 0.42/50, drawn as 5 × 0.42/10 in series MS2A–E so it fits
+the layout outline) pulls `su` high, MS1 pulls `pbias` low,
 and current starts. Once running, MS3 (a copy of the bias current) pulls `su` to ≈ 13 mV, so MS1 is off.
 Power-down (`pd` = 1) forces `pbias` high and `nbias`/`su` low, and cuts the MS2 current.
 
@@ -32,3 +33,13 @@ own consumption, 0.7 nA when powered down, starts from 0 V on both a 1 µs and a
 3. **`su` dips to ≈ −0.38 V during the supply ramp** (capacitive coupling through MS1 before the core
    turns on). It's clamped by the junctions and startup still works, but re-check it at ss/−40 °C with slow ramps.
 4. Line regulation is 6.4 % over 1.62–1.98 V (target < 10 %), without cascodes.
+
+## Changes for layout (chunk 1a, 2026-11-08)
+
+- **MS2 split into 5 × 0.42/10 in series** (MS2A–E). A 50 µm gate doesn't fit the 22 × 26 µm outline.
+  Function unchanged: fast-ramp startup settles 0.12 µs after the ramp (was 0.06 µs), slow-ramp
+  startup at VDPWR = 0.95 V (was 0.94 V), the running `su` is 13 mV. The `su` dip during the ramp is
+  smaller (−0.14 V instead of −0.38 V).
+- **`tb_bias.spice` uses `.options method=gear`.** With trapezoidal integration, after the 1 µs startup ramp the
+  unit sink showed 0.90 µA for tens of µs, while every node voltage was already at its DC value
+  (a numerical error current, gone with gear or with reltol 1e-5; same check with the old netlist: 1.004 µA).

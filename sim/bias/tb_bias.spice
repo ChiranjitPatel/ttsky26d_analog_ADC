@@ -5,6 +5,9 @@
 .include ../out/netlist/bias_gen.spice
 .temp 27
 .param vdd=1.8
+* gear: trapezoidal integration left a slowly decaying 10 % error current in the unit mirror after
+* the fast startup ramp (all node voltages already at their DC values); gear does not
+.options method=gear
 
 VDD  vdd 0 {vdd}
 VPD  pd  0 0
@@ -55,12 +58,17 @@ alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
 tran 10n 40u uic
 let isink = -i(VMN)
 wrdata ../out/bias/startup.dat isink v(nbias) v(pbias) v(x1.su)
+meas tran ist_fast find isink at=39u
+meas tran sumin_fast min v(x1.su)
 
 echo "=== Startup, slow ramp: 0 -> 1.8 V in 100 us"
 alter @VDD[pulse] = [ 0 1.8 0 100u 1u 1 2 ]
 tran 50n 150u uic
 let isink = -i(VMN)
 wrdata ../out/bias/startup_slow.dat isink v(nbias) v(pbias) v(x1.su)
+meas tran ist_slow find isink at=149u
+meas tran t50_slow when isink=0.5u rise=1
+meas tran sumin_slow min v(x1.su)
 quit
 .endc
 .end

@@ -7,7 +7,8 @@ Usage (from the testbench's directory):
 For each combination it writes a copy of the testbench into ../out/corners/<tb>/<tag>/ with
   * '.lib .../sky130.lib.spice tt'  -> the corner
   * '.temp 27'                      -> the temperature
-  * every supply source 'V<name> <node> 0 [dc] 1.8 ...' whose name starts with VDD -> the supply value
+  * every supply source 'V<name> <node> 0 [dc] 1.8 ...' whose name starts with VDD, '.param vdd=1.8'
+    and supply ramps 'alter @VDD[pulse] = [ 0 1.8 ...' -> the supply value
   * relative paths '../out/...' rewritten so outputs land in that run's own directory
 runs ngspice (num_threads = 1, in parallel), and collects every "name = value" line that ngspice
 prints (meas results and print statements) into ../out/corners/<tb>/results.csv.
@@ -50,6 +51,9 @@ def make(tag, corner, temp, vdd, seed):
     s = lib_re.sub(lambda m: f"{m.group(1)} {corner}", src)
     s = re.sub(r"^\.temp\s+\S+", f".temp {temp}", s, flags=re.M)
     s = vdd_re.sub(lambda m: m.group(1) + vdd, s)
+    s = re.sub(r"^(\.param\s+vdd\s*=\s*)1\.8\b", lambda m: m.group(1) + vdd, s, flags=re.M)
+    # supply ramps written in .control as 'alter @VDD[pulse] = [ 0 1.8 ...'
+    s = re.sub(r"(@VDD\[pulse\]\s*=\s*\[\s*0\s+)1\.8\b", lambda m: m.group(1) + vdd, s)
     s = s.replace("../out/netlist/", os.path.abspath(os.path.join(here, "..", "out", "netlist")) + "/")
     s = re.sub(r"\.\./out/[\w/]+/", d + "/", s)
     if seed is not None:
