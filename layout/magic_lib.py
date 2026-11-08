@@ -67,8 +67,11 @@ class Layout:
         os.makedirs(CELLS, exist_ok=True); os.makedirs(WORK, exist_ok=True)
         gds = os.path.join(CELLS, f"{self.cell}.gds")
         t = self.t + list(extra) + [
-            "select top cell", "drc on", "drc check", "drc catchup",
-            'puts "DRC_COUNT [drc list count total]"',
+            # grow the box: an error region can lie outside the cell's bounding box, and
+            # 'drc listall' only returns errors inside the box
+            "select top cell", "box grow c 5um", "drc on", "drc style drc(full)", "drc check", "drc catchup",
+            # count from the full error list ('drc list count total' can report 0 while errors exist)
+            'set n 0', 'foreach {r b} [drc listall why] {incr n [llength $b]}', 'puts "DRC_COUNT $n"',
             f"cd {WORK}", f"save {self.cell}",
             f"gds write {gds}", "quit -noprompt"]
         tcl = os.path.join(WORK, f"{self.cell}.tcl")
@@ -80,3 +83,37 @@ class Layout:
         m = re.search(r"DRC_COUNT (\d+)", log)
         errs = [l for l in log.splitlines() if re.search(r"\berror\b|Error", l)][:10]
         return (int(m.group(1)) if m else -1), errs, gds
+
+
+def probe_gencell(gtype, **params):
+    """Generate one PDK device cell at the origin and return its geometry in um (parent coordinates):
+    {'bbox': (x0, y0, x1, y1), 'labels': {name: (x, y)}, 'li': [rects], 'met1': [rects]}.
+    Used by generators to find terminal positions instead of hard-coding them."""
+    import glob, tempfile
+    d = tempfile.mkdtemp(prefix="probe_", dir=WORK if os.path.isdir(WORK) else None)
+    p = " ".join(f"{k} {v}" for k, v in params.items())
+    tcl = os.path.join(d, "p.tcl")
+    open(tcl, "w").write("\n".join([
+        "drc off", "cellname rename (UNNAMED) probe", "edit", "box 0 0 0 0",
+        f"magic::gencell sky130::{gtype} D {p}", "select top cell", 'puts "BB [box values]"',
+        "writeall force", "quit -noprompt"]) + "\n")
+    r = subprocess.run(["magic", "-dnull", "-noconsole", "-rcfile", RC, tcl], capture_output=True, text=True, cwd=d)
+    top = open(os.path.join(d, "probe.mag")).read()
+    m = re.search(r"use (\S+)\s+D\b.*?\ntransform (\S+) (\S+) (\S+) (\S+) (\S+) (\S+)", top, re.S)
+    child, (a, b, c, dd, e, ff) = m.group(1), [int(v) for v in m.groups()[1:]]
+    sc = 0.005                                   # magscale 1 2: one unit = 5 nm
+    tr = lambda x, y: ((a * x + b * y + c) * sc, (dd * x + e * y + ff) * sc)
+    src = open(os.path.join(d, child + ".mag")).read()
+    out = {"labels": {}, "li": [], "met1": []}
+    for name, x, y in re.findall(r"rlabel \S+ (-?\d+) (-?\d+) -?\d+ -?\d+ \d+ (\S+)", src) and \
+            [(n, int(x), int(y)) for x, y, n in re.findall(r"rlabel \S+ (-?\d+) (-?\d+) -?\d+ -?\d+ \d+ (\S+)", src)]:
+        out["labels"][name] = tr(x, y)
+    for layer, key in (("locali", "li"), ("metal1", "met1")):
+        sec = re.search(rf"<< {layer} >>\n(.*?)(?=\n<< )", src, re.S)
+        if sec:
+            for x0, y0, x1, y1 in re.findall(r"rect (-?\d+) (-?\d+) (-?\d+) (-?\d+)", sec.group(1)):
+                p0, p1 = tr(int(x0), int(y0)), tr(int(x1), int(y1))
+                out[key].append((min(p0[0], p1[0]), min(p0[1], p1[1]), max(p0[0], p1[0]), max(p0[1], p1[1])))
+    bb = re.search(r"BB (-?\d+) (-?\d+) (-?\d+) (-?\d+)", r.stdout)
+    out["bbox"] = tuple(int(v) * sc for v in bb.groups())
+    return out

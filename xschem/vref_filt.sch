@@ -71,12 +71,26 @@ N 1140 510 1140 550 {lab=vbg_f}
 C {lab_pin.sym} 1140 550 0 0 {name=p26 sig_type=std_logic lab=vbg_f}
 N 1120 480 1080 480 {lab=VGND}
 C {lab_pin.sym} 1080 480 0 0 {name=p27 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/nfet_01v8.sym} 1520 480 0 0 {name=MCF model=nfet_01v8 spiceprefix=X W=10 L=10 nf=1 mult=5}
-N 1540 450 1540 410 {lab=VGND}
-C {lab_pin.sym} 1540 410 0 0 {name=p28 sig_type=std_logic lab=VGND}
-N 1500 480 1460 480 {lab=vbg_f}
-C {lab_pin.sym} 1460 480 0 0 {name=p29 sig_type=std_logic lab=vbg_f}
-N 1540 510 1540 550 {lab=VGND}
-C {lab_pin.sym} 1540 550 0 0 {name=p30 sig_type=std_logic lab=VGND}
-N 1540 480 1650 480 {lab=VGND}
-C {lab_pin.sym} 1650 480 0 1 {name=p31 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 480 0 0 {name=RFD1 W=0.35 L=20 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 450 1520 410 {lab=VGND}
+C {lab_pin.sym} 1520 410 0 0 {name=p28 sig_type=std_logic lab=VGND}
+N 1520 510 1520 550 {lab=VGND}
+C {lab_pin.sym} 1520 550 0 0 {name=p29 sig_type=std_logic lab=VGND}
+N 1500 480 1460 480 {lab=VGND}
+C {lab_pin.sym} 1460 480 0 0 {name=p30 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 760 0 0 {name=RFD2 W=0.35 L=20 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 730 0 690 {lab=VGND}
+C {lab_pin.sym} 0 690 0 0 {name=p31 sig_type=std_logic lab=VGND}
+N 0 790 0 830 {lab=VGND}
+C {lab_pin.sym} 0 830 0 0 {name=p32 sig_type=std_logic lab=VGND}
+N -20 760 -60 760 {lab=VGND}
+C {lab_pin.sym} -60 760 0 0 {name=p33 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/nfet_01v8.sym} 380 760 0 0 {name=MCF model=nfet_01v8 spiceprefix=X W=10 L=10 nf=1 mult=5}
+N 400 730 400 690 {lab=VGND}
+C {lab_pin.sym} 400 690 0 0 {name=p34 sig_type=std_logic lab=VGND}
+N 360 760 320 760 {lab=vbg_f}
+C {lab_pin.sym} 320 760 0 0 {name=p35 sig_type=std_logic lab=vbg_f}
+N 400 790 400 830 {lab=VGND}
+C {lab_pin.sym} 400 830 0 0 {name=p36 sig_type=std_logic lab=VGND}
+N 400 760 510 760 {lab=VGND}
+C {lab_pin.sym} 510 760 0 1 {name=p37 sig_type=std_logic lab=VGND}

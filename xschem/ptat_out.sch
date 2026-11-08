@@ -9,166 +9,180 @@ C {iopin.sym} -400 -200 0 0 {name=p_VDPWR lab=VDPWR}
 C {iopin.sym} -400 -160 0 0 {name=p_VGND lab=VGND}
 C {ipin.sym} -400 -120 0 0 {name=p_vgp lab=vgp}
 C {opin.sym} -400 -80 0 0 {name=p_vptat lab=vptat}
-C {sky130_fd_pr/pfet_01v8.sym} 0 200 0 0 {name=MPP model=pfet_01v8 spiceprefix=X W=8 L=4 nf=1 mult=1}
-N 20 230 20 270 {lab=vptat}
-C {lab_pin.sym} 20 270 0 0 {name=p1 sig_type=std_logic lab=vptat}
-N -20 200 -60 200 {lab=vgp}
-C {lab_pin.sym} -60 200 0 0 {name=p2 sig_type=std_logic lab=vgp}
-N 20 170 20 130 {lab=VDPWR}
-C {lab_pin.sym} 20 130 0 0 {name=p3 sig_type=std_logic lab=VDPWR}
-N 20 200 130 200 {lab=VDPWR}
-C {lab_pin.sym} 130 200 0 1 {name=p4 sig_type=std_logic lab=VDPWR}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 200 0 0 {name=R3_1 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 380 170 380 130 {lab=vptat}
-C {lab_pin.sym} 380 130 0 0 {name=p5 sig_type=std_logic lab=vptat}
-N 380 230 380 270 {lab=r3_1}
-C {lab_pin.sym} 380 270 0 0 {name=p6 sig_type=std_logic lab=r3_1}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 200 0 0 {name=R3D1 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 170 0 130 {lab=VGND}
+C {lab_pin.sym} 0 130 0 0 {name=p1 sig_type=std_logic lab=VGND}
+N 0 230 0 270 {lab=VGND}
+C {lab_pin.sym} 0 270 0 0 {name=p2 sig_type=std_logic lab=VGND}
+N -20 200 -60 200 {lab=VGND}
+C {lab_pin.sym} -60 200 0 0 {name=p3 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 200 0 0 {name=R3D2 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 380 170 380 130 {lab=VGND}
+C {lab_pin.sym} 380 130 0 0 {name=p4 sig_type=std_logic lab=VGND}
+N 380 230 380 270 {lab=VGND}
+C {lab_pin.sym} 380 270 0 0 {name=p5 sig_type=std_logic lab=VGND}
 N 360 200 320 200 {lab=VGND}
-C {lab_pin.sym} 320 200 0 0 {name=p7 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 200 0 0 {name=R3_2 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 760 170 760 130 {lab=r3_1}
-C {lab_pin.sym} 760 130 0 0 {name=p8 sig_type=std_logic lab=r3_1}
-N 760 230 760 270 {lab=r3_2}
-C {lab_pin.sym} 760 270 0 0 {name=p9 sig_type=std_logic lab=r3_2}
-N 740 200 700 200 {lab=VGND}
-C {lab_pin.sym} 700 200 0 0 {name=p10 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 200 0 0 {name=R3_3 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1140 170 1140 130 {lab=r3_2}
-C {lab_pin.sym} 1140 130 0 0 {name=p11 sig_type=std_logic lab=r3_2}
-N 1140 230 1140 270 {lab=r3_3}
-C {lab_pin.sym} 1140 270 0 0 {name=p12 sig_type=std_logic lab=r3_3}
+C {lab_pin.sym} 320 200 0 0 {name=p6 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/pfet_01v8.sym} 760 200 0 0 {name=MPP model=pfet_01v8 spiceprefix=X W=8 L=4 nf=1 mult=1}
+N 780 230 780 270 {lab=vptat}
+C {lab_pin.sym} 780 270 0 0 {name=p7 sig_type=std_logic lab=vptat}
+N 740 200 700 200 {lab=vgp}
+C {lab_pin.sym} 700 200 0 0 {name=p8 sig_type=std_logic lab=vgp}
+N 780 170 780 130 {lab=VDPWR}
+C {lab_pin.sym} 780 130 0 0 {name=p9 sig_type=std_logic lab=VDPWR}
+N 780 200 890 200 {lab=VDPWR}
+C {lab_pin.sym} 890 200 0 1 {name=p10 sig_type=std_logic lab=VDPWR}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 200 0 0 {name=R3_1 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1140 170 1140 130 {lab=vptat}
+C {lab_pin.sym} 1140 130 0 0 {name=p11 sig_type=std_logic lab=vptat}
+N 1140 230 1140 270 {lab=r3_1}
+C {lab_pin.sym} 1140 270 0 0 {name=p12 sig_type=std_logic lab=r3_1}
 N 1120 200 1080 200 {lab=VGND}
 C {lab_pin.sym} 1080 200 0 0 {name=p13 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 200 0 0 {name=R3_4 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1520 170 1520 130 {lab=r3_3}
-C {lab_pin.sym} 1520 130 0 0 {name=p14 sig_type=std_logic lab=r3_3}
-N 1520 230 1520 270 {lab=r3_4}
-C {lab_pin.sym} 1520 270 0 0 {name=p15 sig_type=std_logic lab=r3_4}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 200 0 0 {name=R3_2 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 170 1520 130 {lab=r3_1}
+C {lab_pin.sym} 1520 130 0 0 {name=p14 sig_type=std_logic lab=r3_1}
+N 1520 230 1520 270 {lab=r3_2}
+C {lab_pin.sym} 1520 270 0 0 {name=p15 sig_type=std_logic lab=r3_2}
 N 1500 200 1460 200 {lab=VGND}
 C {lab_pin.sym} 1460 200 0 0 {name=p16 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 480 0 0 {name=R3_5 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 0 450 0 410 {lab=r3_4}
-C {lab_pin.sym} 0 410 0 0 {name=p17 sig_type=std_logic lab=r3_4}
-N 0 510 0 550 {lab=r3_5}
-C {lab_pin.sym} 0 550 0 0 {name=p18 sig_type=std_logic lab=r3_5}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 480 0 0 {name=R3_3 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 450 0 410 {lab=r3_2}
+C {lab_pin.sym} 0 410 0 0 {name=p17 sig_type=std_logic lab=r3_2}
+N 0 510 0 550 {lab=r3_3}
+C {lab_pin.sym} 0 550 0 0 {name=p18 sig_type=std_logic lab=r3_3}
 N -20 480 -60 480 {lab=VGND}
 C {lab_pin.sym} -60 480 0 0 {name=p19 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 480 0 0 {name=R3_6 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 380 450 380 410 {lab=r3_5}
-C {lab_pin.sym} 380 410 0 0 {name=p20 sig_type=std_logic lab=r3_5}
-N 380 510 380 550 {lab=r3_6}
-C {lab_pin.sym} 380 550 0 0 {name=p21 sig_type=std_logic lab=r3_6}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 480 0 0 {name=R3_4 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 380 450 380 410 {lab=r3_3}
+C {lab_pin.sym} 380 410 0 0 {name=p20 sig_type=std_logic lab=r3_3}
+N 380 510 380 550 {lab=r3_4}
+C {lab_pin.sym} 380 550 0 0 {name=p21 sig_type=std_logic lab=r3_4}
 N 360 480 320 480 {lab=VGND}
 C {lab_pin.sym} 320 480 0 0 {name=p22 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 480 0 0 {name=R3_7 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 760 450 760 410 {lab=r3_6}
-C {lab_pin.sym} 760 410 0 0 {name=p23 sig_type=std_logic lab=r3_6}
-N 760 510 760 550 {lab=r3_7}
-C {lab_pin.sym} 760 550 0 0 {name=p24 sig_type=std_logic lab=r3_7}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 480 0 0 {name=R3_5 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 760 450 760 410 {lab=r3_4}
+C {lab_pin.sym} 760 410 0 0 {name=p23 sig_type=std_logic lab=r3_4}
+N 760 510 760 550 {lab=r3_5}
+C {lab_pin.sym} 760 550 0 0 {name=p24 sig_type=std_logic lab=r3_5}
 N 740 480 700 480 {lab=VGND}
 C {lab_pin.sym} 700 480 0 0 {name=p25 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 480 0 0 {name=R3_8 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1140 450 1140 410 {lab=r3_7}
-C {lab_pin.sym} 1140 410 0 0 {name=p26 sig_type=std_logic lab=r3_7}
-N 1140 510 1140 550 {lab=r3_8}
-C {lab_pin.sym} 1140 550 0 0 {name=p27 sig_type=std_logic lab=r3_8}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 480 0 0 {name=R3_6 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1140 450 1140 410 {lab=r3_5}
+C {lab_pin.sym} 1140 410 0 0 {name=p26 sig_type=std_logic lab=r3_5}
+N 1140 510 1140 550 {lab=r3_6}
+C {lab_pin.sym} 1140 550 0 0 {name=p27 sig_type=std_logic lab=r3_6}
 N 1120 480 1080 480 {lab=VGND}
 C {lab_pin.sym} 1080 480 0 0 {name=p28 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 480 0 0 {name=R3_9 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1520 450 1520 410 {lab=r3_8}
-C {lab_pin.sym} 1520 410 0 0 {name=p29 sig_type=std_logic lab=r3_8}
-N 1520 510 1520 550 {lab=r3_9}
-C {lab_pin.sym} 1520 550 0 0 {name=p30 sig_type=std_logic lab=r3_9}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 480 0 0 {name=R3_7 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 450 1520 410 {lab=r3_6}
+C {lab_pin.sym} 1520 410 0 0 {name=p29 sig_type=std_logic lab=r3_6}
+N 1520 510 1520 550 {lab=r3_7}
+C {lab_pin.sym} 1520 550 0 0 {name=p30 sig_type=std_logic lab=r3_7}
 N 1500 480 1460 480 {lab=VGND}
 C {lab_pin.sym} 1460 480 0 0 {name=p31 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 760 0 0 {name=R3_10 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 0 730 0 690 {lab=r3_9}
-C {lab_pin.sym} 0 690 0 0 {name=p32 sig_type=std_logic lab=r3_9}
-N 0 790 0 830 {lab=r3_10}
-C {lab_pin.sym} 0 830 0 0 {name=p33 sig_type=std_logic lab=r3_10}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 760 0 0 {name=R3_8 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 730 0 690 {lab=r3_7}
+C {lab_pin.sym} 0 690 0 0 {name=p32 sig_type=std_logic lab=r3_7}
+N 0 790 0 830 {lab=r3_8}
+C {lab_pin.sym} 0 830 0 0 {name=p33 sig_type=std_logic lab=r3_8}
 N -20 760 -60 760 {lab=VGND}
 C {lab_pin.sym} -60 760 0 0 {name=p34 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 760 0 0 {name=R3_11 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 380 730 380 690 {lab=r3_10}
-C {lab_pin.sym} 380 690 0 0 {name=p35 sig_type=std_logic lab=r3_10}
-N 380 790 380 830 {lab=r3_11}
-C {lab_pin.sym} 380 830 0 0 {name=p36 sig_type=std_logic lab=r3_11}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 760 0 0 {name=R3_9 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 380 730 380 690 {lab=r3_8}
+C {lab_pin.sym} 380 690 0 0 {name=p35 sig_type=std_logic lab=r3_8}
+N 380 790 380 830 {lab=r3_9}
+C {lab_pin.sym} 380 830 0 0 {name=p36 sig_type=std_logic lab=r3_9}
 N 360 760 320 760 {lab=VGND}
 C {lab_pin.sym} 320 760 0 0 {name=p37 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 760 0 0 {name=R3_12 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 760 730 760 690 {lab=r3_11}
-C {lab_pin.sym} 760 690 0 0 {name=p38 sig_type=std_logic lab=r3_11}
-N 760 790 760 830 {lab=r3_12}
-C {lab_pin.sym} 760 830 0 0 {name=p39 sig_type=std_logic lab=r3_12}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 760 0 0 {name=R3_10 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 760 730 760 690 {lab=r3_9}
+C {lab_pin.sym} 760 690 0 0 {name=p38 sig_type=std_logic lab=r3_9}
+N 760 790 760 830 {lab=r3_10}
+C {lab_pin.sym} 760 830 0 0 {name=p39 sig_type=std_logic lab=r3_10}
 N 740 760 700 760 {lab=VGND}
 C {lab_pin.sym} 700 760 0 0 {name=p40 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 760 0 0 {name=R3_13 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1140 730 1140 690 {lab=r3_12}
-C {lab_pin.sym} 1140 690 0 0 {name=p41 sig_type=std_logic lab=r3_12}
-N 1140 790 1140 830 {lab=r3_13}
-C {lab_pin.sym} 1140 830 0 0 {name=p42 sig_type=std_logic lab=r3_13}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 760 0 0 {name=R3_11 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1140 730 1140 690 {lab=r3_10}
+C {lab_pin.sym} 1140 690 0 0 {name=p41 sig_type=std_logic lab=r3_10}
+N 1140 790 1140 830 {lab=r3_11}
+C {lab_pin.sym} 1140 830 0 0 {name=p42 sig_type=std_logic lab=r3_11}
 N 1120 760 1080 760 {lab=VGND}
 C {lab_pin.sym} 1080 760 0 0 {name=p43 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 760 0 0 {name=R3_14 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1520 730 1520 690 {lab=r3_13}
-C {lab_pin.sym} 1520 690 0 0 {name=p44 sig_type=std_logic lab=r3_13}
-N 1520 790 1520 830 {lab=r3_14}
-C {lab_pin.sym} 1520 830 0 0 {name=p45 sig_type=std_logic lab=r3_14}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 760 0 0 {name=R3_12 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 730 1520 690 {lab=r3_11}
+C {lab_pin.sym} 1520 690 0 0 {name=p44 sig_type=std_logic lab=r3_11}
+N 1520 790 1520 830 {lab=r3_12}
+C {lab_pin.sym} 1520 830 0 0 {name=p45 sig_type=std_logic lab=r3_12}
 N 1500 760 1460 760 {lab=VGND}
 C {lab_pin.sym} 1460 760 0 0 {name=p46 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 1040 0 0 {name=R3_15 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 0 1010 0 970 {lab=r3_14}
-C {lab_pin.sym} 0 970 0 0 {name=p47 sig_type=std_logic lab=r3_14}
-N 0 1070 0 1110 {lab=r3_15}
-C {lab_pin.sym} 0 1110 0 0 {name=p48 sig_type=std_logic lab=r3_15}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 1040 0 0 {name=R3_13 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 1010 0 970 {lab=r3_12}
+C {lab_pin.sym} 0 970 0 0 {name=p47 sig_type=std_logic lab=r3_12}
+N 0 1070 0 1110 {lab=r3_13}
+C {lab_pin.sym} 0 1110 0 0 {name=p48 sig_type=std_logic lab=r3_13}
 N -20 1040 -60 1040 {lab=VGND}
 C {lab_pin.sym} -60 1040 0 0 {name=p49 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 1040 0 0 {name=R3_16 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 380 1010 380 970 {lab=r3_15}
-C {lab_pin.sym} 380 970 0 0 {name=p50 sig_type=std_logic lab=r3_15}
-N 380 1070 380 1110 {lab=r3_16}
-C {lab_pin.sym} 380 1110 0 0 {name=p51 sig_type=std_logic lab=r3_16}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 1040 0 0 {name=R3_14 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 380 1010 380 970 {lab=r3_13}
+C {lab_pin.sym} 380 970 0 0 {name=p50 sig_type=std_logic lab=r3_13}
+N 380 1070 380 1110 {lab=r3_14}
+C {lab_pin.sym} 380 1110 0 0 {name=p51 sig_type=std_logic lab=r3_14}
 N 360 1040 320 1040 {lab=VGND}
 C {lab_pin.sym} 320 1040 0 0 {name=p52 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 1040 0 0 {name=R3_17 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 760 1010 760 970 {lab=r3_16}
-C {lab_pin.sym} 760 970 0 0 {name=p53 sig_type=std_logic lab=r3_16}
-N 760 1070 760 1110 {lab=r3_17}
-C {lab_pin.sym} 760 1110 0 0 {name=p54 sig_type=std_logic lab=r3_17}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 1040 0 0 {name=R3_15 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 760 1010 760 970 {lab=r3_14}
+C {lab_pin.sym} 760 970 0 0 {name=p53 sig_type=std_logic lab=r3_14}
+N 760 1070 760 1110 {lab=r3_15}
+C {lab_pin.sym} 760 1110 0 0 {name=p54 sig_type=std_logic lab=r3_15}
 N 740 1040 700 1040 {lab=VGND}
 C {lab_pin.sym} 700 1040 0 0 {name=p55 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 1040 0 0 {name=R3_18 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1140 1010 1140 970 {lab=r3_17}
-C {lab_pin.sym} 1140 970 0 0 {name=p56 sig_type=std_logic lab=r3_17}
-N 1140 1070 1140 1110 {lab=r3_18}
-C {lab_pin.sym} 1140 1110 0 0 {name=p57 sig_type=std_logic lab=r3_18}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 1040 0 0 {name=R3_16 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1140 1010 1140 970 {lab=r3_15}
+C {lab_pin.sym} 1140 970 0 0 {name=p56 sig_type=std_logic lab=r3_15}
+N 1140 1070 1140 1110 {lab=r3_16}
+C {lab_pin.sym} 1140 1110 0 0 {name=p57 sig_type=std_logic lab=r3_16}
 N 1120 1040 1080 1040 {lab=VGND}
 C {lab_pin.sym} 1080 1040 0 0 {name=p58 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 1040 0 0 {name=R3_19 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 1520 1010 1520 970 {lab=r3_18}
-C {lab_pin.sym} 1520 970 0 0 {name=p59 sig_type=std_logic lab=r3_18}
-N 1520 1070 1520 1110 {lab=r3_19}
-C {lab_pin.sym} 1520 1110 0 0 {name=p60 sig_type=std_logic lab=r3_19}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 1040 0 0 {name=R3_17 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 1010 1520 970 {lab=r3_16}
+C {lab_pin.sym} 1520 970 0 0 {name=p59 sig_type=std_logic lab=r3_16}
+N 1520 1070 1520 1110 {lab=r3_17}
+C {lab_pin.sym} 1520 1110 0 0 {name=p60 sig_type=std_logic lab=r3_17}
 N 1500 1040 1460 1040 {lab=VGND}
 C {lab_pin.sym} 1460 1040 0 0 {name=p61 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 1320 0 0 {name=R3_20 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 0 1290 0 1250 {lab=r3_19}
-C {lab_pin.sym} 0 1250 0 0 {name=p62 sig_type=std_logic lab=r3_19}
-N 0 1350 0 1390 {lab=r3_20}
-C {lab_pin.sym} 0 1390 0 0 {name=p63 sig_type=std_logic lab=r3_20}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 0 1320 0 0 {name=R3_18 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 0 1290 0 1250 {lab=r3_17}
+C {lab_pin.sym} 0 1250 0 0 {name=p62 sig_type=std_logic lab=r3_17}
+N 0 1350 0 1390 {lab=r3_18}
+C {lab_pin.sym} 0 1390 0 0 {name=p63 sig_type=std_logic lab=r3_18}
 N -20 1320 -60 1320 {lab=VGND}
 C {lab_pin.sym} -60 1320 0 0 {name=p64 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 1320 0 0 {name=R3_21 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 380 1290 380 1250 {lab=r3_20}
-C {lab_pin.sym} 380 1250 0 0 {name=p65 sig_type=std_logic lab=r3_20}
-N 380 1350 380 1390 {lab=r3_21}
-C {lab_pin.sym} 380 1390 0 0 {name=p66 sig_type=std_logic lab=r3_21}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 380 1320 0 0 {name=R3_19 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 380 1290 380 1250 {lab=r3_18}
+C {lab_pin.sym} 380 1250 0 0 {name=p65 sig_type=std_logic lab=r3_18}
+N 380 1350 380 1390 {lab=r3_19}
+C {lab_pin.sym} 380 1390 0 0 {name=p66 sig_type=std_logic lab=r3_19}
 N 360 1320 320 1320 {lab=VGND}
 C {lab_pin.sym} 320 1320 0 0 {name=p67 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 1320 0 0 {name=R3_22 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
-N 760 1290 760 1250 {lab=r3_21}
-C {lab_pin.sym} 760 1250 0 0 {name=p68 sig_type=std_logic lab=r3_21}
-N 760 1350 760 1390 {lab=VGND}
-C {lab_pin.sym} 760 1390 0 0 {name=p69 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 760 1320 0 0 {name=R3_20 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 760 1290 760 1250 {lab=r3_19}
+C {lab_pin.sym} 760 1250 0 0 {name=p68 sig_type=std_logic lab=r3_19}
+N 760 1350 760 1390 {lab=r3_20}
+C {lab_pin.sym} 760 1390 0 0 {name=p69 sig_type=std_logic lab=r3_20}
 N 740 1320 700 1320 {lab=VGND}
 C {lab_pin.sym} 700 1320 0 0 {name=p70 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1140 1320 0 0 {name=R3_21 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1140 1290 1140 1250 {lab=r3_20}
+C {lab_pin.sym} 1140 1250 0 0 {name=p71 sig_type=std_logic lab=r3_20}
+N 1140 1350 1140 1390 {lab=r3_21}
+C {lab_pin.sym} 1140 1390 0 0 {name=p72 sig_type=std_logic lab=r3_21}
+N 1120 1320 1080 1320 {lab=VGND}
+C {lab_pin.sym} 1080 1320 0 0 {name=p73 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/res_xhigh_po_0p35.sym} 1520 1320 0 0 {name=R3_22 W=0.35 L=2 model=res_xhigh_po_0p35 spiceprefix=X mult=1}
+N 1520 1290 1520 1250 {lab=r3_21}
+C {lab_pin.sym} 1520 1250 0 0 {name=p74 sig_type=std_logic lab=r3_21}
+N 1520 1350 1520 1390 {lab=VGND}
+C {lab_pin.sym} 1520 1390 0 0 {name=p75 sig_type=std_logic lab=VGND}
+N 1500 1320 1460 1320 {lab=VGND}
+C {lab_pin.sym} 1460 1320 0 0 {name=p76 sig_type=std_logic lab=VGND}

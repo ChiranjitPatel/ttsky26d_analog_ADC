@@ -56,14 +56,20 @@ gds flatglob *__example_*
 gds read {gds}
 load {cell}
 select top cell
+# grow the box: Magic marks an error as the region where the rule fails, which can lie outside
+# the cell's bounding box, and 'drc listall' only returns errors inside the box
+box grow c 5um
 drc on
 drc style drc(full)
 drc check
 drc catchup
-set n [drc list count total]
+# count from the full error list ('drc list count total' gave 0 while 'drc listall why' listed errors)
+set why [drc listall why]
+set n 0
+foreach {{rule boxes}} $why {{ incr n [llength $boxes] }}
 set fp [open {out}/drc.txt w]
 puts $fp "DRC_COUNT $n"
-foreach {{rule boxes}} [drc listall why] {{
+foreach {{rule boxes}} $why {{
     puts $fp "$rule: [llength $boxes]"
     foreach b [lrange $boxes 0 4] {{ puts $fp "    $b" }}
 }}

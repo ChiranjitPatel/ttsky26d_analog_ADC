@@ -55,8 +55,11 @@ for name, x, y in outs:
 # M1/M2 extend these into the vref_sel / inmux routes. Pins: 0.9 x 1.0 um at y = 0 ... 1.
 for name, x in (("ua[0]", 152.26), ("ua[1]", 132.94)):
     L += [f"box {x - 0.45}um 0um {x + 0.45}um 4um", "paint met4"]
-L += ["select top cell", "drc on", "drc check", "drc catchup",
-      'puts "DRC_COUNT [drc list count total]"',
+L += ["select top cell", "box grow c 5um", "drc on", "drc style drc(full)", "drc check", "drc catchup",
+      # count from the full list ('drc list count total' can say 0 while errors exist) on a grown box
+      # (an error region can lie outside the cell's bounding box)
+      'set n 0', 'foreach {r b} [drc listall why] {incr n [llength $b]}', 'puts "DRC_COUNT $n"',
+      "select top cell",
       # save by name from inside mag/: with an absolute path Magic names the cell after the path,
       # and the GDS/LEF cell name becomes '/home/.../tt_um_...' (precheck: top macro name mismatch)
       f"cd {ROOT}/mag", f"save {TOP}",

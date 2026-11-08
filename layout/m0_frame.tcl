@@ -201,10 +201,15 @@ paint met4
 box 132.49um 0um 133.39um 4um
 paint met4
 select top cell
+box grow c 5um
 drc on
+drc style drc(full)
 drc check
 drc catchup
-puts "DRC_COUNT [drc list count total]"
+set n 0
+foreach {r b} [drc listall why] {incr n [llength $b]}
+puts "DRC_COUNT $n"
+select top cell
 cd /home/user/ttsky26d_analog_ADC/mag
 save tt_um_chiranjitpatel_sar_adc
 gds write /home/user/ttsky26d_analog_ADC/gds/tt_um_chiranjitpatel_sar_adc.gds
