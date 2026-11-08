@@ -30,7 +30,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 
 | # | Chunk | Who | Target |
 |---|---|---|---|
-| **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | Nov 9–10 — built Nov 8 (DRC clean; CI precheck pending) |
+| **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | **Done Nov 8**: TT precheck green in CI (gds run 46, commit 5849aa6) |
 | 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 — draft Nov 8 (`docs/specs/floorplan.md`) |
 | 1a | bias_gen | designer | Nov 11 |
 | 1b | ota | designer | Nov 12 |
