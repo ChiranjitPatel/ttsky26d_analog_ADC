@@ -13,3 +13,4 @@ sim/out
 *.raw
 *.ext
 __pycache__/
+layout/*.log
