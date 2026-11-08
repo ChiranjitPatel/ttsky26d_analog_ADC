@@ -1,0 +1,29 @@
+* Copy of tb_ptat_p2.spice for the Monte Carlo run (separate results folder). Keep the two identical.
+* Corners: ../../tools/run_corners.py tb_ptat_p2.spice --corners tt,ff,ss,fs,sf,ll,hh --vdd 1.62,1.8,1.98
+* Mismatch: ../../tools/run_corners.py tb_ptat_p2.spice --mc 100 --mc-corner tt_mm
+* Then python3 sensor_report.py. The ADC code is ~ VPTAT / VREF with VREF ~ VBG, so the sensor error is
+* evaluated on the ratio VPTAT/VBG (sensor_report.py).
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.include ../out/netlist/ptat_out.spice
+.temp 27
+.options method=gear
+.nodeset v(vbg)=1.21 v(vgp)=0.75 v(pbias)=1.17 v(nbias)=0.64
+VDD vdd 0 1.8
+VPD pd  0 0
+xb  vdd 0 pd nbias pbias bias_gen
+xbg vdd 0 pbias pd vbg vgp bandgap_core
+xpt vdd 0 vgp vptat ptat_out
+.control
+set wr_singlescale
+set wr_vecnames
+op
+let vptat_op = v(vptat)
+let vbg_op = v(vbg)
+print vptat_op vbg_op
+dc temp -40 125 5
+wrdata ../out/ptat/temp_p2.dat v(vptat) v(vbg)
+quit
+.endc
+.end

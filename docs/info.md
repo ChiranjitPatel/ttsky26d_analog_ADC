@@ -53,19 +53,26 @@ An 8-bit successive-approximation (SAR) ADC that uses its **own on-chip bandgap 
 ## How to test
 
 All tests run from the TT demo board's RP2040 (MicroPython). Set `uio[0,1,2,3,6,7]` as RP2040
-outputs and `uio[4,5]` as inputs.
+outputs and `uio[4,5]` as inputs. **After power-up (or BG_PD 1 → 0), wait ≥ 100 µs** before the first
+conversion: the filtered reference settles in ≈ 45 µs (simulated).
 
 1. **Basic conversion (internal reference).** MODE = 0, REF_SEL = 0, INSEL = 00, clock 1 MHz,
    pulse `rst_n` low, then set START = 1. Apply a DC voltage (0 … 1.2 V) to `ua[0]` from a low-impedance
-   source. On each rising edge of EOC, read D[7:0]. Expect D ≈ 256 · VIN / 1.215 V.
-2. **Reference check.** Set VREF_OE = 1 and measure `ua[1]` with a ≥ 10 MΩ multimeter: ≈ 1.214 V.
+   source. On each rising edge of EOC, read D[7:0]. Expect D ≈ 256 · VIN / VREF with VREF ≈ 1.21 V.
+2. **Reference check and calibration.** Set VREF_OE = 1 and measure `ua[1]` with a ≥ 10 MΩ multimeter:
+   ≈ 1.21 V (simulated chip-to-chip spread σ ≈ 18 mV from mismatch, ±0.4 % over process). Store the
+   measured value and use it as VREF in all conversions: D · VREF_measured / 256.
    (A 1 MΩ probe reads ≈ 17 mV low, because the buffer's output resistance is ≈ 12 kΩ. Conversions are
    not affected.)
 3. **Linearity.** Sweep VIN slowly over 0 … 1.2 V (or use a sine from a function generator) and record
    codes. Compute DNL/INL from the code histogram, ENOB from an FFT.
 4. **Temperature sensor.** INSEL = 01, **clock ≤ 100 kHz** (VPTAT has ≈ 270 kΩ source impedance and
-   needs a ≥ 4 µs sample phase). Read D at a known temperature T0 (°C) to calibrate:
-   T(°C) = (D / D0) · (T0 + 273.15) − 273.15. About 2.4 °C per code.
+   needs a ≥ 4 µs sample phase). About 2.4 °C per code.
+   - 1-point calibration: read D0 at a known temperature T0 (°C), then T(°C) = (D / D0) · (T0 + 273.15) − 273.15.
+     Simulated: within ±5 °C for most chips, but mismatch can make up to ~10 % of chips worse.
+   - 2-point calibration (recommended): read D1 at T1 and D2 at T2 (e.g. room temperature and a hot plate at
+     85 °C), then T = T1 + (D − D1) · (T2 − T1) / (D2 − D1). Simulated: within ±2.7 °C (−40…125 °C),
+     plus the ±1.2 °C quantization.
 5. **Bandgap voltage through the ADC.** Apply a known reference (e.g. 1.500 V) to `ua[1]`, decoupled with
    ≥ 100 nF next to the pin. REF_SEL = 1, INSEL = 10, clock ≤ 100 kHz. VBG = D · VREF_ext / 256.
 6. **Fallback: external reference.** If the bandgap doesn't work, REF_SEL = 1 with an external

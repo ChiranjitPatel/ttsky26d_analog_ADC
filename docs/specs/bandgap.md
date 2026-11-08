@@ -73,7 +73,7 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 | B10 | 0.6005 V | 1 | 2026-11-08 | stage 4, after the resize |
 | B11 | 1.956 mV/°C | early, tt only | 2026-11-08 | |
 | B12 | 2.43 °C/LSB | early, tt only | 2026-11-08 | LSB = 4.75 mV |
-| B13 | 1.9 °C (ideal-PTAT model, tt) | early, tt only | 2026-11-08 | mismatch/ADC errors not included yet |
+| B13 | corners ≤ 2.6 °C (1-point cal.); mismatch: 10 % of seeds > 5 °C with 1 point, ≤ 2.7 °C with 2 points | 2 | 2026-11-08 | **open: see the B13 note**; `sim/ptat/sensor.md`; ADC quantization (±1.2 °C) not included |
 | B6 | corners: −0.4 / +0.3 % (63 runs) ✅. Mismatch: σ = 17.6 mV (1.45 %, Monte Carlo 100 seeds) | 2 | 2026-11-08 | **open: see the B6 note below** |
 
 ## B6 note — VBG spread with mismatch (open, for the designer, 2026-11-08)
@@ -88,3 +88,11 @@ Options:
 2. Larger PNP ratio (1 : 24, a 5 × 5 array): R2/R1 drops from 9.5 to about 6, so the OTA and resistor parts drop by
    about 35 %, to σ ≈ 12–13 mV. Cost: about +400 µm² and another layout iteration of `pnp_array`.
 3. Chopping the OTA: largest gain, but it needs a clock, switches and a filter. Too big a change this late.
+
+## B13 note — temperature-sensor accuracy (open, for the designer, 2026-11-08)
+
+The corners alone give ≤ 2.6 °C after a 1-point calibration at 27 °C. Mismatch changes the slope of VPTAT/VBG
+(σ 1.6 %), so with 1 point, 10 % of chips exceed ±5 °C (95th percentile 5.4 °C). A second calibration point
+(e.g. 85 °C on a hot plate, or any second known temperature) brings every seed within 2.7 °C.
+Recommendation: keep the circuit, make the test procedure a 2-point calibration, and reword B13 to
+"±3 °C after a 2-point calibration; ±5 °C typical after 1 point".
