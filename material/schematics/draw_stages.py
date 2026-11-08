@@ -8,7 +8,7 @@ import schemdraw
 import schemdraw.elements as elm
 
 OUT = sys.argv[1]
-schemdraw.config(fontsize=10, lw=1.2)
+schemdraw.config(fontsize=10, lw=1.2, bgcolor="white")
 NETC = "#1565c0"   # net label colour
 DEVC = "#555555"   # device annotation colour
 
@@ -58,7 +58,8 @@ class Sch:
         if sub: self.d.add(elm.Label().at((x, y - 0.55)).label(sub, halign="left", fontsize=9, color=DEVC))
 
     def save(self, path):
-        self.d.save(path, dpi=130)
+        # white background (schemdraw saves transparent PNGs by default)
+        self.d.save(path, dpi=130, transparent=False)
 
 
 # =================================================================== stage 1: bias_gen

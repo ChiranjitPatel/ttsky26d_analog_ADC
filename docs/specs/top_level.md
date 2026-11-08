@@ -43,6 +43,7 @@ Other projects have submitted plain SAR ADCs and stand-alone bandgaps before (se
 | Process | sky130 |
 | Supply | VDPWR = 1.8 V only (no VAPWR) |
 | Tiles | **1x2** = **161.00 × 225.76 µm** (36 347 µm²), from TT `tt-support-tools` `tech/sky130A/tile_sizes.yaml` and `def/analog/tt_analog_1x2.def` |
+| Spec check | Re-checked 2026-11-08 against tinytapeout.com/specs/analog and `tt_analog_1x2.def` (last changed 2026-05-31): no changes. CI uses the `@ttsky26d` action tags |
 | Pin locations | `ua[0]` at x = 152.26 µm, `ua[1]` at x = 132.94 µm, on the **bottom** edge (met4, 0.9 × 1.0 µm). Digital pins (`clk`, `ui_in`, …) on the **top** edge (met4, 0.3 × 1.0 µm). Place VIN-side analog near the bottom right and SAR logic near the top |
 | Power | We draw our own `VDPWR`/`VGND` straps: **vertical met4 stripes**, at least **1.2 µm** wide, starting within the bottom 10 µm and reaching the top 10 µm of the tile. The PDN drops about 0.1 V at 20 mA |
 | Analog pad path (`ua[]`) | Goes through the TT analog switch `tt_asw_3v3`. **R < 500 Ω, C < 5 pF, max 4 mA** |
