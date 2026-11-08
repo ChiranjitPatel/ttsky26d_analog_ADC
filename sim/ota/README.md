@@ -45,3 +45,13 @@ See `results.md` (generated): 80.4 dB, 3.0 MHz unity-gain frequency, 81° phase 
    bandgap's real load after stage 3.
 4. **ngspice-36 quirk:** running `op` after a `tran` with an `alter`ed source gave a false solution
    (v(out) = 2.26 V). Power-down is therefore checked in its own testbench.
+
+## Resize for matching (2026-11-08, from the bandgap Phase 2 Monte Carlo)
+
+Input pair 8/2 → 32/8, loads 1/4 → 4/16 (M6 4 × 4/16), CC 0.7 → 2.1 pF, RZ 40 → 120 kΩ, power-down
+devices no longer minimum length, plus 4 layout dummies. The reasons are in `sim/bandgap/README.md`.
+- **Offset:** σ = 1.49 mV (target ≤ 2 mV ✅), measured in the bandgap loop as σ(vb − va) over 100 Monte Carlo seeds.
+- **Stability:** what counts is the bandgap loop: PM 76.4° at 0.79 MHz (stage 3), and 69.9° with the PTAT branch.
+  The stand-alone unity-gain follower with 0.5 pF in `results.md` (PM 21.4°) is not a use case of this cell any more.
+  It is the worst-case feedback factor, while in the bandgap the OTA drives about 3 pF at a feedback factor below 1.
+  Don't use this OTA as a unity-gain buffer.

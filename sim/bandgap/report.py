@@ -46,7 +46,7 @@ fig.tight_layout(); fig.savefig(os.path.join(H, "plots", "bandgap.png"), dpi=85)
 
 ok = lambda c: "✅" if c else "❌"
 rows = [
-    ("B1", "VBG", f"{vbg:.4f} V", "1.21 … 1.29 V (typ 1.25)", ok(1.21 <= vbg <= 1.29), 1),
+    ("B1", "VBG", f"{vbg:.4f} V", "1.18 … 1.25 V (typ 1.215)", ok(1.18 <= vbg <= 1.25), 1),
     ("B2", "Supply current, bandgap_core + bias_gen", f"{itot*1e6:.1f} µA (core {ibg*1e6:.1f})", "≤ 50 µA", ok(itot <= 50e-6), 1),
     ("B3", "Startup to 1 % after a 1 µs ramp", f"{ts_f*1e6:.2f} µs after ramp end", "≤ 20 µs", ok(ts_f <= 20e-6), 1),
     ("—", "Startup, 100 µs ramp (rule 7)", f"settled {ts_s*1e6:.1f} µs after ramp end", "starts from 0 V", ok(ts_s <= 20e-6), 1),

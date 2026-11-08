@@ -5,7 +5,7 @@ Phase-2 rows are early checks at tt only; corners, temperature and supply sweeps
 
 | Spec | Quantity | Result | Target | | Phase |
 |---|---|---|---|---|---|
-| B1 | VBG | 1.2105 V | 1.21 … 1.29 V (typ 1.25) | ✅ | 1 |
+| B1 | VBG | 1.2105 V | 1.18 … 1.25 V (typ 1.215) | ✅ | 1 |
 | B2 | Supply current, bandgap_core + bias_gen | 15.7 µA (core 13.6) | ≤ 50 µA | ✅ | 1 |
 | B3 | Startup to 1 % after a 1 µs ramp | 2.35 µs after ramp end | ≤ 20 µs | ✅ | 1 |
 | — | Startup, 100 µs ramp (rule 7) | settled 0.3 µs after ramp end | starts from 0 V | ✅ | 1 |

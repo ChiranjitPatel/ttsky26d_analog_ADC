@@ -63,14 +63,28 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 
 | # | Result | Phase | Date | Notes |
 |---|---|---|---|---|
-| B1 | 1.2154 V | 1 (tt) | 2026-11-01 | ✅ against the new 1.18–1.25 V window (the old 1.21–1.29 V window passed by only 5 mV) |
-| B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-01 | core 13.6 µA |
-| B3 | 0.47 µs after a 1 µs ramp | 1 | 2026-11-07 | also starts on a 100 µs ramp (rerun without the stray MCPS cap) |
-| B4 | 6.1 mV/V | early, tt only | 2026-11-01 | |
-| B5 | 22 ppm/°C | early, tt only | 2026-11-01 | R2/R1 = 19/2 |
-| B7 | 45.8 dB DC / 20.9 dB at 1 MHz at `vbg_f` | early, tt only | 2026-11-07 | ✅ with the stage 5 RC filter (raw `vbg`: −8.9 dB at 1 MHz) |
-| B8 | 1.4 nA | early, tt only | 2026-11-01 | incl. bias_gen |
-| B10 | 0.5988 V | 1 | 2026-11-07 | stage 4, `sim/ptat/` |
-| B11 | 2.004 mV/°C | early, tt only | 2026-11-07 | |
-| B12 | 2.37 °C/LSB | early, tt only | 2026-11-07 | with LSB = 4.75 mV |
-| B13 | 0.5 °C (ideal-PTAT model, tt) | early, tt only | 2026-11-07 | mismatch/ADC errors not included yet |
+| B1 | 1.2105 V | 1 (tt) | 2026-11-08 | ✅ after the Phase 2 resize (was 1.2154 V); corners 1.2059–1.2146 V |
+| B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-08 | core 13.6 µA; unchanged by the resize |
+| B3 | 2.4 µs after a 1 µs ramp (tt); 63/63 corner runs start on both ramps | 2 | 2026-11-08 | startup MSU1 0.42/1 → 0.42/4 fixed a limit cycle caused by the resize |
+| B4 | 2.2 mV/V (tt); worst 9.88 mV/V (fs, 125 °C) | 2 | 2026-11-08 | ✅ but marginal at fs/125 °C |
+| B5 | 23.5 ppm/°C (tt); worst corner 33.3 ppm/°C (ff) | 2 | 2026-11-08 | ✅ |
+| B7 | 55.7 dB DC / 22.2 dB at 1 MHz at `vbg_f` (tt) | early, tt only | 2026-11-08 | ✅ after the filter grew to 1.6 MΩ / 5.5 pF (was 16.0 dB after the resize) |
+| B8 | 0.08 nA (tt) | early, tt only | 2026-11-08 | incl. bias_gen |
+| B10 | 0.6005 V | 1 | 2026-11-08 | stage 4, after the resize |
+| B11 | 1.956 mV/°C | early, tt only | 2026-11-08 | |
+| B12 | 2.43 °C/LSB | early, tt only | 2026-11-08 | LSB = 4.75 mV |
+| B13 | 1.9 °C (ideal-PTAT model, tt) | early, tt only | 2026-11-08 | mismatch/ADC errors not included yet |
+| B6 | corners: −0.4 / +0.3 % (63 runs) ✅. Mismatch: σ = 17.6 mV (1.45 %, Monte Carlo 100 seeds) | 2 | 2026-11-08 | **open: see the B6 note below** |
+
+## B6 note — VBG spread with mismatch (open, for the designer, 2026-11-08)
+
+Corners alone give −0.4 / +0.3 % (B6 passes easily). Mismatch adds **σ(VBG) = 17.6 mV** (Monte Carlo, tt, 100 seeds),
+so the 3σ untrimmed spread is ±53 mV ≈ ±4.4 %, which is above ±3 %. This is already 3× better than the first
+sizing (54 mV). The largest remaining part is the OTA offset, multiplied by 1 + R2/R1 ≈ 10.5 (`sim/bandgap/README.md`).
+Options:
+1. **Accept and reword B6**: corners ±3 % (met) and mismatch σ ≤ 20 mV (met). Rely on the built-in
+   calibration path: VREF is measured on `ua[1]` with a DMM (VREF_OE = 1), and firmware scales the ADC codes.
+   No area cost. *Recommended.*
+2. Larger PNP ratio (1 : 24, a 5 × 5 array): R2/R1 drops from 9.5 to about 6, so the OTA and resistor parts drop by
+   about 35 %, to σ ≈ 12–13 mV. Cost: about +400 µm² and another layout iteration of `pnp_array`.
+3. Chopping the OTA: largest gain, but it needs a clock, switches and a filter. Too big a change this late.

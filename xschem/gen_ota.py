@@ -53,6 +53,12 @@ p("M7", "out", "pbias", "VDPWR", W=2, L=2, mult=4)
 # compensation: out1 -- RZ -- cz -- CC -- out (MIM bottom plate c1 on the low-impedance output)
 s.dev(RX, "RZ", {"P": "out1", "M": "cz", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
 s.dev(CM, "CC", {"c0": "cz", "c1": "out"}, W=CC_W, L=CC_L, MF=1, model="cap_mim_m3_1", spiceprefix="X")
+# layout dummies (all terminals on the rail): ends of the input-pair row (D A B B A D, 16/8 fingers)
+# and of the load row (D M6 M6 M3 M4 M6 M6 D); see docs/specs/layout_briefs/ota.md
+for nm in ("MDP1", "MDP2"):
+    p(nm, "VDPWR", "VDPWR", "VDPWR", W=16, L=8, mult=1)
+for nm in ("MDN1", "MDN2"):
+    n(nm, "VGND", "VGND", "VGND", W=4, L=16, mult=1)
 # power-down
 p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.5, mult=1)   # not min. length: hot leakage (bias_gen Phase 2)
 n("MND", "out1", "pd", "VGND", W=0.42, L=0.5, mult=1)

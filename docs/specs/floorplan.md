@@ -1,6 +1,6 @@
 # Floorplan (chunk 0b) — tt_um_chiranjitpatel_sar_adc
 
-**Status: DRAFT for review (2026-11-08).** Source of truth: `layout/floorplan.py` → `layout/floorplan.json`
+**Status: approved 2026-11-08; revised the same night after the bandgap Phase 2 resize (see below).** Source of truth: `layout/floorplan.py` → `layout/floorplan.json`
 (read by the layout scripts and the M0 frame). Picture: `material/layout/floorplan.png`.
 Coordinates in µm from the tile's bottom-left corner; tile 161.00 × 225.76 µm (`tt_analog_1x2.def`).
 
@@ -9,9 +9,9 @@ Coordinates in µm from the tile's bottom-left corner; tile 161.00 × 225.76 µm
 | Block | x0 – x1 | y0 – y1 | Area µm² | × device area | Milestone | Why here |
 |---|---|---|---|---|---|---|
 | bias_gen | 8 – 30 | 188 – 214 | 572 | 3.0 | M1 | top-left, short pbias/nbias runs into the bandgap below |
-| ptat_out | 34 – 62 | 188 – 214 | 728 | 3.0 | M1 | next to the bandgap's `vgp` |
-| bandgap_core | 8 – 62 | 100 – 182 | 4428 | 2.1 | M1 | largest analog block (OTA, PNP 3×3, R chains, startup) |
-| vref_filt | 8 – 62 | 60 – 94 | 1836 | 1.9 | M1 | directly under the bandgap that feeds it |
+| bandgap_core | 8 – 62 | 92 – 186 | 5076 | 1.2 (1.6 without the MIM) | M1 | largest analog block (OTA with a 2.1 pF MIM over its devices, PNP array, R1/R2, startup) |
+| vref_filt | 8 – 62 | 46 – 88 | 2268 | 1.5 | M1 | directly under the bandgap that feeds it (cell 52.8 × 39.5) |
+| ptat_out | 8 – 42 | 6 – 42 | 1224 | 2.7 | M1 | bottom left (cell 31.2 × 31.4); `vptat` runs along the bottom to the input mux |
 | vref_buf | 72 – 116 | 38 – 74 | 1584 | 1.6 | M1 | between the filter and the DAC switches: short `vref` |
 | vref_sel | 118 – 150 | 6 – 20 | 448 | 6.1 | M1 | on top of the `ua[1]` pin (x = 132.94) |
 | inmux | 118 – 150 | 24 – 50 | 832 | 5.4 | M2 | VIN from `ua[0]` (x = 152.26) up the right edge |
@@ -20,10 +20,11 @@ Coordinates in µm from the tile's bottom-left corner; tile 161.00 × 225.76 µm
 | comparator | 86 – 114 | 164 – 184 | 560 | 4.0 | M2 | right above the array: short, shielded `vtop` (rule 5) |
 | vcm_gen | 116 – 150 | 164 – 184 | 680 | 1.5 | M2 | next to the comparator's `inn` |
 | adc_digital | 71 – 153 | 186 – 216 | 2460 | 1.0 × (1289 µm² cells / 0.55) | M2 | under the top pins; LibreLane macro |
-| reserve_left | 8 – 62 | 6 – 56 | 2700 | — | — | growth for M1 blocks |
+| reserve_top | 34 – 62 | 188 – 214 | 728 | — | — | spare (was ptat_out) |
+| reserve_left | 44 – 62 | 6 – 42 | 648 | — | — | spare |
 | reserve_right | 72 – 116 | 6 – 34 | 1232 | — | — | e.g. a larger VREF reservoir cap |
 
-Used 20 032 µm² (55 % of the tile), reserve 3 932 µm².
+Used 21 608 µm² (59 % of the tile), reserve 2 608 µm².
 
 ## Power
 
@@ -57,3 +58,12 @@ met4 themselves (MIM top plates; the macro's own power grid).
    pitch (≈ 3 µm) would free ≈ 2000 µm², if the common-centroid routing allows it.
 3. pbias/nbias run from the top-left to the right column (vcm_gen, comparator preamp, vref_buf): ≈ 150 µm on
    met3. These are high-impedance gate-bias nets; each consumer gets a local decoupling cap.
+
+## Revision 2026-11-08 (night)
+
+The bandgap Phase 2 Monte Carlo made the matched devices larger (`sim/bandgap/README.md`): the OTA input pair,
+loads and Miller cap, the PMOS current sources, and R1/R2/R3 (0.69/4 units). Changes:
+- bandgap_core grows from 54 × 82 to 54 × 94 µm.
+- vref_filt grows from 54 × 34 to 54 × 42 µm (14 resistor units, 7 caps for B7).
+- ptat_out (now 31 × 31 µm) moves to the bottom left, and its old place becomes reserve_top.
+`vgp` (a DC gate net) now runs about 60 µm from the bandgap down to ptat_out on met3.

@@ -60,6 +60,11 @@ chain("R1_", "vb", "vq2", N1)
 q("Q2", "vq2", 8)
 chain("R2_", "vbg", "vq3", N2)
 q("Q3", "vq3", 1)
+# layout dummies (all terminals on VGND; netgen does not drop shorted devices): the two PNPs in
+# pnp_array's 4th column and the two end strips of bg_res
+q("QD", "VGND", 2)
+for i in (1, 2):
+    s.dev(RX, f"RD{i}", {"P": "VGND", "M": "VGND", "B": "VGND"}, W=WU, L=LU, model="res_xhigh_po_0p69", spiceprefix="X", mult=1)
 # PSRR cap: PMOS gate cap from vgp to VDPWR, so the source gates follow the supply at high frequency
 if CPS_W:
     p("MCPS", "VDPWR", "vgp", "VDPWR", W=CPS_W, L=CPS_W, mult=1)
