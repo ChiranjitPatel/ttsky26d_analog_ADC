@@ -148,7 +148,7 @@ pass through simulation, layout and LVS on a small block.
 | Stage | a | b | c | d | e | f | g | Notes |
 |---|---|---|---|---|---|---|---|---|
 | 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: ideal zero-TC VBG ≈ 1.25 V (stage 3 later found 1.215 V for the real circuit), tight headroom at 1.62 V |
-| 1 Bias | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps |
+| 1 Bias | ✅ 2026-11-01 (layout changes 11-08) | ✅ 2026-11-01 | ✅ 2026-11-08, 45/45 | | | | | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps; Phase 2 0.68–1.64 µA (mostly temperature), line ≤ 8.9 %, PD ≤ 43 nA (`corners.md`) |
 | 2 OTA | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/ota/README.md`: two-stage, 80.4 dB, PM 81° (0.5 pF load, CC 0.7 pF), 5.8 µA; Monte Carlo offset in Phase 2 |
 | 3 Bandgap | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/bandgap/README.md`: VBG 1.215 V (B1 margin), 15.7 µA, PM 82.5°, 22 ppm/°C at tt; raw PSRR at 1 MHz fails (fixed by the stage 5 filter) |
 | 4 PTAT | ✅ 2026-11-07 | ✅ 2026-11-07 | | | | | | `sim/ptat/README.md`: 0.599 V, 2.00 mV/°C, VBG unaffected, loop PM 79.9° |

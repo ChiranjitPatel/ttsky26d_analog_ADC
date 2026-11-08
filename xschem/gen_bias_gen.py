@@ -52,14 +52,15 @@ for i in range(5):
     p(f"MS2{'ABCDE'[i]}", _ms[i + 1], "VGND", _ms[i], sym=PF, model="pfet_01v8", W=0.42, L=10, nf=1, mult=1)
 n("MS3", "su", "nbias", "VGND", W=2, L=2, nf=1, mult=1)
 n("MS1", "pbias", "su", "VGND", W=0.42, L=1, nf=1, mult=1)
-# power-down
-p("MPD2", "sup", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.15, nf=1, mult=1)
-p("MPD1", "pbias", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.15, nf=1, mult=1)
-n("MND1", "nbias", "pd", "VGND", W=0.42, L=0.15, nf=1, mult=1)
-n("MND2", "su", "pd", "VGND", W=0.42, L=0.15, nf=1, mult=1)
+# power-down. Static switches, so not minimum length: at L = 0.15 the off-state leakage at 125 C
+# (fast corners) reached 1.5 uA in power-down (MIP) - Phase 2 sweep, 2026-11-08.
+p("MPD2", "sup", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.5, nf=1, mult=1)
+p("MPD1", "pbias", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.5, nf=1, mult=1)
+n("MND1", "nbias", "pd", "VGND", W=0.42, L=0.5, nf=1, mult=1)
+n("MND2", "su", "pd", "VGND", W=0.42, L=0.5, nf=1, mult=1)
 # pd inverter
-p("MIP", "pdb", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.84, L=0.15, nf=1, mult=1)
-n("MIN", "pdb", "pd", "VGND", W=0.42, L=0.15, nf=1, mult=1)
+p("MIP", "pdb", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.84, L=1, nf=1, mult=1)
+n("MIN", "pdb", "pd", "VGND", W=0.42, L=1, nf=1, mult=1)
 
 s.write(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bias_gen.sch"), sym=True)
 print("wrote xschem/bias_gen.sch, bias_gen.sym")

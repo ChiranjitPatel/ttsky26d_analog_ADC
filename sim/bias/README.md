@@ -43,3 +43,16 @@ own consumption, 0.7 nA when powered down, starts from 0 V on both a 1 µs and a
 - **`tb_bias.spice` uses `.options method=gear`.** With trapezoidal integration, after the 1 µs startup ramp the
   unit sink showed 0.90 µA for tens of µs, while every node voltage was already at its DC value
   (a numerical error current, gone with gear or with reltol 1e-5; same check with the old netlist: 1.004 µA).
+
+## Phase 2 (2026-11-08)
+
+`../../tools/run_corners.py tb_bias.spice --corners tt,ff,ss,fs,sf --temps=-40,27,125 --vdd 1.62,1.8,1.98`
+then `python3 corners_report.py` → `corners.md`, `plots/corners.png`. All 45 runs pass (summary in `corners.md`).
+Changes it caused:
+- **Power-down switches and the pd inverter are no longer minimum length** (switches L = 0.5, inverter
+  L = 1). At L = 0.15 the inverter PMOS leaked 1.5 µA at 125 °C in power-down; now the worst case is 43 nA.
+- **The testbench drives `pd` from VDPWR** (`EPD`, gain 0/1), not a fixed 1.8 V source. At 1.98 V a 1.8 V
+  "high" left the PMOS switches partly on.
+- **Nodesets for `.op`.** At tt/27 °C/1.98 V the plain `.op` converged to a non-physical point. The report
+  cross-checks each `.op` current against the DC sweep.
+- **Layout dummies** MDN1/2 and MDP1/2 are in the schematic.

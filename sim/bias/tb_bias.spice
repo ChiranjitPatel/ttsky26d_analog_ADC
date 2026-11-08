@@ -13,7 +13,8 @@
 .nodeset v(nbias)=0.64 v(pbias)=1.17 v(x1.nr)=0.06 v(x1.su)=0.013
 
 VDD  vdd 0 {vdd}
-VPD  pd  0 0
+* pd follows the supply when high (a logic 1 = VDPWR); gain 0 = enabled, 1 = powered down
+EPD  pd  0 vdd 0 0
 x1 vdd 0 pd nbias pbias bias_gen
 
 * unit output mirrors
@@ -50,11 +51,11 @@ meas dc isrc162 find isrc at=1.62
 meas dc isrc198 find isrc at=1.98
 
 echo "=== Power-down"
-alter VPD dc = 1.8
+alter EPD gain = 1
 op
 let ipd = -i(VDD)
 print ipd i(VMN) i(VMP)
-alter VPD dc = 0
+alter EPD gain = 0
 
 echo "=== Startup: VDPWR ramp 0 -> 1.8 V in 1 us, all nodes start at 0 V"
 alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]

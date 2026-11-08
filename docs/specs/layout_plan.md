@@ -32,7 +32,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 |---|---|---|---|
 | **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | **Done Nov 8**: TT precheck green in CI (gds run 46, commit 5849aa6) |
 | 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 — draft Nov 8 (`docs/specs/floorplan.md`) |
-| 1a | bias_gen | designer | Nov 11 |
+| 1a | bias_gen | designer | Nov 11 — Phase 2 done and brief ready Nov 8 (`docs/specs/layout_briefs/bias_gen.md`) |
 | 1b | ota | designer | Nov 12 |
 | 1c | PNP 3×3 common-centroid array + R1/R2 unit-resistor chains (scripted) | Claude | Nov 11 |
 | 1d | bandgap_core assembly (1b + 1c + current sources + startup) | designer, Claude checks | Nov 13–14 |
