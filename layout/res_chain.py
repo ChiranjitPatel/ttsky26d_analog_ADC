@@ -12,8 +12,10 @@ extracts as exactly l_um).
 from magic_lib import probe_gencell
 
 
-def add_chain(L, n, l_um, x0=0.0, y0=0.0, name="R"):
-    g = probe_gencell("sky130_fd_pr__res_xhigh_po_0p35", w=0.35, l=l_um + 0.16, nx=n + 2, guard=1)
+def add_chain(L, n, l_um, x0=0.0, y0=0.0, name="R", w=0.35):
+    """w = 0.35 or 0.69 (res_xhigh_po_0p35 / _0p69). Both generators draw l + 0.16 -> extract as l."""
+    dev = {0.35: "sky130_fd_pr__res_xhigh_po_0p35", 0.69: "sky130_fd_pr__res_xhigh_po_0p69"}[w]
+    g = probe_gencell(dev, w=w, l=l_um + 0.16, nx=n + 2, guard=1)
     bx0, by0, bx1, by1 = g["bbox"]
     ox, oy = x0 - bx0, y0 - by0                    # shift so the bbox starts at (x0, y0)
     ring = (bx0 + 0.265 + ox, by0 + 0.265 + oy, bx1 - 0.265 + ox, by1 - 0.265 + oy)   # guard-ring centre lines
@@ -21,7 +23,7 @@ def add_chain(L, n, l_um, x0=0.0, y0=0.0, name="R"):
     yt = g["labels"]["R1_0"][1] + oy - 0.31        # inside the top head's met1
     yb = g["labels"]["R2_0"][1] + oy + 0.26        # inside the bottom head's met1
     # the generator draws relative to the box corner exactly as in the probe (corner at 0, 0)
-    L.gencell("sky130_fd_pr__res_xhigh_po_0p35", name, ox, oy, w=0.35, l=l_um + 0.16, nx=n + 2, guard=1)
+    L.gencell(dev, name, ox, oy, w=w, l=l_um + 0.16, nx=n + 2, guard=1)
 
     def pad(i, top, hi="metal2"):
         x, y = xs[i], (yt if top else yb)

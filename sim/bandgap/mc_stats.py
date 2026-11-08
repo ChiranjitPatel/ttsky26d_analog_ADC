@@ -7,7 +7,8 @@ for name in sys.argv[1:]:
     bad = [x["tag"] for x in r if not 0.5 < float(x["v(vbg)"] or 0) < 2]
     r = [x for x in r if 0.5 < float(x["v(vbg)"] or 0) < 2]
     v = np.array([float(x["v(vbg)"]) for x in r]); d = np.array([float(x["dv_in"]) for x in r])
-    tc = np.array([(float(x["vbg125"]) - float(x["vbgm40"])) for x in r])
+    tc = np.array([(float(x["vbg125"]) - float(x["vbgm40"])) for x in r
+                   if x.get("vbg125") and x.get("vbgm40") and 0.5 < float(x["vbg125"]) < 2 and 0.5 < float(x["vbgm40"]) < 2])
     print(f"{name:22s} n={len(v):3d} VBG mean {v.mean():.4f} V  sd {v.std(ddof=1)*1e3:5.1f} mV  "
           f"[{v.min():.3f}, {v.max():.3f}]  dv_in sd {d.std(ddof=1)*1e3:.2f} mV  "
           f"VBG(125)-VBG(-40) sd {tc.std(ddof=1)*1e3:.1f} mV  non-converged: {bad}")

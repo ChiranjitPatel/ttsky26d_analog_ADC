@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Chunk 1e — ptat_out (scripted): MPP = pfet_01v8 W 8 L 4 (gate vgp) into R3 = 22 x res_xhigh_po_0p35 L 2.
+"""Chunk 1e — ptat_out (scripted): MPP = pfet_01v8 W 16 L 8 (gate vgp) into R3 = 22 x res_xhigh_po_0p69 L 4
+(the same unit resistor and source as bandgap_core, sized for matching in Phase 2, 2026-11-08).
 
     VDPWR --MPP(gate vgp)-- vptat --[R3_1 .. R3_22]-- VGND
 Layout: the resistor chain (one array, 2 dummies, guard ring) at the bottom, MPP above it with its own
@@ -12,17 +13,17 @@ from magic_lib import Layout, probe_gencell
 from res_chain import add_chain
 
 L = Layout("ptat_out")
-ch = add_chain(L, 22, 2.0, 0.0, 0.0, name="R3")
+ch = add_chain(L, 22, 4.0, 0.0, 0.0, name="R3", w=0.69)
 assert not ch["end_top"]
 # chain end (strip 22, bottom head) -> VGND: extend the right dummy's bottom met1 stub over it
 xs, yb = ch["xs"], ch["yb"]
 L.paint("metal1", xs[22] - 0.125, yb - 0.15, xs[23] + 0.125, yb + 0.15)
 
-g = probe_gencell("sky130_fd_pr__pfet_01v8", w=8, l=4, nf=1, guard=1, full_metal=1)
+g = probe_gencell("sky130_fd_pr__pfet_01v8", w=16, l=8, nf=1, guard=1, full_metal=1)
 bx0, by0, bx1, by1 = g["bbox"]
 px0, py0 = 1.0, ch["bbox"][3] + 1.2
 ox, oy = px0 - bx0, py0 - by0
-L.gencell("sky130_fd_pr__pfet_01v8", "MPP", ox, oy, w=8, l=4, nf=1, guard=1, full_metal=1)
+L.gencell("sky130_fd_pr__pfet_01v8", "MPP", ox, oy, w=16, l=8, nf=1, guard=1, full_metal=1)
 ring = (bx0 + 0.265 + ox, by0 + 0.265 + oy, bx1 - 0.265 + ox, by1 - 0.265 + oy)
 lab = {k: (x + ox, y + oy) for k, (x, y) in g["labels"].items()}
 # S -> n-tap ring (VDPWR): li strap; ring -> VDPWR pin: li pad on the right side, mcon, met1

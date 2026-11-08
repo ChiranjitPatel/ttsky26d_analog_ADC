@@ -10,8 +10,8 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
 from xsch import Schematic
 RX, NF = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/nfet_01v8.sym"
-NR, LR = 9, 20.0          # 9 x ~115 kOhm
-CW, CL, CM = 10, 10, 5    # MOS cap: 5 x (10 x 10 um)
+NR, LR = 14, 20.0         # 14 x ~115 kOhm = 1.6 MOhm (was 9 / 1.04 MOhm; B7 at 1 MHz after the 2026-11-08 bandgap resize)
+CW, CL, CM = 10, 10, 7    # MOS cap: 7 x (10 x 10 um) ~ 5.5 pF (was 5)
 s = Schematic()
 for p, d in (("VGND", "inout"), ("vbg", "in"), ("vbg_f", "out")):
     s.port(p, d)

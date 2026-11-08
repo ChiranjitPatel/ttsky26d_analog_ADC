@@ -11,9 +11,10 @@ Why this topology (see sim/ota/README.md):
 
 Devices (bias from bias_gen: pbias -> 1 uA per pfet_01v8_lvt W=2 L=2 unit):
   M5        pfet_01v8_lvt 2/2 x2      tail, 2 uA
-  M1, M2    pfet_01v8_lvt 8/2         input pair (M1 gate = inn, M2 gate = inp)
-  M3, M4    nfet_01v8     1/4         mirror load (M3 diode on the M1 side)
-  M6        nfet_01v8     1/4 x4      2nd stage; 4x M3 density at 4 uA -> zero systematic offset
+  M1, M2    pfet_01v8_lvt 32/8        input pair (M1 gate = inn, M2 gate = inp); was 8/2
+  (Phase 2 Monte Carlo 2026-11-08: the OTA offset x (1 + R2/R1) dominated sigma(VBG), 49 mV -> 6 mV)
+  M3, M4    nfet_01v8     4/16        mirror load (M3 diode on the M1 side); was 1/4
+  M6        nfet_01v8     4/16 x4     2nd stage; 4x M3 density at 4 uA -> zero systematic offset
   M7        pfet_01v8_lvt 2/2 x4      2nd-stage load, 4 uA
   CC, RZ    MIM + xhigh_po            Miller compensation with zero-nulling resistor
   Power-down (pd = 1): MPD pulls out to VDPWR (turns the bandgap PMOS sources off), MND pulls
@@ -26,8 +27,9 @@ from xsch import Schematic
 NF, PF, PFL = "sky130_fd_pr/nfet_01v8.sym", "sky130_fd_pr/pfet_01v8.sym", "sky130_fd_pr/pfet_01v8_lvt.sym"
 RX, CM = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/cap_mim_m3_1.sym"
 
-CC_W = CC_L = 18.7   # um -> ~0.7 pF (2.0 fF/um^2 + 0.164 fF/um, stage 0); raised from 0.5 pF for the bandgap loop (stage 3)
-RZ_L = 7.0           # um -> ~40 kOhm (2004 ohm/sq, 312 ohm per end)
+CC_W = CC_L = 32.0   # um -> ~2.1 pF (was 18.7 = 0.7 pF). Raised 2026-11-08 after the matching resize (input pair
+                     # 32/8, loads 4/16, sources 16/8): PM 9.5 -> 76.4 deg. MIM can sit over the OTA devices.
+RZ_L = 21.0          # um -> ~120 kOhm (was 7 = 40 kOhm), with the larger CC
 
 s = Schematic()
 for p, d in (("VDPWR", "inout"), ("VGND", "inout"), ("pbias", "in"), ("pd", "in"),
@@ -41,21 +43,21 @@ def p(name, d, g, src, sym=PFL, model="pfet_01v8_lvt", body="VDPWR", **k):
 
 # first stage
 p("M5", "tail", "pbias", "VDPWR", W=2, L=2, mult=2)
-p("M1", "d1", "inn", "tail", W=8, L=2, mult=1)
-p("M2", "out1", "inp", "tail", W=8, L=2, mult=1)
-n("M3", "d1", "d1", "VGND", W=1, L=4, mult=1)
-n("M4", "out1", "d1", "VGND", W=1, L=4, mult=1)
+p("M1", "d1", "inn", "tail", W=32, L=8, mult=1)
+p("M2", "out1", "inp", "tail", W=32, L=8, mult=1)
+n("M3", "d1", "d1", "VGND", W=4, L=16, mult=1)
+n("M4", "out1", "d1", "VGND", W=4, L=16, mult=1)
 # second stage
-n("M6", "out", "out1", "VGND", W=1, L=4, mult=4)
+n("M6", "out", "out1", "VGND", W=4, L=16, mult=4)
 p("M7", "out", "pbias", "VDPWR", W=2, L=2, mult=4)
 # compensation: out1 -- RZ -- cz -- CC -- out (MIM bottom plate c1 on the low-impedance output)
 s.dev(RX, "RZ", {"P": "out1", "M": "cz", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
 s.dev(CM, "CC", {"c0": "cz", "c1": "out"}, W=CC_W, L=CC_L, MF=1, model="cap_mim_m3_1", spiceprefix="X")
 # power-down
-p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.15, mult=1)
-n("MND", "out1", "pd", "VGND", W=0.42, L=0.15, mult=1)
-p("MIP", "pdb", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.84, L=0.15, mult=1)
-n("MIN", "pdb", "pd", "VGND", W=0.42, L=0.15, mult=1)
+p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.5, mult=1)   # not min. length: hot leakage (bias_gen Phase 2)
+n("MND", "out1", "pd", "VGND", W=0.42, L=0.5, mult=1)
+p("MIP", "pdb", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.84, L=1, mult=1)
+n("MIN", "pdb", "pd", "VGND", W=0.42, L=1, mult=1)
 
 s.write(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ota.sch"), sym=True)
 print("wrote xschem/ota.sch, ota.sym")

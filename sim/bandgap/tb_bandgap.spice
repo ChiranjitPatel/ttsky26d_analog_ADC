@@ -4,6 +4,9 @@
 .include ../out/netlist/bias_gen.spice
 .include ../out/netlist/bandgap_core.spice
 .temp 27
+.options method=gear
+* nodesets near the running state (robust .op across corners; see sim/bias)
+.nodeset v(vbg)=1.21 v(vgp)=0.75 v(pbias)=1.17 v(nbias)=0.64
 
 VDD  vdd  0 1.8
 VMB  vdd  vddb 0
@@ -19,6 +22,8 @@ op
 let ibg = i(VMB)
 let itot = -i(VDD)
 let dv_in = v(xbg.vb) - v(xbg.va)
+let vbg_op = v(vbg)
+print vbg_op
 print v(vbg) v(vgp) v(xbg.va) v(xbg.vb) v(xbg.vq2) v(xbg.vq3) v(xbg.su) dv_in ibg itot
 print @m.xbg.xmpa.msky130_fd_pr__pfet_01v8[id] @m.xbg.xmpb.msky130_fd_pr__pfet_01v8[id] @m.xbg.xmpc.msky130_fd_pr__pfet_01v8[id]
 
@@ -37,11 +42,15 @@ echo "=== Startup: 1 us ramp, all nodes from 0 V"
 alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
 tran 10n 40u uic
 wrdata ../out/bandgap/startup.dat v(vbg) v(vgp) v(xbg.su) v(pbias)
+meas tran vbg_fast find v(vbg) at=39u
+meas tran vbg_fmin min v(vbg) from=20u to=39u
+meas tran vbg_fmax max v(vbg) from=20u to=39u
 
 echo "=== Startup: 100 us ramp"
 alter @VDD[pulse] = [ 0 1.8 0 100u 1u 1 2 ]
 tran 50n 150u uic
 wrdata ../out/bandgap/startup_slow.dat v(vbg) v(vgp) v(xbg.su) v(pbias)
+meas tran vbg_slow find v(vbg) at=149u
 quit
 .endc
 .end

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Chunk 1c — bandgap R1 / R2 unit-resistor array (scripted).
 
-23 strips of res_xhigh_po_0p35, L = 2 um each (generated as one PDK array with a common guard ring):
+23 strips of res_xhigh_po_0p69, L = 4 um each (generated as one PDK array with a common guard ring;
+0.69/4 since the Phase 2 Monte Carlo, 2026-11-08: 4x the area of 0.35/2, same resistance):
     index:  0   1 .. 21   22
             D   21 active   D          D = dummy (both ends and the body on VGND)
 Active positions p = 0 .. 20 (array index p + 1): R1 (2 units) at p = 5 and 15, R2 (19 units) on the
@@ -9,26 +10,32 @@ rest. The R1 and R2 centroids both sit at p = 10, so a linear gradient doesn't c
     R2: vbg -> 19 units in series (serpentine) -> vq3; skips over the R1 strips on met2 jumpers
     R1: vb -> p5 -> (met3 link, top) -> p15 -> vq2
 Pins: vbg, vb, vq2 at the bottom (met2 / met3), vq3 at the top (met2), VGND (met1, left).
-The generator's 'l' includes the contact overlap: l = 2.16 extracts as L = 2.00 (= the schematic).
+The generator's 'l' includes the contact overlap: l = L + 0.16 extracts as L (= the schematic).
+All positions come from probing the PDK generator (magic_lib.probe_gencell).
 Writes layout/cells/bg_res.gds and the LVS reference layout/cells/bg_res_ref.spice.
 """
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from magic_lib import Layout, CELLS
+from magic_lib import Layout, CELLS, probe_gencell
 
 N_ACT = 21
 R1_POS = (5, 15)
-PITCH = 0.83                    # strip pitch (um) of the PDK array
-X0 = 0.74                       # x of array index 0 (um) with the array placed at the origin
-YT, YB = 6.40, 1.00             # via / bridge height on the top and bottom heads
-RING_L, RING_R = 0.0, 19.74     # guard-ring li centre lines (x)
-RING_T, RING_B = 7.45, 0.0      # (y)
+W_U, L_U = 0.69, 4.0                                  # unit resistor (schematic: res_xhigh_po_0p69, L = 4)
+DEV = "sky130_fd_pr__res_xhigh_po_0p69"
+_g = probe_gencell(DEV, w=W_U, l=L_U + 0.16, nx=N_ACT + 2, guard=1)
+_bb = _g["bbox"]
+X0 = _g["labels"]["R1_0"][0]                          # x of array index 0
+PITCH = _g["labels"]["R1_1"][0] - X0
+YT = _g["labels"]["R1_0"][1] - 0.31                   # inside the top head's met1
+YB = _g["labels"]["R2_0"][1] + 0.26                   # inside the bottom head's met1
+RING_L, RING_B = _bb[0] + 0.265, _bb[1] + 0.265       # guard-ring centre lines
+RING_R, RING_T = _bb[2] - 0.265, _bb[3] - 0.265
 
 def x(p):                       # active position -> strip centre x
     return X0 + PITCH * (p + 1)
 
 L = Layout("bg_res")
-L.gencell("sky130_fd_pr__res_xhigh_po_0p35", "R", 0, 0, w=0.35, l=2.16, nx=N_ACT + 2, guard=1)
+L.gencell(DEV, "R", 0, 0, w=W_U, l=L_U + 0.16, nx=N_ACT + 2, guard=1)
 
 def head_via(p, top, hi):
     """met1 pad + via up to `hi` on a strip head."""
@@ -100,12 +107,12 @@ drc, errs, gds = L.run()
 print(f"bg_res: Magic DRC {drc}; {gds}", *errs, sep="\n  ")
 
 lines = ["* LVS reference for layout/cells/bg_res.gds: bandgap R1 (2 units) + R2 (19 units) + 2 dummies",
-         "* res_xhigh_po_0p35 pins: P M B", ".subckt bg_res vbg vq3 vb vq2 VGND"]
+         "* res_xhigh_po_0p69 pins: P M B", ".subckt bg_res vbg vq3 vb vq2 VGND"]
 nets = ["vbg"] + [f"r2_{i}" for i in range(1, 19)] + ["vq3"]
 for i in range(19):
-    lines.append(f"XR2_{i+1} {nets[i]} {nets[i+1]} VGND sky130_fd_pr__res_xhigh_po_0p35 L=2")
-lines += ["XR1_1 vb r1_1 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2",
-          "XR1_2 r1_1 vq2 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2",
-          "XRD1 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p35 L=2",
-          "XRD2 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p35 L=2", ".ends"]
+    lines.append(f"XR2_{i+1} {nets[i]} {nets[i+1]} VGND sky130_fd_pr__res_xhigh_po_0p69 L=4")
+lines += ["XR1_1 vb r1_1 VGND sky130_fd_pr__res_xhigh_po_0p69 L=4",
+          "XR1_2 r1_1 vq2 VGND sky130_fd_pr__res_xhigh_po_0p69 L=4",
+          "XRD1 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p69 L=4",
+          "XRD2 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p69 L=4", ".ends"]
 open(os.path.join(CELLS, "bg_res_ref.spice"), "w").write("\n".join(lines) + "\n")

@@ -5,13 +5,13 @@ Generates xschem/bandgap_core.sch + bandgap_core.sym. Re-run after editing sizes
     python3 xschem/gen_bandgap_core.py
 
 Topology (see sim/bandgap/README.md and material/schematics/stage3_bandgap_core.png):
-  MPA, MPB, MPC  pfet_01v8 8/4, gates on vgp (OTA output): equal currents I into three branches
+  MPA, MPB, MPC  pfet_01v8 16/8 (was 8/4; Monte Carlo: 8.2 -> 4.1 mV sigma(VBG)), gates on vgp (OTA output): equal currents I into three branches
   A: va  -> Q1 (1x PNP)                       Vbe1
   B: vb  -> R1 -> vq2 -> Q2 (8x PNP)          OTA forces vb = va, so I = dVbe / R1
   C: vbg -> R2 -> vq3 -> Q3 (1x PNP)          VBG = Vbe3 + I*R2 = Vbe + (R2/R1) dVbe
   OTA (stage 2): inp = vb, inn = va, out = vgp. (Branch B has the higher impedance, so this
                  polarity gives net negative feedback.)
-  R1, R2: series chains of identical res_xhigh_po_0p35 units (good ratio matching, TC cancels).
+  R1, R2: series chains of identical res_xhigh_po_0p69 units (good ratio matching, TC cancels).
   Startup: MSU2 (1 uA from pbias) pulls su high while vbg is low; MSU1 then pulls vgp low so
            current flows. Once vbg is up, MSU3 holds su low and MSU1 is off.
   PSRR: MCPS (PMOS gate cap vgp -> VDPWR) keeps the source Vsg constant at high frequency.
@@ -23,12 +23,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from xsch import Schematic
 
 NF, PF, PFL = "sky130_fd_pr/nfet_01v8.sym", "sky130_fd_pr/pfet_01v8.sym", "sky130_fd_pr/pfet_01v8_lvt.sym"
-RX, PNP = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/pnp_05v5.sym"
+RX, PNP = "sky130_fd_pr/res_xhigh_po_0p69.sym", "sky130_fd_pr/pnp_05v5.sym"
 
-LU = 2.0     # um, unit resistor length (W = 0.35): ~12.1 kOhm
+LU = 4.0     # um, unit resistor length (W = 0.69): ~12 kOhm. Was 0.35/2: 4x the area halves the
+             # R2/R1 mismatch (Phase 2 Monte Carlo, 2026-11-08: 14.9 -> 6.2 mV sigma(VBG))
+WU = 0.69
 N1 = 2       # R1 = N1 units  -> I = dVbe / R1 ~ 2.25 uA
 N2 = 19      # R2 = N2 units  -> R2/R1 = 9.5, tuned for zero TC at tt (stage 0's ideal 10.54 ignored the resistor TC)
-WP, LP = 8, 4   # PMOS current sources
+WP, LP = 16, 8   # PMOS current sources (was 8/4)
 CPS_W = 0       # um, optional PMOS cap vgp -> VDPWR (W = L). Off: 1-2 pF barely moves PSRR at 1 MHz (sim/bandgap/README.md)
 
 s = Schematic()
@@ -44,7 +46,7 @@ def chain(prefix, top, bot, nunits):
     nodes = [top] + [f"{prefix.lower()}_{i}" for i in range(1, nunits)] + [bot]
     for i in range(nunits):
         s.dev(RX, f"{prefix}{i+1}", {"P": nodes[i], "M": nodes[i + 1], "B": "VGND"},
-              W=0.35, L=LU, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
+              W=WU, L=LU, model="res_xhigh_po_0p69", spiceprefix="X", mult=1)
 def q(name, e, m): s.dev(PNP, name, {"emitter": e, "base": "VGND", "collector": "VGND"},
                          model="pnp_05v5_W3p40L3p40", spiceprefix="X", m=m)
 
@@ -67,8 +69,8 @@ s.dev("ota.sym", "xota", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "p
 # startup
 p("MSU2", "su", "pbias", "VDPWR", sym=PFL, model="pfet_01v8_lvt", W=2, L=2, mult=1)
 n("MSU3", "su", "vbg", "VGND", W=1, L=1, mult=1)
-n("MSU1", "vgp", "su", "VGND", W=0.42, L=1, mult=1)
-n("MSD", "su", "pd", "VGND", W=0.42, L=0.15, mult=1)
+n("MSU1", "vgp", "su", "VGND", W=0.42, L=4, mult=1)   # L 1 -> 4 (2026-11-08): with the larger OTA/CC the strong kick caused a startup limit cycle
+n("MSD", "su", "pd", "VGND", W=0.42, L=0.5, mult=1)
 
 s.write(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bandgap_core.sch"), sym=True)
 print("wrote xschem/bandgap_core.sch, bandgap_core.sym")

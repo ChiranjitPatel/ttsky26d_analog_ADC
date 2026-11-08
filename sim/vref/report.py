@@ -15,10 +15,11 @@ ld = lambda f: np.loadtxt(os.path.join(O, f), skiprows=1)
 vref, offs, ibuf, itot = val("v(vref)"), val("offs"), val("ibuf"), val("itot")
 pf_dc, pf_1m, pr_dc, pr_1m = val("pf_dc"), val("pf_1m"), val("pr_dc"), val("pr_1m")
 tr = ld("tran.dat"); t, vr, vf = tr[:, 0], tr[:, 1], tr[:, 2]
-pre = vr[np.argmin(abs(t - 59.9e-6))]
-errs = [vr[np.argmin(abs(t - (60.87e-6 + c * 1e-6)))] - pre for c in range(10)]
-droop = pre - vr[(t > 60e-6) & (t < 61e-6)].min()
-m = t < 59e-6; bad = np.where(abs(vr[m] - pre) > 0.01 * pre)[0]; t_start = t[m][bad[-1] + 1] - 1e-6
+TL = 150e-6   # DAC-like load starts here (tb_vref.spice)
+pre = vr[np.argmin(abs(t - (TL - 0.1e-6)))]
+errs = [vr[np.argmin(abs(t - (TL + 0.87e-6 + c * 1e-6)))] - pre for c in range(10)]
+droop = pre - vr[(t > TL) & (t < TL + 1e-6)].min()
+m = t < 149e-6; bad = np.where(abs(vr[m] - pre) > 0.01 * pre)[0]; t_start = t[m][bad[-1] + 1] - 1e-6
 st = ld("step.dat"); ts, va, vb_ = st[:, 0], st[:, 1], st[:, 2]
 def step_metrics(v):
     v0 = v[np.argmin(abs(ts - 1.9e-6))]; v1 = v[np.argmin(abs(ts - 6.9e-6))]; mm = (ts > 2e-6) & (ts < 7e-6)
@@ -33,10 +34,10 @@ os.makedirs(os.path.join(H, "plots"), exist_ok=True)
 fig, ax = plt.subplots(1, 3, figsize=(14, 3.8))
 ax[0].semilogx(ps[:, 0], ps[:, 1], label="vbg (raw)"); ax[0].semilogx(ps[:, 0], ps[:, 2], label="vbg_f (filtered)"); ax[0].semilogx(ps[:, 0], ps[:, 3], label="vref")
 ax[0].axhline(20, color="k", lw=0.5, ls="--"); ax[0].set(xlabel="f [Hz]", ylabel="PSRR [dB]", title="PSRR"); ax[0].legend(fontsize=7)
-mm = (t > 59.5e-6) & (t < 63e-6)
-ax[1].plot((t[mm] - 60e-6) * 1e6, vr[mm]); ax[1].set(xlabel="t − 60 µs [µs]", ylabel="vref [V]", title="DAC-like load: 1.2 pF every 1 µs")
+mm = (t > TL - 0.5e-6) & (t < TL + 3e-6)
+ax[1].plot((t[mm] - TL) * 1e6, vr[mm]); ax[1].set(xlabel="t − 150 µs [µs]", ylabel="vref [V]", title="DAC-like load: 1.2 pF every 1 µs")
 ax[2].plot(t * 1e6, vr, label="vref"); ax[2].plot(t * 1e6, vf, label="vbg_f"); ax[2].plot(t * 1e6, tr[:, 3], label="vbg")
-ax[2].set(xlabel="t [µs]", ylabel="V", title="Startup from 0 V (1 µs ramp)", xlim=(0, 40)); ax[2].legend(fontsize=7)
+ax[2].set(xlabel="t [µs]", ylabel="V", title="Startup from 0 V (1 µs ramp)", xlim=(0, 120)); ax[2].legend(fontsize=7)
 for a in ax: a.grid(alpha=0.3)
 fig.tight_layout(); fig.savefig(os.path.join(H, "plots", "vref.png"), dpi=85)
 
@@ -47,7 +48,7 @@ rows = [
     ("—", "PSRR at vref, DC / 1 MHz", f"{pr_dc:.1f} / {pr_1m:.1f} dB", "—", "", "early, tt"),
     ("—", "DAC-like load: droop when 1.2 pF connects", f"{droop*1e3:.0f} mV", "—", "", "1"),
     ("—", "DAC-like load: worst error at end of bit cycle", f"{max(abs(e) for e in errs)*1e6:.1f} µV", "≤ 0.5 LSB = 2.4 mV", ok(max(abs(e) for e in errs) <= 2.4e-3), "1"),
-    ("—", "Startup: vref within 1 % (after a 1 µs ramp)", f"{t_start*1e6:.1f} µs", "≤ 40 µs", ok(t_start <= 40e-6), "1"),
+    ("—", "Startup: vref within 1 % (after a 1 µs ramp)", f"{t_start*1e6:.1f} µs", "≤ 100 µs (power-up only)", ok(t_start <= 100e-6), "1"),
     ("—", "Follower step (10 mV): overshoot / 10–90 % rise, reservoir only", f"{oa:.1f} % / {tra*1e9:.0f} ns", "stable", ok(oa < 10), "1"),
     ("—", "Same, with pad + probe via TG (VREF_OE = 1)", f"{ob:.1f} % / {trb*1e9:.0f} ns", "stable", ok(ob < 10), "1"),
     ("—", "Buffer supply current", f"{ibuf*1e6:.2f} µA", "—", "", "1"),

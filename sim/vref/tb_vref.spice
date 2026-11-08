@@ -30,8 +30,8 @@ RPRB pin 0 1meg
 CDAC cl 0 1.2p
 S1 vref cl c1 0 swm
 S2 cl 0 c2 0 swm
-VC1 c1 0 dc 0 pulse(0 1.8 60u 1n 1n 0.88u 1u)
-VC2 c2 0 dc 0 pulse(0 1.8 60.9u 1n 1n 0.09u 1u)
+VC1 c1 0 dc 0 pulse(0 1.8 150u 1n 1n 0.88u 1u)
+VC2 c2 0 dc 0 pulse(0 1.8 150.9u 1n 1n 0.09u 1u)
 .model swm sw vt=0.9 vh=0.1 ron=200 roff=1e12
 .control
 set wr_singlescale
@@ -52,13 +52,13 @@ meas ac pf_dc find psrr_f at=1
 meas ac pf_1m find psrr_f at=1e6
 meas ac pr_dc find psrr_ref at=1
 meas ac pr_1m find psrr_ref at=1e6
-echo "=== Startup + DAC-like load (1 us ramp from 0 V, load starts at 60 us)"
+echo "=== Startup + DAC-like load (1 us ramp from 0 V, load starts at 150 us)"
 alter @VDD[pulse] = [ 0 1.8 0 1u 1u 1 2 ]
-tran 2n 70u uic
+tran 2n 160u uic
 wrdata ../out/vref/tran.dat v(vref) v(vbg_f) v(vbg) v(cl)
-meas tran vref_pre find v(vref) at=59.9u
-meas tran vref_end find v(vref) at=69.87u
-meas tran vref_min min v(vref) from=69u to=69.88u
+meas tran vref_pre find v(vref) at=149.9u
+meas tran vref_end find v(vref) at=159.87u
+meas tran vref_min min v(vref) from=159u to=159.88u
 quit
 .endc
 .end
