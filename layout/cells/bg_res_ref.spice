@@ -1,0 +1,27 @@
+* LVS reference for layout/cells/bg_res.gds: bandgap R1 (2 units) + R2 (19 units) + 2 dummies
+* res_xhigh_po_0p35 pins: P M B
+.subckt bg_res vbg vq3 vb vq2 VGND
+XR2_1 vbg r2_1 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_2 r2_1 r2_2 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_3 r2_2 r2_3 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_4 r2_3 r2_4 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_5 r2_4 r2_5 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_6 r2_5 r2_6 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_7 r2_6 r2_7 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_8 r2_7 r2_8 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_9 r2_8 r2_9 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_10 r2_9 r2_10 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_11 r2_10 r2_11 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_12 r2_11 r2_12 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_13 r2_12 r2_13 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_14 r2_13 r2_14 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_15 r2_14 r2_15 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_16 r2_15 r2_16 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_17 r2_16 r2_17 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_18 r2_17 r2_18 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR2_19 r2_18 vq3 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR1_1 vb r1_1 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XR1_2 r1_1 vq2 VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XRD1 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+XRD2 VGND VGND VGND sky130_fd_pr__res_xhigh_po_0p35 L=2
+.ends

@@ -56,12 +56,13 @@ def make(tag, corner, temp, vdd, seed):
     s = re.sub(r"(@VDD\[pulse\]\s*=\s*\[\s*0\s+)1\.8\b", lambda m: m.group(1) + vdd, s)
     s = s.replace("../out/netlist/", os.path.abspath(os.path.join(here, "..", "out", "netlist")) + "/")
     s = re.sub(r"\.\./out/[\w/]+/", d + "/", s)
-    if seed is not None:
-        s = s.replace(".control", f".control\nset rndseed={seed}", 1)
     f = os.path.join(d, "tb.spice"); open(f, "w").write(s)
-    # each run needs the .spiceinit next to it
-    if os.path.exists(os.path.join(here, ".spiceinit")):
-        open(os.path.join(d, ".spiceinit"), "w").write(open(os.path.join(here, ".spiceinit")).read())
+    # each run needs the .spiceinit next to it. The Monte Carlo seed goes there: the mismatch
+    # parameters (agauss) are drawn while the netlist is parsed, i.e. before .control runs.
+    init = open(os.path.join(here, ".spiceinit")).read() if os.path.exists(os.path.join(here, ".spiceinit")) else ""
+    if seed is not None:
+        init += f"\nset rndseed={seed}\n"
+    open(os.path.join(d, ".spiceinit"), "w").write(init)
     return d
 
 def run(job):

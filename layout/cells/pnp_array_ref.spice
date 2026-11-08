@@ -1,0 +1,8 @@
+* LVS reference for layout/cells/pnp_array.gds (from bandgap_core: Q1, Q2 m=8, Q3, + 2 dummies)
+* PNP pins: collector base emitter
+.subckt pnp_array vq2 va vq3 VGND
+XQ1 VGND VGND va sky130_fd_pr__pnp_05v5_W3p40L3p40 m=1
+XQ2 VGND VGND vq2 sky130_fd_pr__pnp_05v5_W3p40L3p40 m=8
+XQ3 VGND VGND vq3 sky130_fd_pr__pnp_05v5_W3p40L3p40 m=1
+XQD VGND VGND VGND sky130_fd_pr__pnp_05v5_W3p40L3p40 m=2
+.ends
