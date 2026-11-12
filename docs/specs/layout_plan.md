@@ -32,14 +32,14 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 |---|---|---|---|
 | **M0** | Frame: DEF outline/pins, power stripes, output ties, CI precheck green | Claude | **Done Nov 8**: TT precheck green in CI (gds run 46, commit 5849aa6) |
 | 0b | Floorplan: final position and outline of every block | Claude (designer reviews) | Nov 10 — draft Nov 8 (`docs/specs/floorplan.md`) |
-| 1a | bias_gen | Claude (scripted; designer reviews) | Nov 11 — Phase 2 done and brief ready Nov 8 (`docs/specs/layout_briefs/bias_gen.md`) |
-| 1b | ota | Claude (scripted; designer reviews) | Nov 12 — resized + brief ready Nov 8 (`layout_briefs/ota.md`) |
+| 1a | bias_gen | Claude (scripted; designer reviews) | **Done Nov 12**: 53.6 × 23.9 µm, DRC 0 (Magic + KLayout), LVS match (`gen_bias_gen.py`) |
+| 1b | ota | Claude (scripted; designer reviews) | **Done Nov 12**: 68.7 × 47.8 µm, DRC 0, LVS match (`gen_ota.py`; also inside bandgap_core) |
 | 1c | PNP 3×3 common-centroid array + R1/R2 unit-resistor chains (scripted) | Claude | Nov 11 — cells done Nov 8 (`pnp_array`, `bg_res` regenerated with 0.69/4 units; DRC/LVS clean, `layout_briefs/scripted_cells.md`); bandgap Phase 2 done (corners 63/63; MC σ 17.6 mV, B6 decision open) |
-| 1d | bandgap_core assembly (1b + 1c + current sources + startup) | Claude (scripted; designer reviews) | Nov 13–14 |
+| 1d | bandgap_core assembly (1b + 1c + current sources + startup) | Claude (scripted; designer reviews) | **Done Nov 12**: 71.7 × 104 µm, DRC 0, LVS match (`gen_bandgap_core.py`) |
 | 1e | ptat_out (one PMOS + resistor chain) | Claude | Nov 14 — done Nov 8: Phase 2 (`sim/ptat/sensor.md`, B13 decision open) + layout (16/8 + 0.69/4, DRC/LVS clean) |
 | 1f | vref_filt (resistor chain + MOS cap, scripted) | Claude | Nov 14 — done Nov 8: 1.6 MΩ + 5.5 pF for B7, layout DRC/LVS clean; VREF-chain corners in `sim/vref/corners.md` |
-| 1g | vref_buf + reservoir cap | Claude (scripted; designer reviews) | Nov 15 |
-| 1h | vref_sel logic + `ua[1]` transmission gate | Claude (scripted; designer reviews) | Nov 16 |
+| 1g | vref_buf + reservoir cap | Claude (scripted; designer reviews) | **Done Nov 12**: 43.1 × 57.3 µm, DRC 0, LVS match (`gen_vref_buf.py`) |
+| 1h | vref_sel logic + `ua[1]` transmission gate | Claude (scripted; designer reviews) | **Done Nov 12**: 30.1 × 30.1 µm, DRC 0, LVS match (`gen_vref_sel.py`) |
 | **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Nov 17** |
 | 2a | DAC unit cell + 16 × 16 common-centroid MIM array (scripted) | Claude | Nov 18 |
 | 2b | dac_sw (one cell, used 9×) | designer | Nov 18 |
@@ -58,3 +58,11 @@ simulation of each cell as it is finished.
 - Layout: KLayout (designer's 0.30.8; precheck uses 0.30.4). Extraction/LVS: Magic + netgen.
 - Digital P&R: LibreLane in Docker (`ghcr.io/librelane/librelane:3.0.17`). Nix's LibreLane binary
   cache (librelane.cachix.org) is blocked by this environment's network policy; Docker works.
+
+## Status 2026-11-12: all M1 cells scripted
+
+Every M1 cell is DRC clean (Magic and the TT KLayout deck) and LVS-matched to its schematic. Pictures are in
+`material/layout/`. The scripted cells are bigger than the 2026-11-08 floorplan estimates, so the left column
+must be ~72 µm wide (bandgap_core is 71.7 µm). That moves the middle VDPWR/VGND stripe pair from x = 64–69 to
+~82–87 and narrows the right (M2) half to ~64 µm. M1 integration comes next: floorplan v3, M0 frame with the
+moved stripes, block placement, inter-block routing in reserved corridors, full-chip LVS and precheck.
