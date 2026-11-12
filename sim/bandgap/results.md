@@ -7,10 +7,10 @@ Phase-2 rows are early checks at tt only; corners, temperature and supply sweeps
 |---|---|---|---|---|---|
 | B1 | VBG | 1.2105 V | 1.18 … 1.25 V (typ 1.215) | ✅ | 1 |
 | B2 | Supply current, bandgap_core + bias_gen | 16.0 µA (core 13.6) | ≤ 50 µA | ✅ | 1 |
-| B3 | Startup to 1 % after a 1 µs ramp | 2.18 µs after ramp end | ≤ 20 µs | ✅ | 1 |
+| B3 | Startup to 1 % after a 1 µs ramp | 2.19 µs after ramp end | ≤ 20 µs | ✅ | 1 |
 | — | Startup, 100 µs ramp (rule 7) | settled 0.3 µs after ramp end | starts from 0 V | ✅ | 1 |
-| — | Loop gain at DC / crossover | 85.1 dB / 0.79 MHz | — |  | 1 |
-| — | Loop phase margin (Middlebrook) | 76.5° | ≥ 60° (stage target) | ✅ | 1 |
+| — | Loop gain at DC / crossover | 85.1 dB / 0.78 MHz | — |  | 1 |
+| — | Loop phase margin (Middlebrook) | 77.1° | ≥ 60° (stage target) | ✅ | 1 |
 | — | OTA input difference vb − va | -20 µV | — |  | 1 |
 | — | Startup node su when running | 7.3 mV | MSU1 off | ✅ | 1 |
 | B4 | Line regulation 1.62–1.98 V | 2.2 mV/V | ≤ 10 mV/V | ✅ | 2 |

@@ -27,9 +27,11 @@ from xsch import Schematic
 NF, PF, PFL = "sky130_fd_pr/nfet_01v8.sym", "sky130_fd_pr/pfet_01v8.sym", "sky130_fd_pr/pfet_01v8_lvt.sym"
 RX, CM = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/cap_mim_m3_1.sym"
 
-CC_W = CC_L = 32.0   # um -> ~2.1 pF (was 18.7 = 0.7 pF). Raised 2026-11-08 after the matching resize (input pair
+CC_W = CC_L = 16.0   # um, CC_MF = 4 in parallel -> ~2.1 pF (one 32 x 32 until 2026-11-12: four 16 x 16 fit over
+CC_MF = 4            # the input-pair rows of the layout). Was 18.7 = 0.7 pF before the matching resize. Raised 2026-11-08 after the matching resize (input pair
                      # 32/8, loads 4/16, sources 16/8): PM 9.5 -> 76.4 deg. MIM can sit over the OTA devices.
-RZ_L = 21.0          # um -> ~120 kOhm (was 7 = 40 kOhm), with the larger CC
+RZ_L = 10.45         # um per strip, 2 strips in series -> ~120 kOhm (one 21 um strip until 2026-11-12; the layout
+                     # row height). Was 7 = 40 kOhm before the larger CC.
 
 s = Schematic()
 for p, d in (("VDPWR", "inout"), ("VGND", "inout"), ("pbias", "in"), ("pd", "in"),
@@ -51,14 +53,16 @@ n("M4", "out1", "d1", "VGND", W=4, L=16, mult=1)
 n("M6", "out", "out1", "VGND", W=4, L=16, mult=4)
 p("M7", "out", "pbias", "VDPWR", W=2, L=2, mult=4)
 # compensation: out1 -- RZ -- cz -- CC -- out (MIM bottom plate c1 on the low-impedance output)
-s.dev(RX, "RZ", {"P": "out1", "M": "cz", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
-s.dev(CM, "CC", {"c0": "cz", "c1": "out"}, W=CC_W, L=CC_L, MF=1, model="cap_mim_m3_1", spiceprefix="X")
+s.dev(RX, "RZA", {"P": "out1", "M": "rzm", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
+s.dev(RX, "RZB", {"P": "rzm", "M": "cz", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
+for nm in ("RZD1", "RZD2"):   # layout dummies of the RZ array
+    s.dev(RX, nm, {"P": "VGND", "M": "VGND", "B": "VGND"}, W=0.35, L=RZ_L, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
+s.dev(CM, "CC", {"c0": "cz", "c1": "out"}, W=CC_W, L=CC_L, MF=CC_MF, model="cap_mim_m3_1", spiceprefix="X")
 # layout dummies (all terminals on the rail): ends of the input-pair row (D A B B A D, 16/8 fingers)
 # and of the load row (D M6 M6 M3 M4 M6 M6 D); see docs/specs/layout_briefs/ota.md
-for nm in ("MDP1", "MDP2"):
-    p(nm, "VDPWR", "VDPWR", "VDPWR", W=16, L=8, mult=1)
-for nm in ("MDN1", "MDN2"):
-    n(nm, "VGND", "VGND", "VGND", W=4, L=16, mult=1)
+for nm in ("MDP1", "MDP2"):   # ends of the input-pair row (D A B B A D);
+    p(nm, "VDPWR", "VDPWR", "VDPWR", W=16, L=1, mult=1)   # same W, short L (only the edge environment matters)
+# (no load-row dummies: the four M6 units flank M3/M4 in the layout row M6 M6 M3 M4 M6 M6)
 # power-down
 p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=1, mult=1)   # not min. length: hot leakage (bias_gen Phase 2)
 n("MND", "out1", "pd", "VGND", W=0.42, L=1, mult=1)

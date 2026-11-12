@@ -50,10 +50,16 @@ class Layout:
             cut = self.STACK[i][1]
             self.paint(cut, x - size / 2, y - size / 2, x + size / 2, y + size / 2)
 
-    def gencell(self, gtype, name, x, y, **params):
-        """Place a PDK device generator cell with its lower-left corner at (x, y)."""
+    def gencell(self, gtype, name, x, y, rot=0, flip=False, **params):
+        """Place a PDK device generator cell; (x, y) is the box corner it is generated at (as in
+        probe_gencell, so probed geometry + (x, y) is the placed geometry). rot: Magic 'rotate' angle,
+        applied right after generation exactly as in the probe."""
         p = " ".join(f"{k} {v}" for k, v in params.items())
         self.t += [f"box {f(x)} {f(y)} {f(x)} {f(y)}", f"magic::gencell sky130::{gtype} {name} {p}"]
+        if rot:
+            self.t += [f"select cell {name}", f"rotate {rot}"]
+        if flip:
+            self.t += [f"select cell {name}", "sideways"]
 
     def place(self, name, x, y):
         """Move an already placed instance so its bounding box starts at (x, y)."""
@@ -85,7 +91,7 @@ class Layout:
         return (int(m.group(1)) if m else -1), errs, gds
 
 
-def probe_gencell(gtype, **params):
+def probe_gencell(gtype, rot=0, flip=False, **params):
     """Generate one PDK device cell at the origin and return its geometry in um (parent coordinates):
     {'bbox': (x0, y0, x1, y1), 'labels': {name: (x, y)}, 'li': [rects], 'met1': [rects]}.
     Used by generators to find terminal positions instead of hard-coding them."""
@@ -95,7 +101,9 @@ def probe_gencell(gtype, **params):
     tcl = os.path.join(d, "p.tcl")
     open(tcl, "w").write("\n".join([
         "drc off", "cellname rename (UNNAMED) probe", "edit", "box 0 0 0 0",
-        f"magic::gencell sky130::{gtype} D {p}", "select top cell", 'puts "BB [box values]"',
+        f"magic::gencell sky130::{gtype} D {p}"] + ([ "select cell D", f"rotate {rot}"] if rot else [])
+        + (["select cell D", "sideways"] if flip else []) + [
+        "select top cell", 'puts "BB [box values]"',
         "writeall force", "quit -noprompt"]) + "\n")
     r = subprocess.run(["magic", "-dnull", "-noconsole", "-rcfile", RC, tcl], capture_output=True, text=True, cwd=d)
     top = open(os.path.join(d, "probe.mag")).read()
