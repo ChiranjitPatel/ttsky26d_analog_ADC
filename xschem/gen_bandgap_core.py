@@ -50,7 +50,9 @@ def chain(prefix, top, bot, nunits):
 def q(name, e, m): s.dev(PNP, name, {"emitter": e, "base": "VGND", "collector": "VGND"},
                          model="pnp_05v5_W3p40L3p40", spiceprefix="X", m=m)
 
-# current sources
+# current sources (layout row D MPA MPB MPC D: dummies 16/1, same W as the sources, short L)
+for nm in ("MDS1", "MDS2"):
+    p(nm, "VDPWR", "VDPWR", "VDPWR", W=WP, L=1, mult=1)
 p("MPA", "va", "vgp", "VDPWR", W=WP, L=LP, mult=1)
 p("MPB", "vb", "vgp", "VDPWR", W=WP, L=LP, mult=1)
 p("MPC", "vbg", "vgp", "VDPWR", W=WP, L=LP, mult=1)

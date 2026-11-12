@@ -61,6 +61,12 @@ class Layout:
         if flip:
             self.t += [f"select cell {name}", "sideways"]
 
+    def place_gds(self, gds, cell, x, y):
+        """Import an existing cell from a GDS file and place it with its bounding box's lower-left corner
+        at (x, y) (Magic 'getcell'). The instance is named <cell>_0."""
+        self.t += [f"gds read {gds}", f"load {self.cell}", "edit",
+                   f"box {f(x)} {f(y)} {f(x)} {f(y)}", f"getcell {cell}"]
+
     def place(self, name, x, y):
         """Move an already placed instance so its bounding box starts at (x, y)."""
         self.t += [f"select cell {name}", f"move to {f(x)} {f(y)}"]

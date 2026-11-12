@@ -233,7 +233,7 @@ class Cell:
         for n in nets: visit(n)
         return order[::-1]
 
-    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=()):
+    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=(), bus_ylo=None):
         """Two passes: count channel tracks (and shift rows sideways if a channel can't be ordered),
         then place, connect and route."""
         nch = len(self.rows) - 1
@@ -268,7 +268,8 @@ class Cell:
         bx["VDPWR"] = xmax + 1.0 + BUS * (len(right) + 1)
         for k, n in enumerate([n for n in left if n != "VGND"]): bx[n] = xmin - 1.0 - BUS * (k + 1)
         for k, n in enumerate([n for n in right if n != "VDPWR"]): bx[n] = xmax + 1.0 + BUS * (k + 1)
-        ylo = self.rows[0]["y"] - 1.0; yhi = self.rows[-1]["top"] + 1.5
+        ylo = self.rows[0]["y"] - 1.0 if bus_ylo is None else bus_ylo
+        yhi = self.rows[-1]["top"] + 1.5
         # channel tracks
         ty = {}
         for c in range(nch):
