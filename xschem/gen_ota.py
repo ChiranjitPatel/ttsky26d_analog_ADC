@@ -60,8 +60,8 @@ for nm in ("MDP1", "MDP2"):
 for nm in ("MDN1", "MDN2"):
     n(nm, "VGND", "VGND", "VGND", W=4, L=16, mult=1)
 # power-down
-p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=0.5, mult=1)   # not min. length: hot leakage (bias_gen Phase 2)
-n("MND", "out1", "pd", "VGND", W=0.42, L=0.5, mult=1)
+p("MPD", "out", "pdb", "VDPWR", sym=PF, model="pfet_01v8", W=0.42, L=1, mult=1)   # not min. length: hot leakage (bias_gen Phase 2)
+n("MND", "out1", "pd", "VGND", W=0.42, L=1, mult=1)
 p("MIP", "pdb", "pd", "VDPWR", sym=PF, model="pfet_01v8", W=0.84, L=1, mult=1)
 n("MIN", "pdb", "pd", "VGND", W=0.42, L=1, mult=1)
 

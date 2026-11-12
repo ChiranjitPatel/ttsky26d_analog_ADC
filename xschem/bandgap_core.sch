@@ -269,7 +269,7 @@ N 1160 1910 1160 1950 {lab=VGND}
 C {lab_pin.sym} 1160 1950 0 0 {name=p111 sig_type=std_logic lab=VGND}
 N 1160 1880 1270 1880 {lab=VGND}
 C {lab_pin.sym} 1270 1880 0 1 {name=p112 sig_type=std_logic lab=VGND}
-C {sky130_fd_pr/nfet_01v8.sym} 1520 1880 0 0 {name=MSD model=nfet_01v8 spiceprefix=X nf=1 W=0.42 L=0.5 mult=1}
+C {sky130_fd_pr/nfet_01v8.sym} 1520 1880 0 0 {name=MSD model=nfet_01v8 spiceprefix=X nf=1 W=0.42 L=1 mult=1}
 N 1540 1850 1540 1810 {lab=su}
 C {lab_pin.sym} 1540 1810 0 0 {name=p113 sig_type=std_logic lab=su}
 N 1500 1880 1460 1880 {lab=pd}

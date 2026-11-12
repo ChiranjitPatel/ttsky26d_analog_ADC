@@ -75,7 +75,7 @@ s.dev("ota.sym", "xota", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "p
 p("MSU2", "su", "pbias", "VDPWR", sym=PFL, model="pfet_01v8_lvt", W=2, L=2, mult=1)
 n("MSU3", "su", "vbg", "VGND", W=1, L=1, mult=1)
 n("MSU1", "vgp", "su", "VGND", W=0.42, L=4, mult=1)   # L 1 -> 4 (2026-11-08): with the larger OTA/CC the strong kick caused a startup limit cycle
-n("MSD", "su", "pd", "VGND", W=0.42, L=0.5, mult=1)
+n("MSD", "su", "pd", "VGND", W=0.42, L=1, mult=1)
 
 s.write(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bandgap_core.sch"), sym=True)
 print("wrote xschem/bandgap_core.sch, bandgap_core.sym")

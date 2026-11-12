@@ -54,21 +54,11 @@
    "rect": [
     8,
     188,
-    30,
-    214
-   ],
-   "milestone": "M1",
-   "note": "1 uA reference; pbias/nbias to all analog blocks"
-  },
-  "reserve_top": {
-   "rect": [
-    34,
-    188,
     62,
     214
    ],
-   "milestone": "\u2014",
-   "note": "spare (ptat_out moved, 2026-11-08 night)"
+   "milestone": "M1",
+   "note": "1 uA reference (scripted cell 53.6 x 23.9 um); pbias/nbias to all analog blocks"
   },
   "bandgap_core": {
    "rect": [

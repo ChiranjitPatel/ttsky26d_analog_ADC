@@ -71,7 +71,7 @@ set fp [open {out}/drc.txt w]
 puts $fp "DRC_COUNT $n"
 foreach {{rule boxes}} $why {{
     puts $fp "$rule: [llength $boxes]"
-    foreach b [lrange $boxes 0 4] {{ puts $fp "    $b" }}
+    foreach b [lrange $boxes 0 199] {{ puts $fp "    $b" }}
 }}
 close $fp
 puts "DRC_COUNT $n"

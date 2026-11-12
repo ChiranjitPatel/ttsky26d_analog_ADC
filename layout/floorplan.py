@@ -23,8 +23,7 @@ stripes = [  # (net, x0, x1) vertical met4, 2 um wide
 ]
 blocks = {  # name: (x0, y0, x1, y1, milestone, note)
     "adc_digital":  (71, 186, 153, 216, "M2", "SAR logic + pin decoding, LibreLane macro under the top pins"),
-    "bias_gen":     (8, 188, 30, 214, "M1", "1 uA reference; pbias/nbias to all analog blocks"),
-    "reserve_top":  (34, 188, 62, 214, "—", "spare (ptat_out moved, 2026-11-08 night)"),
+    "bias_gen":     (8, 188, 62, 214, "M1", "1 uA reference (scripted cell 53.6 x 23.9 um); pbias/nbias to all analog blocks"),
     "bandgap_core": (8, 92, 62, 186, "M1", "incl. OTA (2.1 pF MIM over its devices), PNP array, R1/R2, startup; grown after Phase 2"),
     "vref_filt":    (8, 46, 62, 88, "M1", "1.6 MOhm + 5.5 pF (52.8 x 39.5 um cell), under the bandgap that feeds it"),
     "ptat_out":     (8, 6, 42, 42, "M1", "MPP 16/8 + R3 (31.2 x 31.4 um cell); vptat runs to the input mux along the bottom"),

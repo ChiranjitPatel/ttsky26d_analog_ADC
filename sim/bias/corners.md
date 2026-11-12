@@ -6,21 +6,21 @@
 
 | corner | sink −40 °C | sink 27 °C | sink 125 °C | source −40 °C | source 27 °C | source 125 °C |
 |---|---|---|---|---|---|---|
-| tt | 0.730 | 1.004 | 1.514 | 0.698 | 0.967 | 1.468 |
-| ff | 0.743 | 1.016 | 1.539 | 0.709 | 0.976 | 1.488 |
-| ss | 0.718 | 0.995 | 1.509 | 0.690 | 0.963 | 1.468 |
-| fs | 0.754 | 1.041 | 1.608 | 0.728 | 1.010 | 1.569 |
-| sf | 0.708 | 0.975 | 1.463 | 0.671 | 0.932 | 1.410 |
+| tt | 0.730 | 1.003 | 1.512 | 0.699 | 0.967 | 1.466 |
+| ff | 0.743 | 1.016 | 1.536 | 0.709 | 0.976 | 1.485 |
+| ss | 0.718 | 0.995 | 1.506 | 0.690 | 0.962 | 1.465 |
+| fs | 0.755 | 1.040 | 1.605 | 0.729 | 1.010 | 1.566 |
+| sf | 0.708 | 0.975 | 1.461 | 0.671 | 0.932 | 1.408 |
 
 ## Summary over all 45 runs
 
 | Quantity | min | max | Note |
 |---|---|---|---|
-| Unit sink (nfet 2/2) | 0.676 µA | 1.643 µA | spread 2.43× |
-| Unit source (pfet_lvt 2/2) | 0.639 µA | 1.605 µA | spread 2.51× |
-| bias_gen own current | 1.39 µA | 3.51 µA | |
-| Power-down supply current | 0.02 nA | 42.95 nA | |
+| Unit sink (nfet 2/2) | 0.676 µA | 1.641 µA | spread 2.43× |
+| Unit source (pfet_lvt 2/2) | 0.640 µA | 1.603 µA | spread 2.50× |
+| bias_gen own current | 1.53 µA | 4.02 µA | |
+| Power-down supply current | 0.02 nA | 42.86 nA | |
 | Line: sink change 1.62–1.98 V | | 8.9 % | worst at sf, -40 °C (target < 10 %) |
 | Startup (1 µs and 100 µs ramps reach the DC current within 1 %) | | | 45/45 runs |
 | Slow ramp: VDPWR when the sink reaches 0.5 µA | 0.62 V | 0.98 V | worst at fs, -40 °C, 1.98 V (must be < 1.62 V) |
-| Lowest `su` during the ramps | -0.15 V | | junction clamp; startup unaffected |
+| Lowest `su` during the ramps | -0.14 V | | junction clamp; startup unaffected |

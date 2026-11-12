@@ -56,3 +56,17 @@ Changes it caused:
 - **Nodesets for `.op`.** At tt/27 °C/1.98 V the plain `.op` converged to a non-physical point. The report
   cross-checks each `.op` current against the DC sweep.
 - **Layout dummies** MDN1/2 and MDP1/2 are in the schematic.
+
+## Layout changes (2026-11-12, scripted layout `layout/gen_bias_gen.py`)
+
+The first scripted layout was 90 × 29.5 µm, against 54 × 26 µm available. The five 0.42/10 startup devices
+made the PMOS row 87 µm long, and the 11 µm R1 made the NMOS row 16 µm tall. Schematic changes:
+- **MS2: 2 devices of 0.42/10 in series** (was 5), so about 2.5× the pull-up current. **MS3 is now W = 4** (2× the unit
+  current), so it still sinks the pull-up with margin and `su` sits at 15 mV when running.
+- **R1 = 2 strips of 0.35/5.45 in series** (was one 0.35/11), plus a dummy strip on each side (rpm.1 needs a
+  marker ≥ 1.27 µm wide). 5.45 µm per strip gives the same 1.003 µA (the split adds two contact ends).
+- The power-down switches are L = 1 (was 0.5), so the gate and drain via landings fit side by side.
+
+Re-verified: Phase 1 (1.003 µA, 2.45 µA own current, startup 0.04 µs) and the 45-corner sweep
+(`corners.md`: 45/45 start, line ≤ 8.9 %, PD ≤ 43 nA). The bandgap is unchanged (VBG 1.2105 V, PM 76.5°).
+Layout: 53.6 × 23.9 µm, Magic DRC 0, KLayout 0, LVS match.
