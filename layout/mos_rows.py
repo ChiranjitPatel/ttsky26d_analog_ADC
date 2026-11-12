@@ -97,6 +97,11 @@ class Cell:
             g1 = lab["G"]
             cx, cy = (ring[0] + ring[2]) / 2, (ring[1] + ring[3]) / 2
             g2 = (2 * cx - g1[0], 2 * cy - g1[1])          # the opposite gate contact
+            if d.rot in (90, 270):
+                # rotated: D and S are horizontal strips W long; put their vias a quarter of W off centre in
+                # opposite directions, so their stubs are far apart in x (short-L devices: strips 0.44 um apart)
+                (dx_, dy_), (sx_, sy_) = lab["D"], lab["S"]
+                return {"D": (dx_ - 0.25 * d.w, dy_), "S": (sx_ + 0.25 * d.w, sy_), "G": [g1, g2]}
             return {"D": lab["D"], "S": lab["S"], "G": [g1, g2]}
         n = d.series
         heads = []
@@ -156,10 +161,20 @@ class Cell:
                     if t == "G":
                         pos = self._gate_toward(p, i, nrows)
                     ch, side = self._channel_for(i, pos[1], r, nrows)
-                    kind = "G" if t == "G" else "SD"
+                    kind = "G" if t == "G" else ("SDH" if d.rot in (90, 270) else "SD")
                     x, y = pos
-                    if kind == "G" and d.rot == 0:          # move the pad off the gate strip, away from D/S
-                        y = y + (0.07 if y > (p["ring"][1] + p["ring"][3]) / 2 else -0.07)
+                    if kind == "G" and d.rot != 0 and d.l < 0.9:
+                        # the other (unused) gate contact of a short-L device is a 0.29 x 0.23 um met1 patch,
+                        # below met1's minimum area: enlarge it outward with a plain met1 pad
+                        ox_, oy_ = [q for q in p["term"]["G"] if q != pos][0]
+                        sh = -0.1 if ox_ < (p["ring"][0] + p["ring"][2]) / 2 else 0.1
+                        L.paint("metal1", ox_ + sh - 0.185, oy_ - 0.215, ox_ + sh + 0.185, oy_ + 0.215)
+                    if kind == "G" and d.rot != 0:          # rotated: move the pad outward (toward the li-only
+                        x = x + (-0.1 if x < (p["ring"][0] + p["ring"][2]) / 2 else 0.1)   # side ring line), off the strip ends
+                    if kind == "G" and d.rot == 0:          # move the pad off the gate strip, away from D/S -
+                        up = y > (p["ring"][1] + p["ring"][3]) / 2    # but only toward a ring line without met1
+                        if (up and r["bar"] != "t") or (not up and r["bar"] != "b"):
+                            y = y + (0.07 if up else -0.07)
                     self._via(net, x, y, ch, side, kind, horizontal_gate=(kind == "G" and d.rot != 0))
 
     def _gate_toward(self, p, i, nrows):
@@ -171,6 +186,10 @@ class Cell:
         if i == 0:
             return max(g1, g2, key=lambda q: q[1])
         if i == nrows - 1:
+            return min(g1, g2, key=lambda q: q[1])
+        if p["dev"].l < 0.9:
+            # short-L device in a middle row: the gate contact is ~0.25 um from the D/S strips in x, so its
+            # stub must not run alongside theirs: gate down (lower channel), D/S up (upper channel)
             return min(g1, g2, key=lambda q: q[1])
         return max(g1, g2, key=lambda q: q[1])
 
@@ -207,11 +226,14 @@ class Cell:
         L = self.L
         if horizontal_gate:          # rotated device: the gate contact is a vertical strip
             hx, hy = 0.185, 0.215
+        elif kind == "SDH":          # rotated device: D/S are horizontal strips
+            hx, hy = 0.215, 0.185
         else:
             hx, hy = (0.185, 0.215) if kind == "SD" else (0.215, 0.185)
         L.paint("metal1", x - hx, y - hy, x + hx, y + hy)
         L.paint("via1", x - 0.13, y - 0.13, x + 0.13, y + 0.13)
-        L.paint("metal2", x - 0.2, y - 0.2, x + 0.2, y + 0.2)
+        # met2 landing at the via1 enclosure minimum: short-L devices have their D and S strips 0.53 um apart
+        L.paint("metal2", x - hx, y - hy, x + hx, y + hy)
         self.stubs.append((net, x, y, ch, side))
 
     # ------------------------------------------------------------------ routing

@@ -65,7 +65,7 @@ N 20 450 20 410 {lab=VDPWR}
 C {lab_pin.sym} 20 410 0 0 {name=p23 sig_type=std_logic lab=VDPWR}
 N 20 480 130 480 {lab=VDPWR}
 C {lab_pin.sym} 130 480 0 1 {name=p24 sig_type=std_logic lab=VDPWR}
-C {sky130_fd_pr/pfet_01v8.sym} 380 480 0 0 {name=MPU model=pfet_01v8 spiceprefix=X nf=1 W=0.42 L=0.15 mult=1}
+C {sky130_fd_pr/pfet_01v8.sym} 380 480 0 0 {name=MPU model=pfet_01v8 spiceprefix=X nf=1 W=0.42 L=1 mult=1}
 N 400 510 400 550 {lab=dm}
 C {lab_pin.sym} 400 550 0 0 {name=p25 sig_type=std_logic lab=dm}
 N 360 480 320 480 {lab=en}
