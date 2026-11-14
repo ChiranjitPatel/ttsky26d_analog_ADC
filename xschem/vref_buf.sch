@@ -11,7 +11,7 @@ C {ipin.sym} -400 -120 0 0 {name=p_nbias lab=nbias}
 C {ipin.sym} -400 -80 0 0 {name=p_en lab=en}
 C {ipin.sym} -400 -40 0 0 {name=p_in lab=in}
 C {opin.sym} -400 0 0 0 {name=p_vref lab=vref}
-C {sky130_fd_pr/nfet_01v8.sym} 0 200 0 0 {name=MT model=nfet_01v8 spiceprefix=X nf=1 W=2 L=2 mult=10}
+C {sky130_fd_pr/nfet_01v8.sym} 0 200 0 0 {name=MT model=nfet_01v8 spiceprefix=X nf=1 W=8 L=2 mult=2}
 N 20 170 20 130 {lab=tail_sw}
 C {lab_pin.sym} 20 130 0 0 {name=p1 sig_type=std_logic lab=tail_sw}
 N -20 200 -60 200 {lab=nbias}

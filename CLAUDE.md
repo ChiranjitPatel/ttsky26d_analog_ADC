@@ -39,6 +39,9 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
   - Use `set num_threads=1` in `.spiceinit`. With 4 threads, parallel runs oversubscribe the CPU
     and slow down ~15× (OpenMP spin-waits).
   - In long fine-step runs, `save` only the needed vectors (saving everything used 1.7 GB per run).
+- **Post-layout (learned in M1):** extract with `layout/m1_pex.py` (Magic 8.3.623 in the LibreLane image; the
+  local 8.3.411 drops the resistors). Tie unused pins of an extracted top level to ground (1 GΩ), or ngspice
+  finds a singular matrix and a wrong operating point. In power-down, take currents from a transient, not `.op`.
 - Every spec number in `docs/specs/` has a testbench that measures it. Record results in the
   spec's "Status" table, with the phase it was measured in.
 
@@ -57,6 +60,9 @@ Use these versions for local DRC; the Ubuntu apt packages are older.
 5. Comparator kickback and DAC top-plate coupling must be checked in simulation; shield the
    top-plate routing (lesson from TT06 silicon, see `docs/specs/prior_art.md`).
 6. Matched devices: common-centroid or interdigitated, with dummies, the same orientation, and guard rings.
+   Current mirrors: every finger has the same W and L as the reference (more fingers, not wider ones). LVS merges
+   parallel devices and can't see this, but sky130's narrow-width effect does (M1: 1 × 8/2 against a 2/2 reference
+   mirrored 20 % less current).
 7. Every node that can start in a bad state (bandgap, biasing) needs a startup circuit,
    and a transient testbench that proves it starts from 0 V.
 8. **Layout freeze: 2026-11-26** (TTSKY26d deadline 2026-12-01, agreed 2026-11-08). After the freeze, only

@@ -19,8 +19,8 @@ cap = lambda k: Dev(f"MCRES_{k}", N, 10, 10, D="VGND", G="vref", S="VGND")
 c = Cell("vref_buf")
 c.add_row([cap(1), cap(2), cap(3)], "VGND")
 c.add_row([cap(4), cap(5), cap(6)], "VGND")
-# MT (schematic 10 x 2/2 = 10 unit currents) drawn as 2 x 10/2: the same W/L, LVS merges parallel devices
-c.add_row([cap(7), Dev("MT_1", N, 10, 2, D="tail_sw", G="nbias", S="VGND"), Dev("MT_2", N, 10, 2, D="tail_sw", G="nbias", S="VGND"),
+# MT 2 x 8/2 (schematic MT W=8 m=2; was 2 x 10/2 against a 10 x 2/2 schematic, which mirrored 12.3 uA: narrow-width effect)
+c.add_row([cap(7), Dev("MT_1", N, 8, 2, D="tail_sw", G="nbias", S="VGND"), Dev("MT_2", N, 8, 2, D="tail_sw", G="nbias", S="VGND"),
            Dev("MSW", N, 4, 0.15, rot=270, D="tail", G="en", S="tail_sw"),
            Dev("M1", N, 4, 1, D="dm", G="in", S="tail"), Dev("M2", N, 4, 1, D="vref", G="vref", S="tail")], "VGND")
 c.add_row([Dev("M3", PL, 4, 1, D="dm", G="dm", S="VDPWR"), Dev("M4", PL, 4, 1, D="vref", G="dm", S="VDPWR"),

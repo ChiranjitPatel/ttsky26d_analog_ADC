@@ -3,15 +3,17 @@
 
 Generates xschem/vref_filt.sch + .sym.   python3 xschem/gen_vref_filt.py
 RF = NR x res_xhigh_po 0.35/LR in series (~1.04 MOhm), CF = nfet_01v8 gate cap (gate = vbg_f,
-S/D/B = VGND; inverted at 1.2 V) ~ 4 pF. Pole ~ 36 kHz. No DC error: the buffer input is a gate.
+S/D/B = VGND; inverted at 1.2 V) ~ 5.5 pF + MIM ~2.5 pF (top plate vbg_f). Pole ~ 36 kHz. No DC error: the buffer input is a gate.
 Ports: VGND vbg(in) vbg_f(out)
 """
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
 from xsch import Schematic
-RX, NF = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/nfet_01v8.sym"
+RX, NF, CMIM = "sky130_fd_pr/res_xhigh_po_0p35.sym", "sky130_fd_pr/nfet_01v8.sym", "sky130_fd_pr/cap_mim_m3_1.sym"
 NR, LR = 14, 20.0         # 14 x ~115 kOhm = 1.6 MOhm (was 9 / 1.04 MOhm; B7 at 1 MHz after the 2026-11-08 bandgap resize)
 CW, CL, CM = 10, 10, 7    # MOS cap: 7 x (10 x 10 um) ~ 5.5 pF (was 5)
+MW, ML, MMF = 21, 30, 2   # + MIM 2 x (21 x 30 um) ~ 2.5 pF over the MOS caps and the chain (2026-11-14: B7 at 1 MHz
+                          #   missed by up to 1 dB in hot / fs corners of the post-layout M1 sim). Top plate = vbg_f.
 s = Schematic()
 for p, d in (("VGND", "inout"), ("vbg", "in"), ("vbg_f", "out")):
     s.port(p, d)
@@ -22,5 +24,6 @@ for i in range(NR):
 for i in (1, 2):  # layout dummies at both ends of the resistor array (all terminals on VGND)
     s.dev(RX, f"RFD{i}", {"P": "VGND", "M": "VGND", "B": "VGND"}, W=0.35, L=LR, model="res_xhigh_po_0p35", spiceprefix="X", mult=1)
 s.dev(NF, "MCF", {"D": "VGND", "G": "vbg_f", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=CW, L=CL, nf=1, mult=CM)
+s.dev(CMIM, "CM", {"c0": "vbg_f", "c1": "VGND"}, W=MW, L=ML, MF=MMF, model="cap_mim_m3_1", spiceprefix="X")
 s.write(os.path.join(os.path.dirname(os.path.abspath(__file__)), "vref_filt.sch"), sym=True)
 print("wrote xschem/vref_filt.sch, vref_filt.sym")

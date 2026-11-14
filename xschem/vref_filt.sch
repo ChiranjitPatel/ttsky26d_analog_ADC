@@ -129,3 +129,8 @@ N 400 1070 400 1110 {lab=VGND}
 C {lab_pin.sym} 400 1110 0 0 {name=p51 sig_type=std_logic lab=VGND}
 N 400 1040 510 1040 {lab=VGND}
 C {lab_pin.sym} 510 1040 0 1 {name=p52 sig_type=std_logic lab=VGND}
+C {sky130_fd_pr/cap_mim_m3_1.sym} 760 1040 0 0 {name=CM W=21 L=30 MF=2 model=cap_mim_m3_1 spiceprefix=X}
+N 760 1010 760 970 {lab=vbg_f}
+C {lab_pin.sym} 760 970 0 0 {name=p53 sig_type=std_logic lab=vbg_f}
+N 760 1070 760 1110 {lab=VGND}
+C {lab_pin.sym} 760 1110 0 0 {name=p54 sig_type=std_logic lab=VGND}

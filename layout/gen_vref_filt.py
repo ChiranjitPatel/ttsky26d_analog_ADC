@@ -71,5 +71,31 @@ L.pin("vbg", "metal2", sx - 0.2, ch["ring"][1] - 2.2, sx + 0.2, ch["ring"][1] - 
 b = ch["vgnd_bar"]
 L.pin("VGND", "metal1", b[0], (b[1] + b[3]) / 2 - 0.5, b[2], (b[1] + b[3]) / 2 + 0.5, 3)
 
+# ---- MIM cap CM = 2 x (21 x 30 um) over the chain and MCF (2026-11-14, B7 at 1 MHz): this cell uses only
+# met1/met2, so met3/met4 are free. Top plates (met4, C1) = vbg_f, bottom plates (met3, C2) = VGND.
+MW, ML, MY0, MGAP = 21, 30, 0.9, 1.24
+mg = probe_gencell("sky130_fd_pr__cap_mim_m3_1", w=MW, l=ML, nx=1, ny=1)
+mw = mg["bbox"][2] - mg["bbox"][0]
+mx = [0.5, 0.5 + mw + MGAP]
+ytie = 33.5                                                # met4 tie of the top plates, above the caps
+for k, x in enumerate(mx):
+    L.gencell("sky130_fd_pr__cap_mim_m3_1", f"CM_{k+1}", x - mg["bbox"][0], MY0 - mg["bbox"][1], w=MW, l=ML, nx=1, ny=1)
+    # top plate up to the tie (left part of the plate, away from the C2 strip on the right edge)
+    L.paint("metal4", x + 4.0, MY0 + ML - 1.0, x + 5.0, ytie + 0.3)
+    # bottom plate -> VGND: met3 down out of the cap to the row-0 VGND bus (met1, y ~0.04), via2 + via1
+    xv = (xbar + 2.9) if k == 0 else (x + 3.6)          # on the row-0 VGND bus (x >= xbar), clear of the ring pads
+    yv = sites[0][1] + 0.04
+    L.paint("metal3", xv - 0.3, yv - 0.3, xv + 0.3, MY0 + 1.0)
+    L.paint("via2", xv - 0.16, yv - 0.16, xv + 0.16, yv + 0.16)
+    L.paint("metal2", xv - 0.25, yv - 0.25, xv + 0.25, yv + 0.25)
+    L.paint("via1", xv - 0.15, yv - 0.15, xv + 0.15, yv + 0.15)
+    L.paint("metal1", xv - 0.3, yv - 0.25, xv + 0.3, yv + 0.25)
+L.paint("metal4", mx[0] + 4.0, ytie - 0.3, xr + 0.3, ytie + 0.3)
+# tie -> vbg_f's right-hand met2 line (x = xr): via3, met3 island, via2
+L.paint("via3", xr - 0.2, ytie - 0.2, xr + 0.2, ytie + 0.2)
+L.paint("metal3", xr - 0.3, ytie - 0.3, xr + 0.3, ytie + 0.3)
+L.paint("via2", xr - 0.16, ytie - 0.16, xr + 0.16, ytie + 0.16)
+L.paint("metal2", xr - 0.25, ytie - 0.25, xr + 0.25, ytie + 0.25)
+
 drc, errs, gds = L.run()
 print(f"vref_filt: Magic DRC {drc}; {gds}", *errs, sep="\n  ")

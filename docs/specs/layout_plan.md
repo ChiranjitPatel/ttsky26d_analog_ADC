@@ -40,7 +40,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | 1f | vref_filt (resistor chain + MOS cap, scripted) | Claude | Nov 14 — done Nov 8: 1.6 MΩ + 5.5 pF for B7, layout DRC/LVS clean; VREF-chain corners in `sim/vref/corners.md` |
 | 1g | vref_buf + reservoir cap | Claude (scripted; designer reviews) | **Done Nov 12**: 43.1 × 57.3 µm, DRC 0, LVS match (`gen_vref_buf.py`) |
 | 1h | vref_sel logic + `ua[1]` transmission gate | Claude (scripted; designer reviews) | **Done Nov 12**: 30.1 × 30.1 µm, DRC 0, LVS match (`gen_vref_sel.py`) |
-| **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Nov 17** — integrated Nov 14 (`layout/m1_top.py`, floorplan v3): Magic DRC 0, KLayout 0, LVS match, local TT checks pass; post-layout sim and CI precheck next |
+| **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Done Nov 14** (`layout/m1_top.py`, floorplan v3): Magic DRC 0, KLayout 0, LVS match, CI precheck passed (474f254); post-layout sim (R+C) matches the schematic within 1 mV / 1 dB, B7 met in all 45 corners after two fixes (`sim/m1/`) |
 | 2a | DAC unit cell + 16 × 16 common-centroid MIM array (scripted) | Claude | Nov 18 |
 | 2b | dac_sw (one cell, used 9×) | designer | Nov 18 |
 | 2c | comparator (with preamp) | designer | Nov 19–20 |
@@ -81,3 +81,19 @@ moved stripes, block placement, inter-block routing in reserved corridors, full-
   names, analog pins, boundary, pin positions, power pins, layers) all pass.
 - **Build lessons:** read the block GDS files before the DEF, and start from an empty cell before `def read`
   (otherwise Magic edits the wrong cell). Delete stale `.mag` files in the build folder.
+
+## M1 post-layout (2026-11-14)
+
+`layout/m1_pex.py` extracts the submission GDS flat with R and C (Magic 8.3.623 in the LibreLane image; the local
+8.3.411 drops the resistors). `sim/m1/` runs the same pin-level tests on the schematic and on the extraction.
+Details in `sim/m1/README.md`, numbers in `sim/m1/results.md` and `sim/m1/corners_b7.md`.
+- **Found:** current mirrors drawn with wider fingers than their 2/2 reference mirror the wrong current
+  (narrow-width effect; LVS merges parallel devices and can't see it). OTA M5/M7 were 11–20 % low, which cost
+  1.4 dB of B7 at 1 MHz; the vref_buf tail was 26 % high.
+  Fixed: bandgap_core draws M5 as 2 × 2/2 and M7 as 4 × 2/2 (same 71.7 × 104 µm cell); vref_buf's tail is
+  2 × 8/2 in both schematic and layout (9.6 µA as before).
+- **Found:** B7 at 1 MHz missed by up to 1 dB in hot / fs corners (schematic too). Fixed with a 2.5 pF MIM
+  (`vbg_f` to VGND) stacked over vref_filt, which used only met1/met2: no area cost.
+- **Result:** VBG 1.2098 V (schematic 1.2105 V); B7 tt 23.8 dB at 1 MHz, corners ≥ 22.7 dB at 1 MHz and
+  ≥ 31.3 dB DC at 1.62 V; startup 24 µs; `ua[1]` path 12 Ω of wiring; power-down 0.84 nA.
+- **Rule for M2:** a mirror's fingers have the same W and L as its reference (more fingers, not wider ones).

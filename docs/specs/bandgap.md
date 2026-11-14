@@ -65,12 +65,15 @@ stage 3: the zero-TC point of the real circuit, including the resistor TC, is 1.
 | # | Result | Phase | Date | Notes |
 |---|---|---|---|---|
 | B1 | 1.2105 V | 1 (tt) | 2026-11-08 | ✅ after the Phase 2 resize (was 1.2154 V); corners 1.2059–1.2146 V |
+| B1 | 1.2098 V post-layout (schematic 1.2105 V) | 3 | 2026-11-14 | ✅ M1 top, R+C extracted; `sim/m1/results.md` |
 | B2 | 15.7 µA (incl. bias_gen) | 1 | 2026-11-08 | core 13.6 µA; unchanged by the resize |
 | B3 | 2.4 µs after a 1 µs ramp (tt); 63/63 corner runs start on both ramps | 2 | 2026-11-08 | startup MSU1 0.42/1 → 0.42/4 fixed a limit cycle caused by the resize |
 | B4 | 2.2 mV/V (tt); worst 9.88 mV/V (fs, 125 °C) | 2 | 2026-11-08 | ✅ but marginal at fs/125 °C |
 | B5 | 23.5 ppm/°C (tt); worst corner 33.3 ppm/°C (ff) | 2 | 2026-11-08 | ✅ |
 | B7 | tt: 55.7 dB DC / 22.2 dB at 1 MHz at `vbg_f`. Corners: 1 MHz ≥ 20.3 dB ✅; DC ≥ 30.4 dB (40 dB not met in 7 of 45 runs, all at 1.62 V and −40/125 °C) | 2 | 2026-11-08 | ✅ against the reworded B7 (2026-11-12); filter grown to 1.6 MΩ / 5.5 pF |
+| B7 | **Post-layout (M1 top, R+C extracted):** tt 55.9 dB DC / 23.8 dB at 1 MHz. Corners (45): 1 MHz ≥ 22.7 dB; DC ≥ 31.3 dB at 1.62 V, ≥ 48.1 dB at 1.8 V | 3 | 2026-11-14 | ✅ after two fixes: OTA M5/M7 drawn as 2/2 units (merged fingers mirrored 11–20 % less current), and a 2.5 pF MIM on `vbg_f` over vref_filt (the 1 MHz part had missed by up to 1 dB in fs/125 °C corners, schematic too); `sim/m1/corners_b7.md` |
 | B8 | 0.08 nA (tt) | early, tt only | 2026-11-08 | incl. bias_gen |
+| B8 | 0.84 nA post-layout (whole M1 chip, transient) | 3 | 2026-11-14 | ✅ |
 | B10 | 0.6005 V | 1 | 2026-11-08 | stage 4, after the resize |
 | B11 | 1.956 mV/°C | early, tt only | 2026-11-08 | |
 | B12 | 2.43 °C/LSB | early, tt only | 2026-11-08 | LSB = 4.75 mV |

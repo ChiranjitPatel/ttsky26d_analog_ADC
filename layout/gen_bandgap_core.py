@@ -3,8 +3,8 @@
 
 Rows, bottom to top (OTA as in gen_ota.py, plus the bandgap's own devices):
   0  NMOS  M6 M3 M4 M6 | RZ | MND MIN | MSU3 MSU1 MSD            (OTA loads + startup)
-  1  PMOS  D M1 M2 M2 M1 D | M5 M7 | MPD MIP                      (OTA input pair: inp = vb, inn = va)
-  2  PMOS  D MPA MPB MPC D | MSU2                                 (current sources, dummies 16/1)
+  1  PMOS  D M1 M2 M2 M1 D | M5 x2 (2/2) | MPD MIP                (OTA input pair: inp = vb, inn = va)
+  2  PMOS  D MPA MPB MPC D | MSU2 | M7 x4 (2/2 units)            (current sources, dummies 16/1; OTA bias)
   CC = 4 x MIM 16 x 16 over rows 0 and 1 (as in gen_ota.py)
 Band under row 0: pnp_array (layout/cells/pnp_array.gds) and bg_res (layout/cells/bg_res.gds) side by side.
   va   PNP top pin -> met3 in the gap under row 0 -> left bus
@@ -37,12 +37,16 @@ m1 = lambda k: Dev(f"M1_{k}", PL, 16, 8, D="d1", G="va", S="tail")
 m2 = lambda k: Dev(f"M2_{k}", PL, 16, 8, D="out1", G="vb", S="tail")
 dp = lambda k: Dev(f"MDP{k}", PL, 16, 1, D="VDPWR", G="VDPWR", S="VDPWR")
 c.add_row([dp(1), m1(1), m2(1), m2(2), m1(2), dp(2),
-           Dev("M5", PL, 4, 2, D="tail", G="pbias", S="VDPWR"), Dev("M7", PL, 8, 2, D="vgp", G="pbias", S="VDPWR"),
+           *[Dev(f"M5_{k}", PL, 2, 2, D="tail", G="pbias", S="VDPWR") for k in (1, 2)],
            Dev("MPD", P, 0.42, 1, D="vgp", G="pdb", S="VDPWR"), Dev("MIP", P, 0.84, 1, D="pdb", G="pd", S="VDPWR")], "VDPWR")
 ds = lambda k: Dev(f"MDS{k}", P, 16, 1, D="VDPWR", G="VDPWR", S="VDPWR")
 src = lambda nm, d: Dev(nm, P, 16, 8, D=d, G="vgp", S="VDPWR")
 c.add_row([ds(1), src("MPA", "va"), src("MPB", "vb"), src("MPC", "vbg"), ds(2),
-           Dev("MSU2", PL, 2, 2, D="su", G="pbias", S="VDPWR")], "VDPWR")
+           Dev("MSU2", PL, 2, 2, D="su", G="pbias", S="VDPWR"),
+           # OTA M5 / M7 as unit 2/2 devices like their reference (bias_gen MP2 2/2): merged wide fingers
+           # (4/2, 8/2) mirrored 11-20 % less current (narrow-width effect; found in the M1 post-layout sim).
+           # M7 in this row (row 1 has no room for six ringed units); M5 in row 1 next to the input pair.
+           *[Dev(f"M7_{k}", PL, 2, 2, D="vgp", G="pbias", S="VDPWR") for k in (1, 2, 3, 4)]], "VDPWR")
 
 # band geometry (below row 0)
 PNP_W, PNP_H, PNP_LL = 28.72, 22.28, (-1.30, -1.30)     # pnp_array bbox size and its lower-left in cell coords
@@ -142,5 +146,7 @@ pbx, pby = P(0.5, -0.9)
 L.paint("metal1", gbx - 0.15, pby - 0.3, gbx + 0.15, gby + 0.3)
 L.paint("metal1", c.bus_x["VGND"] - 0.2, pby - 0.3, gbx + 0.15, pby + 0.3)
 
+for i, r in enumerate(c.rows):
+    print(f"row {i}: x {r['x0']:.2f} .. {r['x1']:.2f}  ({r['x1'] - r['x0']:.2f} um)")
 drc, errs, gds = c.write()
 print(f"bandgap_core: Magic DRC {drc}; {gds}", *errs, sep="\n  ")
