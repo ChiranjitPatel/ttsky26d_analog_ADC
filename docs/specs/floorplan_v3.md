@@ -1,6 +1,6 @@
 # Floorplan v3 (2026-11-14) — tt_um_chiranjitpatel_sar_adc
 
-**Status: DRAFT for review.** Source: `layout/floorplan_v3.py` → `layout/floorplan_v3.json`, picture
+**Status: used for M1 (2026-11-14).** Power stripes start at y = 1 (bottom power-tie straps). Source: `layout/floorplan_v3.py` → `layout/floorplan_v3.json`, picture
 `material/layout/floorplan_v3.png`. The earlier floorplan (`floorplan.md`, `floorplan.py`, `floorplan.json`,
 `floorplan.png`) is kept unchanged; the M0 frame still uses it until M1 integration moves to v3.
 Coordinates in µm from the tile's bottom-left corner; tile 161.00 × 225.76 µm.

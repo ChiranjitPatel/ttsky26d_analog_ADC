@@ -20,7 +20,7 @@ from matplotlib.patches import Rectangle
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W, H = 161.00, 225.76
-STRIPE_Y = (5.0, 217.0)
+STRIPE_Y = (1.0, 217.0)   # start at y = 1 (TT: within the bottom 10 um) so the bottom power-tie straps can reach them
 stripes = [("VDPWR", 1.0, 3.0), ("VGND", 4.0, 6.0),          # left edge
            ("VDPWR", 83.0, 85.0), ("VGND", 86.0, 88.0),      # middle: moved right from 64-69 (v1/v2)
            ("VDPWR", 154.5, 156.5), ("VGND", 157.5, 159.5)]  # right edge, right of the ua[0] route

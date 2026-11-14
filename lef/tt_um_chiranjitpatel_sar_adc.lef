@@ -42,6 +42,7 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN ua[1]
     DIRECTION INOUT ;
     USE SIGNAL ;
+    ANTENNADIFFAREA 8.700000 ;
     PORT
       LAYER met4 ;
         RECT 132.490 0.000 133.390 1.000 ;
@@ -106,6 +107,7 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN ui_in[1]
     DIRECTION INPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 2.100000 ;
     PORT
       LAYER met4 ;
         RECT 135.550 224.760 135.850 225.760 ;
@@ -122,6 +124,7 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN ui_in[3]
     DIRECTION INPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 6.720000 ;
     PORT
       LAYER met4 ;
         RECT 130.030 224.760 130.330 225.760 ;
@@ -186,6 +189,7 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_in[3]
     DIRECTION INPUT ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 4.200000 ;
     PORT
       LAYER met4 ;
         RECT 107.950 224.760 108.250 225.760 ;
@@ -226,6 +230,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[0]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 49.990 224.760 50.290 225.760 ;
@@ -234,6 +240,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[1]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 47.230 224.760 47.530 225.760 ;
@@ -242,6 +250,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[2]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 44.470 224.760 44.770 225.760 ;
@@ -250,6 +260,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[3]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 41.710 224.760 42.010 225.760 ;
@@ -258,6 +270,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[4]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 38.950 224.760 39.250 225.760 ;
@@ -266,6 +280,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[5]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 36.190 224.760 36.490 225.760 ;
@@ -274,6 +290,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[6]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 33.430 224.760 33.730 225.760 ;
@@ -282,6 +300,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_oe[7]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 30.670 224.760 30.970 225.760 ;
@@ -290,6 +310,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[0]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 72.070 224.760 72.370 225.760 ;
@@ -298,6 +320,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[1]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 69.310 224.760 69.610 225.760 ;
@@ -306,6 +330,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[2]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 66.550 224.760 66.850 225.760 ;
@@ -314,6 +340,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[3]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 63.790 224.760 64.090 225.760 ;
@@ -322,6 +350,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[4]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 61.030 224.760 61.330 225.760 ;
@@ -330,6 +360,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[5]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 58.270 224.760 58.570 225.760 ;
@@ -338,6 +370,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[6]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 55.510 224.760 55.810 225.760 ;
@@ -346,6 +380,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uio_out[7]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 52.750 224.760 53.050 225.760 ;
@@ -354,6 +390,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[0]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 94.150 224.760 94.450 225.760 ;
@@ -362,6 +400,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[1]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 91.390 224.760 91.690 225.760 ;
@@ -370,6 +410,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[2]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 88.630 224.760 88.930 225.760 ;
@@ -378,6 +420,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[3]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 85.870 224.760 86.170 225.760 ;
@@ -386,6 +430,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[4]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 83.110 224.760 83.410 225.760 ;
@@ -394,6 +440,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[5]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 80.350 224.760 80.650 225.760 ;
@@ -402,6 +450,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[6]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 77.590 224.760 77.890 225.760 ;
@@ -410,6 +460,8 @@ MACRO tt_um_chiranjitpatel_sar_adc
   PIN uo_out[7]
     DIRECTION OUTPUT TRISTATE ;
     USE SIGNAL ;
+    ANTENNAGATEAREA 320.746796 ;
+    ANTENNADIFFAREA 561.677612 ;
     PORT
       LAYER met4 ;
         RECT 74.830 224.760 75.130 225.760 ;
@@ -420,15 +472,15 @@ MACRO tt_um_chiranjitpatel_sar_adc
     USE POWER ;
     PORT
       LAYER met4 ;
-        RECT 1.000 5.000 3.000 217.000 ;
+        RECT 1.000 1.000 3.000 217.000 ;
     END
     PORT
       LAYER met4 ;
-        RECT 64.000 5.000 66.000 217.000 ;
+        RECT 83.000 1.000 85.000 217.000 ;
     END
     PORT
       LAYER met4 ;
-        RECT 154.500 5.000 156.500 217.000 ;
+        RECT 154.500 1.000 156.500 217.000 ;
     END
   END VDPWR
   PIN VGND
@@ -436,20 +488,26 @@ MACRO tt_um_chiranjitpatel_sar_adc
     USE GROUND ;
     PORT
       LAYER met4 ;
-        RECT 4.000 5.000 6.000 217.000 ;
+        RECT 4.000 1.000 6.000 217.000 ;
     END
     PORT
       LAYER met4 ;
-        RECT 67.000 5.000 69.000 217.000 ;
+        RECT 86.000 1.000 88.000 217.000 ;
     END
     PORT
       LAYER met4 ;
-        RECT 157.500 5.000 159.500 217.000 ;
+        RECT 157.500 1.000 159.500 217.000 ;
     END
   END VGND
   OBS
+      LAYER li1 ;
+        RECT 7.180 7.915 130.775 214.060 ;
+      LAYER met1 ;
+        RECT 1.700 1.080 133.110 214.190 ;
+      LAYER met2 ;
+        RECT 1.750 1.050 133.140 215.200 ;
       LAYER met3 ;
-        RECT 4.000 219.200 94.600 219.800 ;
+        RECT 1.450 1.000 159.050 219.800 ;
       LAYER met4 ;
         RECT 4.000 224.360 30.270 224.760 ;
         RECT 31.370 224.360 33.030 224.760 ;
@@ -496,15 +554,15 @@ MACRO tt_um_chiranjitpatel_sar_adc
         RECT 144.530 224.360 146.190 224.760 ;
         RECT 147.290 224.360 152.710 224.760 ;
         RECT 4.000 217.400 152.710 224.360 ;
-        RECT 6.400 4.600 63.600 217.400 ;
-        RECT 66.400 4.600 66.600 217.400 ;
-        RECT 69.400 4.600 152.710 217.400 ;
-        RECT 4.000 1.400 152.710 4.600 ;
-        RECT 4.000 1.000 16.170 1.400 ;
+        RECT 6.400 1.400 82.600 217.400 ;
+        RECT 6.400 1.000 16.170 1.400 ;
         RECT 17.870 1.000 35.490 1.400 ;
         RECT 37.190 1.000 54.810 1.400 ;
         RECT 56.510 1.000 74.130 1.400 ;
-        RECT 75.830 1.000 93.450 1.400 ;
+        RECT 75.830 1.000 82.600 1.400 ;
+        RECT 85.400 1.000 85.600 217.400 ;
+        RECT 88.400 1.400 152.710 217.400 ;
+        RECT 88.400 1.000 93.450 1.400 ;
         RECT 95.150 1.000 112.770 1.400 ;
         RECT 114.470 1.000 132.090 1.400 ;
         RECT 133.790 1.000 151.410 1.400 ;

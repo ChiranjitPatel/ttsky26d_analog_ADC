@@ -40,7 +40,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | 1f | vref_filt (resistor chain + MOS cap, scripted) | Claude | Nov 14 — done Nov 8: 1.6 MΩ + 5.5 pF for B7, layout DRC/LVS clean; VREF-chain corners in `sim/vref/corners.md` |
 | 1g | vref_buf + reservoir cap | Claude (scripted; designer reviews) | **Done Nov 12**: 43.1 × 57.3 µm, DRC 0, LVS match (`gen_vref_buf.py`) |
 | 1h | vref_sel logic + `ua[1]` transmission gate | Claude (scripted; designer reviews) | **Done Nov 12**: 30.1 × 30.1 µm, DRC 0, LVS match (`gen_vref_sel.py`) |
-| **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Nov 17** |
+| **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Nov 17** — integrated Nov 14 (`layout/m1_top.py`, floorplan v3): Magic DRC 0, KLayout 0, LVS match, local TT checks pass; post-layout sim and CI precheck next |
 | 2a | DAC unit cell + 16 × 16 common-centroid MIM array (scripted) | Claude | Nov 18 |
 | 2b | dac_sw (one cell, used 9×) | designer | Nov 18 |
 | 2c | comparator (with preamp) | designer | Nov 19–20 |
@@ -66,3 +66,18 @@ Every M1 cell is DRC clean (Magic and the TT KLayout deck) and LVS-matched to it
 must be ~72 µm wide (bandgap_core is 71.7 µm). That moves the middle VDPWR/VGND stripe pair from x = 64–69 to
 ~82–87 and narrows the right (M2) half to ~64 µm. M1 integration comes next: floorplan v3, M0 frame with the
 moved stripes, block placement, inter-block routing in reserved corridors, full-chip LVS and precheck.
+
+## M1 integration (2026-11-14)
+
+`layout/m1_top.py` builds the submission GDS/LEF (`gds/`, `lef/`) from the M0 frame recipe and floorplan v3.
+- **Blocks:** the six M1 cells at their v3 positions (vref_filt rotated 180°).
+- **Wiring:** routed in the reserved corridors, crossing the stripes on met3. The control pins (`ui_in[3]` BG_PD,
+  `ui_in[1]` VREF_OE, `uio_in[3]` REF_SEL) come straight in (no digital block in M1). The pad route runs to `ua[1]`.
+- **Power:** each block's rails are strapped to its nearest stripes. **Internal ties:** met3 straps along the bottom
+  (VDPWR y = 1.3, VGND y = 6.7) with via3 into all three stripes of each net; the stripes now start at y = 1.
+  The LVS confirms each supply is one net and the two are not shorted.
+- **Results:** Magic DRC 0. KLayout feol/beol/offgrid 0. LVS against `layout/cells/m1_top_ref.spice`: circuits match
+  uniquely; the only port messages are for the 23 unused TT pins. The precheck functions run locally (top/cell
+  names, analog pins, boundary, pin positions, power pins, layers) all pass.
+- **Build lessons:** read the block GDS files before the DEF, and start from an empty cell before `def read`
+  (otherwise Magic edits the wrong cell). Delete stale `.mag` files in the build folder.
