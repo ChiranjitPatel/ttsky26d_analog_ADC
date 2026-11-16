@@ -5,8 +5,8 @@ Rows (bottom to top). Short-L devices sit in the two middle rows, where mos_rows
 lower channel and their D/S from the upper one (no stub clash next to a 0.15 um gate):
   0 NMOS            MAL1 MAL2 (preamp diode loads 0.5/8) | MTOP (2/0.15, rotated)
   1 NMOS (short L)  MR1 MR3 MION M5 M6 MINN MR4 MR2             reset 0.42/0.15, latch 1/0.15, inverters
-  2 PMOS (short L)  MCXP MCOP MIOP MA1 M2 MT M1 MA2 MINP MCON MCXN   preamp pair lvt 4/0.5, latch pair lvt 4/0.5,
-                    load caps 3/1.5 (xp/xn) and 2/1 (op/on)
+  2 PMOS (short L)  MCXP MIOP MA1 M2 MT M1 MA2 MINP MCXN       preamp pair lvt 4/0.5, latch pair lvt 4/0.5,
+                    load caps 4/1.5 on xp/xn
                     (each latch input device next to the preamp load that drives it, on its own side)
   3 PMOS            M3 | MAT x4 (lvt 2/2 units, the bias_gen MP2 unit: mirror rule) | M4    (M3/M4 2/0.15, rotated)
 Rotated short-L devices (both D and S on signal nets) go in the outer rows, where all their stubs leave on
@@ -32,21 +32,21 @@ def rows():
           Dev("MION", N, 0.42, 0.15, D="opb", G="op", S="VGND"), Dev("M5", N, 1, 0.15, D="op", G="on", S="VGND"),
           Dev("M6", N, 1, 0.15, D="on", G="op", S="VGND"), Dev("MINN", N, 0.42, 0.15, D="onb", G="on", S="VGND"),
           Dev("MR4", N, 0.42, 0.15, D="on", G="clkb", S="VGND"), Dev("MR2", N, 0.42, 0.15, D="xn", G="clkb", S="VGND")], "VGND"),
-        # load caps at the row ends (unrotated, long L: row 2 is narrower than row 3)
-        ([Dev("MCXP", P, 3, 1.5, D="VDPWR", G="xp", S="VDPWR"), Dev("MCOP", P, 2, 1, D="VDPWR", G="op", S="VDPWR"),
+        # load caps at the row ends (unrotated: row 2 is narrower than row 3, which sets the cell width)
+        ([Dev("MCXP", P, 4, 1.5, D="VDPWR", G="xp", S="VDPWR"),
           Dev("MIOP", P, 0.84, 0.15, D="opb", G="op", S="VDPWR"),
           Dev("MA1", PL, 4, 0.5, D="pan", G="inp", S="pts"), Dev("M2", PL, 4, 0.5, D="xp", G="pan", S="ts"),
           Dev("MT", P, 4, 0.15, D="ts", G="clkb", S="VDPWR"),
           Dev("M1", PL, 4, 0.5, D="xn", G="pap", S="ts"), Dev("MA2", PL, 4, 0.5, D="pap", G="inn", S="pts"),
           Dev("MINP", P, 0.84, 0.15, D="onb", G="on", S="VDPWR"),
-          Dev("MCON", P, 2, 1, D="VDPWR", G="on", S="VDPWR"), Dev("MCXN", P, 3, 1.5, D="VDPWR", G="xn", S="VDPWR")], "VDPWR"),
+          Dev("MCXN", P, 4, 1.5, D="VDPWR", G="xn", S="VDPWR")], "VDPWR"),
         ([Dev("M3", P, 2, 0.15, rot=270, D="op", G="on", S="xp")]
          + [Dev(f"MAT_{k}", PL, 2, 2, D="pts", G="pbias", S="VDPWR") for k in range(1, 5)]
          + [Dev("M4", P, 2, 0.15, rot=270, D="on", G="op", S="xn")], "VDPWR"),
     ]
 
 
-NUDGE = (0.0, 0.0, 0.1, -0.1)   # rows 2 / 3 +-0.1 um: met2 stub spacing in channel 2 (0.2 um asymmetry)
+NUDGE = (0.0, 0.0, 0.1, 0.0)    # row 2 +0.1 um: met2 stub spacing in channel 2
 
 
 def make(x0s, **kw):

@@ -18,8 +18,7 @@ Devices:
   M3/M4     pfet_01v8 2/0.15      cross-coupled PMOS (sources on xp/xn; W 1 -> 2 on 2026-11-16 for layout)
   M5/M6     nfet_01v8 1/0.15      cross-coupled NMOS
   MR1..MR4  nfet_01v8 0.42/0.15   reset switches (gate = clkb)
-  MCXP/MCXN pfet_01v8 3/1.5       load caps on xp/xn (~40 fF; gate = node, D/S/B = VDPWR: inverted over 0..1.3 V)
-  MCOP/MCON pfet_01v8 2/1         load caps on op/on (~18 fF)
+  MCXP/MCXN pfet_01v8 4/1.5       load caps on xp/xn (~55 fF; gate = node, D/S/B = VDPWR: inverted over 0..1.3 V)
 Ports: VDPWR VGND pbias clkb smpt inp inn opb onb
 2026-11-16 (M2 layout area): the clock inverter (clk -> clkb) and the NAND SR latch (opb/onb -> q) moved to
 adc_digital (src/sar/sar_drv.v, two explicit nand2 cells); the top-plate switch MTOP (vtop = inp -> vcm = inn,
@@ -28,9 +27,9 @@ equal, state-independent loads.
 Preamp (added in I2, see sim/comparator/README.md): MAT/MA1/MA2/MAL1/MAL2 between the inputs and the latch.
 2026-11-16 (M2 post-layout): the extracted comparator had a -64 mV offset (-40 LSB in the whole tile). The latch
 nodes carried only ~10 fF and the preamp gain was ~2, so 2 fF of layout imbalance on xp moved the toggle point by
-> 80 mV (op: 61 mV, pan: 26 mV). Load caps on xp/xn/op/on and a longer preamp load (MAL L = 8) cut that to
-4 / 2 / 0 mV per 2 fF (2 fF xp-clkb: 7 mV; sim/comparator/README.md); the decision at ~1 mV takes ~4 ns (A10: 50 ns).
-Larger caps (6/2, 3/1.5 with L = 4: 3 / 1 / 1 mV) made the cell too wide for its slot.
+> 80 mV (op: 61 mV, pan: 26 mV). Load caps on xp/xn and a longer preamp load (MAL L = 8) cut that to
+3 / 2 / 0 mV per 2 fF (2 fF xp-clkb: 7 mV; sim/comparator/README.md); the decision at ~1 mV takes 3.2-3.7 ns
+(A10: 50 ns). Extra caps on op/on gained < 1 mV and made the cell too wide for its slot.
 """
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
@@ -72,8 +71,7 @@ n("M6", "on", "op", "VGND", W=1, L=0.15)
 n("MR1", "xp", "clkb", "VGND"); n("MR2", "xn", "clkb", "VGND")
 n("MR3", "op", "clkb", "VGND"); n("MR4", "on", "clkb", "VGND")
 # load caps (pfet gate caps to VDPWR): make the latch insensitive to fF-level layout imbalance
-p("MCXP", "VDPWR", "xp", "VDPWR", W=3, L=1.5); p("MCXN", "VDPWR", "xn", "VDPWR", W=3, L=1.5)
-p("MCOP", "VDPWR", "op", "VDPWR", W=2, L=1); p("MCON", "VDPWR", "on", "VDPWR", W=2, L=1)
+p("MCXP", "VDPWR", "xp", "VDPWR", W=4, L=1.5); p("MCXN", "VDPWR", "xn", "VDPWR", W=4, L=1.5)
 # identical inverters on op/on: equal, state-independent load on the latch outputs
 p("MIOP", "opb", "op", "VDPWR"); n("MION", "opb", "op", "VGND")
 p("MINP", "onb", "on", "VDPWR"); n("MINN", "onb", "on", "VGND")
