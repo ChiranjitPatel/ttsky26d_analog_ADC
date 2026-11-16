@@ -1,7 +1,9 @@
 * Comparator toggle point, schematic (xs) vs extracted layout (xl), tt 27 C 1.8 V.
 * inn = 0.716 V (vcm); inp ramps 0.40 -> 0.80 V at 1 mV per clock cycle (10 MHz, evaluate while clkb is low).
-* Layout netlist: python3 layout/cell_pex.py comparator.  Result: python3 offset.py
+* Netlists: tools/netlist.sh comparator; python3 layout/cell_pex.py comparator.  Result: python3 offset.py
 .lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/comparator.spice
+* bias_gen from the M2 reference netlist (its old comparator is ignored: ngspice keeps the first definition)
 .include ../../layout/cells/m2_top_ref.spice
 .include ../out/layout/comparator_rc/comparator_rc.spice
 .options reltol=1e-5 abstol=1e-12 vntol=1e-6 chgtol=1e-16
