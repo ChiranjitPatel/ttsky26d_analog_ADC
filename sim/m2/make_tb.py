@@ -51,9 +51,11 @@ def tb(dut):
          ".lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt",
          ".include /usr/local/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice" if dut == "rc" else "",
          f".include {NETS[dut]}", ".temp 27",
-         # vntol 1e-7 (trapezoidal or gear) fails at the first clock edge: "timestep too small" in the ptat_out
-         # xhigh_po divider (the resistor model overflows in rejected Newton steps). 1 uV is still << 1 LSB.
-         ".options reltol=1e-5 abstol=1e-12 vntol=1e-6 method=gear",
+         # Without rshunt the first clock edge fails with "timestep too small" in an xhigh_po resistor
+         # (its R depends on abs(V), which has a kink at 0 V that Newton cannot get past). rshunt puts 1 TOhm from
+         # every node to ground: ~1 pA, i.e. < 10 uV droop on the held DAC top plate over a conversion (<< 1 LSB).
+         # vntol 1e-7 also failed; 1 uV is still << 1 LSB.
+         ".options reltol=1e-5 abstol=1e-12 vntol=1e-6 method=gear rshunt=1e12",
          f"xdut {' '.join(conn)} {TOP}",
          "VDD vdd 0 1.8",
          "VCLK clk 0 pulse(0 1.8 0.5u 0.5n 0.5n 0.5u 1u)",
