@@ -6,7 +6,12 @@ Drawing: `material/schematics/stage6_comparator.png`. Run: `./run.sh`.
 ## Design
 
 - **Preamp (added in integration I2):** PMOS-lvt pair 4/0.5, 4 µA tail from `pbias`, diode-connected
-  nfet 0.5/1 loads (gain ≈ 2). It isolates the DAC top plate from the latch's clocked kickback (see below).
+  nfet loads, 0.5/8 since M2 (was 0.5/1, gain ≈ 2). It isolates the DAC top plate from the latch's clocked
+  kickback (see below).
+- **Latch load caps (M2):** pfet 4/1.5 gate caps on xp/xn. With them and the longer preamp load, fF-level layout
+  imbalance costs mV, not tens of mV (section "Layout-imbalance sensitivity" below).
+- The stage 6 numbers below (`results.md`, `tb_cmp*.spice`) are for the original sizing and the old ports; the
+  M2 numbers are in the section below and in `sim/m2`.
 
 - **PMOS (lvt) input pair 4/0.5:** the DAC top plate moves within ≈ 0.1 … 1.3 V around vcm ≈ 0.72 V
   (switching scheme in `sim/inmux/README.md`). A PMOS pair works down to 0 V.
@@ -31,6 +36,32 @@ In the ADC, `vtop` reaches ground through the DAC caps *and* the ~kΩ bottom-pla
 latch decided inside that ≈ 9 mV differential transient. The stage 6 test used ideal-source inputs and
 couldn't show it. With the preamp the latch's kick lands on two identical preamp output nodes (common mode)
 and barely reaches the inputs.
+
+## Layout-imbalance sensitivity: load caps and a longer preamp load (found in M2 post-layout, 2026-11-16)
+
+The first whole-tile post-layout run (`sim/m2`) read 40 LSB low at every input. The extracted comparator alone
+had a −64 mV offset (`tb_offset.spice` + `offset.py`: toggle point, schematic vs `layout/cell_pex.py comparator`,
+1 mV steps). The latch nodes carried ~10 fF and the preamp gain was ~2, so a few fF of routing imbalance
+(xn 41 fF vs xp 30 fF) became tens of mV. Layout symmetry alone didn't fix it: with mirrored buses the offset
+moved between +1, +7, +14 and +33 mV from layout detail to layout detail.
+
+Schematic sensitivity, toggle-point shift for 2 fF added on one side (to VGND, or xp-to-clkb for "clk"):
+
+| Variant | xp | op | pan | clk | Decision at ~1 mV |
+|---|---|---|---|---|---|
+| as built (MAL 0.5/1, no caps) | > 80 mV | 61 mV | −26 mV | | 0.6 ns |
+| MAL L = 4 | 36 | 19 | −4 | | |
+| MAL L = 8 | 22 | 11 | 0 | 31 | 0.8–1.0 ns |
+| MAL L = 16 | 67 | 40 | 0 | | 3.7–4.4 ns (pair near cut-off) |
+| L = 4 + caps 6/2 (xp/xn), 3/1.5 (op/on) | 3 | 1 | −1 | 5 | 3.8–4.6 ns (cell too wide) |
+| **L = 8 + caps 4/1.5 on xp/xn (chosen)** | **3** | **2** | **−1** | **7** | **3.2–3.7 ns** |
+
+The caps are pfet gate caps to VDPWR (inverted over the 0–1.3 V range where the decision happens). Caps on
+op/on as well gained < 1 mV. The longer preamp load raises the gain and also the preamp's output common mode
+(pan/pap ≈ 1.19 V), so the latch input pair runs at a lower overdrive.
+
+Extracted comparator after the fix (mirrored layout, `layout/gen_comparator.py`): toggle point +5 mV against
+the schematic's +1 mV (1 mV steps), i.e. ≈ 4 mV systematic, inside A7 (σ ≤ 10 mV, random).
 
 ## Simulation notes (apply to every comparator / ADC run)
 
