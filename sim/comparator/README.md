@@ -10,8 +10,8 @@ Drawing: `material/schematics/stage6_comparator.png`. Run: `./run.sh`.
   kickback (see below).
 - **Latch load caps (M2):** pfet 4/1.5 gate caps on xp/xn. With them and the longer preamp load, fF-level layout
   imbalance costs mV, not tens of mV (section "Layout-imbalance sensitivity" below).
-- The stage 6 numbers below (`results.md`, `tb_cmp*.spice`) are for the original sizing and the old ports; the
-  M2 numbers are in the section below and in `sim/m2`.
+- Since M2 the clock inverter and the NAND SR latch are in `adc_digital` (`src/sar/sar_drv.v`); the stage 6
+  testbenches wrap the comparator with the same std cells (`cmpq.spice`).
 
 - **PMOS (lvt) input pair 4/0.5:** the DAC top plate moves within ≈ 0.1 … 1.3 V around vcm ≈ 0.72 V
   (switching scheme in `sim/inmux/README.md`). A PMOS pair works down to 0 V.
@@ -23,9 +23,9 @@ Drawing: `material/schematics/stage6_comparator.png`. Run: `./run.sh`.
 
 ## Results (tt, 27 °C, 1.8 V)
 
-See `results.md` (with the preamp): 0.59 ns decision at 1 mV (A10 ≤ 50 ns), all 1 mV decisions correct at
-CM 0.2 / 0.6 / 1.0 V, toggle point within ±0.5 mV, kickback peak on a floating 2.4 pF input 0.02 mV
-(was 3.4 mV without the preamp), 3.9 µA (preamp bias).
+See `results.md` (re-run 2026-11-16 with the M2 sizing: load caps, MAL 0.5/8): 3.76 ns decision at 1 mV
+(A10 ≤ 50 ns; 0.59 ns before the load caps), all 1 mV decisions correct at CM 0.2 / 0.6 / 1.0 V, toggle point
+within ±0.5 mV, kickback peak on a floating 2.4 pF input 0.02 mV (was 3.4 mV without the preamp), 3.9 µA.
 
 ## Why the preamp was added (found in integration I2)
 

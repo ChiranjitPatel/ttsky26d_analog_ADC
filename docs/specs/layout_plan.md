@@ -190,7 +190,7 @@ extracted comparator is now within ~4 mV of the schematic (`sim/comparator/READM
 pbias, smpt/clkb/opb join the comparator buses on met2; onb (now on the comparator's other side) runs down its
 right edge. Magic DRC 0, KLayout 0/0/0, LVS match after the change.
 Open: the comparator and the inmux get VDPWR only through adc_digital's power grid (LVS-clean; a direct tie of
-straps 116.84 / 136.84 to the stripe would be more robust); stage 6 testbenches for the new comparator sizing.
+straps 116.84 / 136.84 to the stripe would be more robust).
 
 Next: CI precheck on the pushed GDS; Phase 2 Monte Carlo (comparator, cap DAC) on the final cells.
 

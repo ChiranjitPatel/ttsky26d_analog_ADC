@@ -1,0 +1,10 @@
+* Stage 6 test wrapper (since M2 the clock inverter and the NAND SR latch are in adc_digital, src/sar/sar_drv.v):
+* clk -> inv_2 -> clkb -> comparator (smpt = 0: top-plate switch off) -> opb/onb -> nand2_1 SR latch -> q, qb
+* q = 1 when inp > inn, held during reset (opb = onb = 1).
+.include /usr/local/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+.subckt cmpq VDPWR VGND pbias clk inp inn q qb
+Xinv clk VGND VGND VDPWR VDPWR clkb sky130_fd_sc_hd__inv_2
+Xc VDPWR VGND pbias clkb VGND inp inn opb onb comparator
+Xn1 opb qb VGND VGND VDPWR VDPWR q sky130_fd_sc_hd__nand2_1
+Xn2 onb q VGND VGND VDPWR VDPWR qb sky130_fd_sc_hd__nand2_1
+.ends
