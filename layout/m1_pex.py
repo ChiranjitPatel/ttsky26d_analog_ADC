@@ -7,9 +7,14 @@ drops the resistors). Needs the Docker daemon (start it with: dockerd &).
   resistance-extracted: their currents are uA, so IR drop is uV) -> ext2spice with R and C (cthresh 0.01 fF)
 Output: sim/out/layout/m1_rc/m1_rc.spice, subckt renamed to tt_um_chiranjitpatel_sar_adc.
 Also prints the effective resistance from each used pin to the devices it drives.
-Usage: python3 layout/m1_pex.py [m2]   (the name only changes the output paths: sim/out/layout/<name>_rc/<name>_rc.spice)
+Usage: python3 layout/m1_pex.py [m2]   (output: sim/out/layout/<name>_rc/<name>_rc.spice)
+m2: the LibreLane block adc_digital is not extracted (flat R+C of ~150 std cells made the whole-tile transient
+~15x slower than the schematic). A copy of the GDS without the adc_digital instance is extracted, with a label
+on each of its pins named after the top-level net (from layout/cells/m2_top_ref.spice), and the extracted
+netlist gets an instance of LibreLane's adc_digital netlist (layout/digital/adc_digital.spice) on those nets.
+The digital block's own timing is signed off by LibreLane's STA.
 """
-import os, re, subprocess, sys
+import json, os, re, subprocess, sys
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,8 +28,37 @@ for f in os.listdir(OUT):
     if f.endswith((".ext", ".sim", ".nodes", ".spice")):
         os.remove(os.path.join(OUT, f))
 ignore = ["VDPWR", "VGND"] + [f"{{{p}[{i}]}}" for p in ("uo_out", "uio_out", "uio_oe") for i in range(8)]
+GDS = os.path.join(ROOT, "gds", f"{TOP}.gds")
+XDIG = None
+if NAME == "m2":
+    import klayout.db as db
+    sub = open(os.path.join(ROOT, "layout", "digital", "adc_digital.spice")).read().replace("\n+", " ")
+    dports = re.search(r"^\.subckt adc_digital (.*)$", sub, re.M).group(1).split()
+    ref = open(os.path.join(ROOT, "layout", "cells", "m2_top_ref.spice")).read().replace("\n+", " ")
+    dnets = re.search(r"^xdig (.*) adc_digital$", ref, re.M).group(1).split()
+    net_of = dict(zip(dports, dnets))
+    XDIG = "Xdig " + " ".join(dnets) + " adc_digital"
+    dig = json.load(open(os.path.join(ROOT, "sim", "out", "layout", "m2p", "pins.json")))["adc_digital"]
+    bb = dig["bbox"]
+    L = db.Layout(); L.read(GDS); top = L.cell(TOP)
+    for inst in list(top.each_inst()):
+        if inst.cell.name == "adc_digital":
+            inst.delete()
+    for port, pts in dig["pins"].items():
+        net = net_of.get(port)
+        if net is None or net in ("VDPWR", "VGND"):
+            continue
+        x, y, gl = pts[0]
+        d = [x - bb[0], bb[2] - x, y - bb[1], bb[3] - y]
+        k = d.index(min(d))                                  # patch of pin metal from the pin to its edge
+        box = [(bb[0] - 0.05, y - 0.07, x + 0.07, y + 0.07), (x - 0.07, y - 0.07, bb[2] + 0.05, y + 0.07),
+               (x - 0.07, bb[1] - 0.05, x + 0.07, y + 0.07), (x - 0.07, y - 0.07, x + 0.07, bb[3] + 0.05)][k]
+        top.shapes(L.layer(gl, 20)).insert(db.DBox(*box))
+        top.shapes(L.layer(gl, 5)).insert(db.DText(net, db.DTrans(x, y)))
+    GDS = os.path.join(OUT, f"{TOP}_nodig.gds")
+    L.write(GDS)
 tcl = f"""gds flatglob *__example_*
-gds read {ROOT}/gds/{TOP}.gds
+gds read {GDS}
 load {TOP}
 flatten tt_flat
 load tt_flat
@@ -54,6 +88,9 @@ src = os.path.join(OUT, "tt_flat.spice")
 if not os.path.exists(src):
     sys.exit(f"extraction failed, see {OUT}/magic.log")
 txt = open(src).read().replace(".subckt tt_flat ", f".subckt {TOP} ")
+if XDIG:
+    i = txt.rindex(".ends")
+    txt = (f".include {ROOT}/layout/digital/adc_digital.spice\n" + txt[:i] + XDIG + "\n" + txt[i:])
 dst = os.path.join(OUT, f"{NAME}_rc.spice")
 open(dst, "w").write(txt)
 lines = txt.replace("\n+", " ").splitlines()

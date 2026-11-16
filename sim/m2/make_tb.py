@@ -4,9 +4,9 @@
 Two netlists of tt_um_chiranjitpatel_sar_adc:
   sch  layout/cells/m2_top_ref.spice (written by layout/m2_top.py: xschem analog subckts + LibreLane adc_digital)
   rc   sim/out/layout/m2_rc/m2_rc.spice (flat R+C extraction of gds/, `python3 layout/m1_pex.py m2`)
-Setup: internal reference (BG_PD = VREF_OE = REF_SEL = 0), INSEL = 0 (ua[0]), MODE = 0, START = 1 from 30.4 us.
-clk 1 MHz; rst_n high at 1.5 us. One conversion every 10 us; the first SAMPLE starts at 32 us (the reference
-has settled by then, see sim/m1). VIN steps right after each EOC.
+Setup: internal reference (BG_PD = VREF_OE = REF_SEL = 0), INSEL = 0 (ua[0]), MODE = 0, START = 1 from 1.4 us.
+clk 1 MHz; rst_n high at 1.5 us. One conversion every 10 us; the first SAMPLE starts at 3 us (the transient starts from the
+operating point, so the reference is already settled; startup is tested in sim/m1). VIN steps right after each EOC.
 Pads (CLAUDE.md rule 2): ua[0] 5 pF on the chip side + 500 Ohm to the ideal source; ua[1] 5 pF + 500 Ohm to a
 10 MOhm || 10 pF DMM. Unused pins: inputs to ground, other outputs 1 GOhm to ground.
 Usage: python3 make_tb.py [vin ...]   -> tb_m2_sch.spice, tb_m2_rc.spice (rc only if the extraction exists)
@@ -18,7 +18,7 @@ TOP = "tt_um_chiranjitpatel_sar_adc"
 NETS = {"sch": os.path.join(ROOT, "layout", "cells", "m2_top_ref.spice"),
         "rc": os.path.join(ROOT, "sim", "out", "layout", "m2_rc", "m2_rc.spice")}
 VINS = [float(x) for x in sys.argv[1:]] or [0.05, 0.31, 0.6, 0.9, 1.17]
-T, TCONV, T0 = 1e-6, 10e-6, 32e-6
+T, TCONV, T0 = 1e-6, 10e-6, 3e-6         # the .op starts the reference settled (no 30 us startup wait)
 PINS = {"VDPWR": "vdd", "VGND": "0", "clk": "clk", "rst_n": "rst_n", "ui_in[0]": "start", "ua[0]": "pad0",
         "ua[1]": "pad1", "uio_out[5]": "eoc", "uio_out[4]": "cmp"}
 PINS.update({f"uo_out[{i}]": f"d{i}" for i in range(8)})
