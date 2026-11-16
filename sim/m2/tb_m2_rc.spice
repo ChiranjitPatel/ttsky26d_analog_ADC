@@ -3,7 +3,7 @@
 .include /usr/local/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
 .include /home/user/ttsky26d_analog_ADC/sim/out/layout/m2_rc/m2_rc.spice
 .temp 27
-.options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
+.options reltol=1e-5 abstol=1e-12 vntol=1e-6 method=gear
 xdut clk 0 rst_n pad0 pad1 nc_ua_2_ nc_ua_3_ nc_ua_4_ nc_ua_5_ nc_ua_6_ nc_ua_7_ start 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 nc_uio_oe_4_ nc_uio_oe_5_ cmp eoc d0 d1 d2 d3 d4 d5 d6 d7 vdd nc_adc_digital_0______________14__ight_14_____ tt_um_chiranjitpatel_sar_adc
 VDD vdd 0 1.8
 VCLK clk 0 pulse(0 1.8 0.5u 0.5n 0.5n 0.5u 1u)

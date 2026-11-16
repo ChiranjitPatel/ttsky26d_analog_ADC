@@ -51,7 +51,9 @@ def tb(dut):
          ".lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt",
          ".include /usr/local/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice" if dut == "rc" else "",
          f".include {NETS[dut]}", ".temp 27",
-         ".options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16",
+         # vntol 1e-7 (trapezoidal or gear) fails at the first clock edge: "timestep too small" in the ptat_out
+         # xhigh_po divider (the resistor model overflows in rejected Newton steps). 1 uV is still << 1 LSB.
+         ".options reltol=1e-5 abstol=1e-12 vntol=1e-6 method=gear",
          f"xdut {' '.join(conn)} {TOP}",
          "VDD vdd 0 1.8",
          "VCLK clk 0 pulse(0 1.8 0.5u 0.5n 0.5n 0.5u 1u)",
