@@ -55,6 +55,20 @@ if NAME == "m2":
                (x - 0.07, bb[1] - 0.05, x + 0.07, y + 0.07), (x - 0.07, y - 0.07, x + 0.07, bb[3] + 0.05)][k]
         top.shapes(L.layer(gl, 20)).insert(db.DBox(*box))
         top.shapes(L.layer(gl, 5)).insert(db.DText(net, db.DTrans(x, y)))
+    # the block's met4 power straps stay: the comparator and the inmux take VDPWR from straps 116.84 / 136.84,
+    # which reach the VDPWR stripe only through the block's own power grid (its std-cell rails). That grid is
+    # stood in for by a met3 bar across the VDPWR straps (via3 at each), inside the deleted block's area.
+    m3, v3, m4 = L.layer(70, 20), L.layer(70, 44), L.layer(71, 20)
+    ym = (bb[1] + bb[3]) / 2
+    for net in ("VDPWR", "VGND"):
+        xs = sorted({round(p[0], 3) for p in dig["pins"][net]})
+        for x in xs:
+            top.shapes(m4).insert(db.DBox(x - 0.6, bb[1], x + 0.6, bb[3]))
+        if net == "VDPWR":
+            top.shapes(m3).insert(db.DBox(xs[0] - 0.6, ym - 0.3, xs[-1] + 0.6, ym + 0.3))
+            for x in xs:
+                for dx in (-0.3, 0.1):
+                    top.shapes(v3).insert(db.DBox(x + dx, ym - 0.1, x + dx + 0.2, ym + 0.1))
     GDS = os.path.join(OUT, f"{TOP}_nodig.gds")
     L.write(GDS)
 tcl = f"""gds flatglob *__example_*
