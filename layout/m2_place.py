@@ -25,7 +25,7 @@ DEF = os.path.join(ROOT, "layout", "tt_analog_1x2.def")
 OUT = os.path.join(ROOT, "sim", "out", "layout", "m2p")
 FP = json.load(open(os.path.join(ROOT, "layout", "floorplan_v4.json")))
 CELLS = ["bias_gen", "bandgap_core", "vref_filt", "ptat_out", "vref_sel", "vref_buf",
-         "inmux", "vcm_gen", "dac_sw_row", "cap_array", "comparator", "adc_digital"]
+         "inmux", "vcm_gen", "dac", "comparator", "adc_digital"]
 os.makedirs(OUT, exist_ok=True)
 for fn in os.listdir(OUT):                 # stale .mag files in Magic's working directory would be loaded
     if fn.endswith(".mag") or fn.endswith(".ext"):  # instead of the fresh cells (2026-11-14: hung at a prompt)

@@ -11,7 +11,7 @@ Rotated short-L devices (both D and S on signal nets) go in the outer rows, wher
 the same side; the unrotated short-L ones go in the middle rows (gate down, D/S up).
 Matched pairs (MA1/MA2, M1/M2, M3/M4, M5/M6, MAL1/MAL2, MR1/MR2, MR3/MR4, inverters) are mirror-symmetric
 about the row centre. MTOP (top-plate switch vtop -> vcm) sits at the row end next to the inp/inn buses.
-Pins: pbias, clkb, smpt (left); inp (= vtop), inn (= vcm), opb, onb (right); VGND, VDPWR.
+Pins: pbias, clkb, smpt, opb, onb (left); inp (= vtop), inn (= vcm) (right: no digital bus next to them); VGND, VDPWR.
 Usage: python3 layout/gen_comparator.py && python3 layout/check_cell.py comparator
 """
 import os, sys
@@ -36,7 +36,7 @@ c.add_row([Dev("MIOP", P, 0.84, 0.15, D="opb", G="op", S="VDPWR"),
 c.add_row([Dev("M3", P, 2, 0.15, rot=270, D="op", G="on", S="xp")]
           + [Dev(f"MAT_{k}", PL, 2, 2, D="pts", G="pbias", S="VDPWR") for k in range(1, 5)]
           + [Dev("M4", P, 2, 0.15, rot=270, D="on", G="op", S="xn")], "VDPWR")
-c.build(pins_left=("pbias", "clkb", "smpt"), pins_right=("inp", "inn", "opb", "onb"), pack=True)
+c.build(pins_left=("pbias", "clkb", "smpt", "opb", "onb"), pins_right=("inp", "inn"), pack=True)   # digital buses away from inp/inn
 drc, errs, gds = c.write()
 for i, r in enumerate(c.rows):
     print(f"row {i}: x {r['x0']:.2f} .. {r['x1']:.2f}  y {r['y']:.2f} .. {r['top']:.2f}")

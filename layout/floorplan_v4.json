@@ -138,36 +138,24 @@
    "orient": "R0",
    "note": "vcm up under the right stripes to the comparator"
   },
-  "dac_sw_row": {
+  "dac": {
    "rect": [
-    91.0,
-    64.4,
-    138.05,
-    70.06
+    88.6,
+    64.0,
+    153.5,
+    134.05
    ],
    "milestone": "M2",
    "status": "drawn",
    "orient": "R0",
-   "note": "9 bottom-plate switches; gn/gpb on met4 above"
-  },
-  "cap_array": {
-   "rect": [
-    91.25,
-    71.0,
-    153.15,
-    134.38
-   ],
-   "milestone": "M2",
-   "status": "drawn",
-   "orient": "R0",
-   "note": "16 x 16 + 2 dummy columns; buses at the bottom"
+   "note": "16 x 16 MIM array + 9 bottom-plate switches (one cell); gn/gpb from met4 tracks under it"
   },
   "comparator": {
    "rect": [
     90.5,
-    134.9,
-    128.96,
-    171.34
+    134.6,
+    130.56,
+    171.04
    ],
    "milestone": "M2",
    "status": "drawn",
@@ -177,14 +165,14 @@
   "adc_digital": {
    "rect": [
     90.0,
-    171.9,
+    171.6,
     153.48,
-    219.22
+    218.92
    ],
    "milestone": "M2",
    "status": "drawn",
    "orient": "R0",
-   "note": "LibreLane, 63.5 x 47.3"
+   "note": "LibreLane, 63.5 x 47.3; power bars above it"
   }
  },
  "corridors": {
@@ -211,6 +199,12 @@
    7.0,
    82.0,
    214.4
+  ],
+  "R4 under the middle stripes (gn/gpb high bits, west pins)": [
+   83.0,
+   57.0,
+   88.4,
+   171.0
   ],
   "R3 under the right stripes (vcm, en/enb, pbias)": [
    153.5,

@@ -143,3 +143,27 @@ integration, full-chip LVS, post-layout simulation.
   core in a 63 µm block; they are 1 row / 4 sites.
 - Result: route DRC 0, Magic DRC 0, KLayout DRC 0, LVS 0, antenna 0; setup slack +27.4 ns, hold +0.12 ns;
   2 max-slew warnings at ss/100 °C/1.6 V only.
+
+## M2 integration plan (2026-11-16, in progress)
+
+Floorplan v4 (`layout/floorplan_v4.py`, positions from the real cells; `layout/m2_place.py` builds a
+placement-only top and writes every pin's absolute position to `sim/out/layout/m2p/pins.json`).
+Right half, bottom to top: vref_buf (M1), vcm_gen (bottom right), `dac` (array + switches, 88.6-153.5 x
+64.0-134.05), comparator (rotated, 90.5-130.6 x 134.6-171.0), adc_digital (90.0-153.5 x 171.6-218.9).
+The only ways past the array are two corridors: R4 under the middle stripes (x 83-88.4, met2/met3 free)
+and R3 under the right stripes (x 153.75-160.7). Routing plan:
+- gn/gpb bits 7-4 (west pins) down R4 on met2, met3 jog right at y 56.8-62.4, met4 tracks under the dac
+  (over vref_buf, no met4 there; the nearest landing gets the highest track), met4 up to the dac's landing pads.
+- gn/gpb bits 3-0, smp, smpb, vin, vptat, vbg, vadc, vcm, pbias down R3 (all met2, ~16 lines at 0.43 pitch;
+  horizontals on met3/met4). vptat/vbg run along the very bottom (y 0.5, under the B1 lanes).
+- inmux moves to the free area right of the comparator (x 131-153, y 136-160), redrawn with its gate pads
+  on top (en/enb straight down from the digital south edge) and its inputs on the right.
+- comparator: vtop from the array's met4 spine onto the inp bus (bottom side), vcm onto inn (bottom right),
+  pbias/clkb/smpt/opb/onb (top side) short to the digital south pins.
+- power: digital straps extended to the block edges -> met3 bars above the block (VDPWR y 219.6, VGND
+  y 220.3) to the middle stripes (extended upward); the comparator and the new inmux from extended digital
+  straps; vcm_gen and vref_buf from the B1 ties; the dac from the middle stripes (stacks kept out of R4's lines).
+- frame: only the 16 constant outputs are tied (uio_oe[5:4] to VDPWR); eoc / cmp_out to uio_out[5:4];
+  the 27 north pins river-route to the TT pins above the power bars.
+- M1 control signals (BG_PD, VREF_OE, REF_SEL) now come from the digital west pins onto the R1 met4 lines;
+  bias_gen's pd is tied to VGND (vcm_gen needs the bias when BG_PD = 1).

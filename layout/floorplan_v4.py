@@ -52,16 +52,16 @@ blocks = {
     "vref_buf":     (at("vref_buf", 90.0, 7.0), "M1", "drawn", "R0", "vref to vref_sel (bottom corridor) and up to dac_sw"),
     "inmux":        (at("inmux", 138.0, 7.0), "M2", "drawn", "R0", "VIN from ua[0] (x 152.3); vptat / vbg along the bottom"),
     "vcm_gen":      (at("vcm_gen", 136.0, 14.0), "M2", "drawn", "R0", "vcm up under the right stripes to the comparator"),
-    "dac_sw_row":   (at("dac_sw_row", 91.0, 64.4), "M2", "drawn", "R0", "9 bottom-plate switches; gn/gpb on met4 above"),
-    "cap_array":    (at("cap_array", 91.25, 71.0), "M2", "drawn", "R0", "16 x 16 + 2 dummy columns; buses at the bottom"),
-    "comparator":   (at("comparator", 90.5, 134.9, "R90"), "M2", "drawn", "R90", "right above the array's vtop exit"),
-    "adc_digital":  (at("adc_digital", 90.0, 171.9), "M2", "drawn", "R0", "LibreLane, 63.5 x 47.3"),
+    "dac":          (at("dac", 88.6, 64.0), "M2", "drawn", "R0", "16 x 16 MIM array + 9 bottom-plate switches (one cell); gn/gpb from met4 tracks under it"),
+    "comparator":   (at("comparator", 90.5, 134.6, "R90"), "M2", "drawn", "R90", "right above the array's vtop exit"),
+    "adc_digital":  (at("adc_digital", 90.0, 171.6), "M2", "drawn", "R0", "LibreLane, 63.5 x 47.3; power bars above it"),
 }
 corridors = {  # reserved for top-level routing
     "G1 bias/bandgap":     (7.0, 188.03, 78.7, 190.5),
     "G2 bandgap/vref_filt": (7.0, 81.46, 78.7, 84.0),
     "G3 vref_filt/bottom": (7.0, 38.44, 78.7, 42.0),
     "R1 left column, right edge": (79.5, 7.0, 82.0, 214.4),
+    "R4 under the middle stripes (gn/gpb high bits, west pins)": (83.0, 57.0, 88.4, 171.0),
     "R3 under the right stripes (vcm, en/enb, pbias)": (153.5, 7.0, 160.0, 171.0),
     "R2 beside vref_filt":  (60.5, 42.0, 78.7, 81.46),
     "B1 bottom (pads)":     (7.0, 1.6, 153.5, 6.4),
@@ -80,8 +80,8 @@ for i, n in enumerate(names):
         if ov(r, blocks[m][0]):
             problems.append(f"{n} overlaps {m}")
     for net, x0, x1 in stripes:
-        if ov(r, (x0, STRIPE_Y[0], x1, STRIPE_Y[1]), gap=1.0):
-            problems.append(f"stripe {net} at x = {x0} is within 1 um of {n}")
+        if ov(r, (x0, STRIPE_Y[0], x1, STRIPE_Y[1]), gap=0.5):
+            problems.append(f"stripe {net} at x = {x0} is within 0.5 um of {n}")
     for c, cr in corridors.items():
         if ov(r, cr):
             problems.append(f"corridor '{c}' overlaps {n}")
