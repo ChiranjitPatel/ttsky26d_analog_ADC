@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Chunk 2e — inmux: 4:1 input multiplexer, four transmission gates (full-custom, Magic layers).
+"""Chunk 2e — inmux: 4:1 input multiplexer, four transmission gates (full-custom, Magic layers). Version 2 (2026-11-16):
+gate pads along the top edge (the enables come straight down from adc_digital's south edge) and the inputs on
+straps that leave on the right (from the R3 corridor). v1 (gen_inmux_v1.py) had its gate pads interleaved with
+the input straps, which left no room for the top-level vias.
 
-TG k connects vadc to input k (0 vin, 1 vptat, 2 vbg, 3 VGND): NMOS 4/0.15 (gate en_k) + PMOS lvt 8/0.35 (gate enb_k).
-Two stacks, each one NMOS diffusion (W = 4) next to one PMOS diffusion (W = 8), gates horizontal:
-      in_a | gate a | vadc | gate b | in_b          stack 0: a = 0, b = 1     stack 1: a = 2, b = 3
-The NMOS strips are stretched so every strip lines up with its PMOS partner; met2 straps join them across
-the gap between the two diffusions. NMOS gate pads on the left, PMOS gate pads on the right.
-p-tap row below the NMOS (VGND), n-tap row above the PMOS (VDPWR).
-Pins: vin, vptat, vbg (met2 straps, left end), vadc (met2), en0..3 (met1, left), en0b..3b (met1, right),
-VGND, VDPWR. Input 3 (VGND) is tied to the VGND rail inside the cell.
+TG k connects vadc to input k (0 vin, 1 vptat, 2 vbg, 3 VGND): NMOS 4/0.15 (gate en_k) + PMOS lvt 8/0.35 (gate en_kb).
+Vertical gates (W along y). Four diffusions side by side, each two transistors sharing their vadc strip:
+      NMOS A: in0 | en0 | vadc | en1 | in1      NMOS B: in2 | en2 | vadc | en3 | in3      (W = 4)
+      PMOS A: in0 | en0b | vadc | en1b | in1    PMOS B: in2 | en2b | vadc | en3b | in3    (W = 8, in the nwell)
+The vadc strip is 0.8 um wide so the gate pads (one row above the PMOS) clear each other. Every S/D strip runs
+down on li + met1 to one of five met2 straps under the cell (vin, vptat, vbg, VGND, vadc).
+p-tap column (VGND) left of the NMOS, n-tap column (VDPWR) right of the PMOS.
+Pins: en0..3, en0b..3b (met1 pads, top); vin, vptat, vbg, vadc (met2, right end); VGND, VDPWR (met1 columns).
 Usage: python3 layout/gen_inmux.py && python3 layout/check_cell.py inmux
 """
 import os, sys
@@ -16,14 +19,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from magic_lib import Layout
 
 WN, WP = 4.0, 8.0
-XN = 0.9                                  # NMOS diffusion left edge (gate pads at XN - 0.5)
-XP = XN + WN + 1.4                        # PMOS diffusion left edge (nwell spacing 0.34 + enclosure 0.18)
-# one stack, y relative to its bottom (PMOS L = 0.35, NMOS L = 0.15 centred on the PMOS gates)
-P_SEG = [(0.0, 0.29), (0.29, 0.64), (0.64, 0.94), (0.94, 1.29), (1.29, 1.58)]      # in_a, g_a, vadc, g_b, in_b
-N_GATES = [(0.39, 0.54), (1.04, 1.19)]
-STRIP_Y = [0.145, 0.79, 1.435]            # licon / strap centres (in_a, vadc, in_b)
-STACK_DY = 1.85
-Y0 = 1.0                                  # bottom of stack 0
+def segs(L):
+    """(start, end) along x of: in_a strip, gate a, vadc strip, gate b, in_b strip."""
+    a = 0.29
+    return [(0, a), (a, a + L), (a + L, a + L + 0.8), (a + L + 0.8, a + 2 * L + 0.8), (a + 2 * L + 0.8, 2 * a + 2 * L + 0.8)]
+NS, PS = segs(0.15), segs(0.35)
+XA_N = 0.5
+XB_N = XA_N + NS[-1][1] + 0.27
+XA_P = XB_N + NS[-1][1] + 0.34 + 0.18 + 0.2
+XB_P = XA_P + PS[-1][1] + 0.27
+XEND = XB_P + PS[-1][1]
+PAD_Y = WP + 0.55
+STRAP = {"vin": -0.8, "vptat": -1.6, "vbg": -2.4, "VGND": -3.2, "vadc": -4.0}   # 0.8 pitch: room for via pads
 mid = lambda a: (a[0] + a[1]) / 2
 
 
@@ -31,79 +38,53 @@ def build():
     L = Layout("inmux")
     P = L.paint
     sq = lambda layer, x, y, hx, hy=None: P(layer, x - hx, y - (hx if hy is None else hy), x + hx, y + (hx if hy is None else hy))
-    W = XP + WP + 0.9
-    ytop = Y0 + STACK_DY + 1.58
-    # p-tap row (VGND) under the NMOS, n-tap row (VDPWR) above the PMOS
-    P("metal1", 0, 0.0, W, 0.48); P("locali", 0, 0.04, W, 0.44); P("psubdiff", 0.25, 0.065, XN + WN + 0.3, 0.415)
-    yt = ytop + 0.55
-    P("metal1", 0, yt, W, yt + 0.48); P("locali", 0, yt + 0.04, W, yt + 0.44)
-    P("nsubdiff", XP - 0.2, yt + 0.065, W - 0.25, yt + 0.415)
-    for x in [0.5 + 0.5 * k for k in range(int((XN + WN - 0.45) / 0.5) + 1)]:
-        sq("psubdiffcont", x, 0.24, 0.085); sq("viali", x, 0.24, 0.085)
-    for x in [XP + 0.05 + 0.5 * k for k in range(int((W - 0.5 - XP - 0.05) / 0.5) + 1)]:
-        sq("nsubdiffcont", x, yt + 0.24, 0.085); sq("viali", x, yt + 0.24, 0.085)
-    P("nwell", XP - 0.4, Y0 - 0.3, W, yt + 0.6)
     pins = []
-    def gate_pad(x, y, pin):
-        P("poly", x - 0.165, y - 0.135, x + 0.165, y + 0.135)
-        sq("polycont", x, y, 0.085); sq("locali", x, y, 0.085, 0.165); sq("viali", x, y, 0.085)
-        sq("metal1", x, y, 0.145, 0.16)
-        pins.append((pin, "metal1", (x - 0.145, y - 0.16, x + 0.145, y + 0.16)))
-    strap_x = {}
-    for s in range(2):
-        y0 = Y0 + s * STACK_DY
-        ka, kb = 2 * s, 2 * s + 1
-        # NMOS
-        P("ndiff", XN, y0, XN + WN, y0 + 1.58)
-        for (ga, gb), k in zip(N_GATES, (ka, kb)):
-            P("poly", XN - 0.5 - 0.165, y0 + ga, XN + WN + 0.13, y0 + gb)
-            gate_pad(XN - 0.5, y0 + mid((ga, gb)), f"en{k}")
-        # PMOS (lvt)
-        P("pdiff", XP, y0, XP + WP, y0 + 1.58)
-        for seg, k in ((P_SEG[1], ka), (P_SEG[3], kb)):
-            P("poly", XP - 0.13, y0 + seg[0], XP + WP + 0.5 + 0.165, y0 + seg[1])
-            P("pmoslvt", XP, y0 + seg[0], XP + WP, y0 + seg[1])
-            gate_pad(XP + WP + 0.5, y0 + mid(seg), f"en{k}b")
-        # strips: licons + li, mcon + met1 + via1 at the inner ends, met2 strap across
-        for j, ys in enumerate(STRIP_Y):
-            y = y0 + ys
-            for x0, w, cont in ((XN, WN, "ndiffc"), (XP, WP, "pdiffc")):
-                cxs = [x0 + 0.25 + 0.5 * i for i in range(int(w / 0.5))]
-                for cx in cxs:
-                    sq(cont, cx, y, 0.085)
-                P("locali", cxs[0] - 0.165, y - 0.085, cxs[-1] + 0.165, y + 0.085)
-            xa, xb = XN + WN - 0.25, XP + 0.25            # inner contact columns
-            for x in (xa, xb):
-                sq("viali", x, y, 0.085); sq("metal1", x, y, 0.19, 0.16)      # encloses via1 (0.06 / 0.03)
-                sq("via1", x, y, 0.13); sq("metal2", x, y, 0.185, 0.16)
-            net = ("vadc" if j == 1 else ["vin", "vptat", "vbg", "VGND"][ka if j == 0 else kb])
-            P("metal2", xa - 0.185, y - 0.16, xb + 0.185, y + 0.16)
-            strap_x[(net, s)] = (xa, xb, y)
-    # vadc: the two stacks' straps joined by a met1 vertical in the gap between the diffusions
-    xj = (XN + WN + XP) / 2
-    ya, yb = strap_x[("vadc", 0)][2], strap_x[("vadc", 1)][2]
-    for y in (ya, yb):
-        P("metal2", strap_x[("vadc", 0)][0], y - 0.16, xj + 0.185, y + 0.16)
-        sq("via1", xj, y, 0.13); sq("metal1", xj, y, 0.15, 0.16)
-    P("metal1", xj - 0.15, ya, xj + 0.15, yb)
-    # inputs leave on met2 to the left edge (vin, vptat, vbg); VGND input: met1 down to the tap row
-    xs, xe, y = strap_x[("VGND", 1)]
-    for net in ("vin", "vptat", "vbg"):
-        xa, xb, y = strap_x[[k for k in strap_x if k[0] == net][0]]
-        # the strap runs left under the NMOS gate pads only on met2 (pads are met1)
-        P("metal2", 0.1, y - 0.15, xa, y + 0.15)
-        pins.append((net, "metal2", (0.1, y - 0.15, 0.6, y + 0.15)))
-    # VGND input strap: met1 from its NMOS-side contact down the left of the NMOS?  The NMOS strip li runs
-    # the full width; tie it to the tap row through li at the NMOS right end, where nothing else runs.
-    xa, xb, y = strap_x[("VGND", 1)]
-    # VGND (input 3) is the top strip of stack 1: li down would cross the other strips, so use met2 -> via1 ->
-    # met1 in the gap, down to the VGND rail
-    xg = xj + 0.445                        # between the vadc join (xj) and the PMOS-side contact pads
-    P("metal2", xa - 0.185, y - 0.16, xg + 0.185, y + 0.16)
-    sq("via1", xg, y, 0.13); sq("metal1", xg, y, 0.15, 0.16)
-    P("metal1", xg - 0.15, 0.0, xg + 0.15, y)
-    pins.append(("vadc", "metal2", (strap_x[("vadc", 0)][0] - 0.185, ya - 0.16, strap_x[("vadc", 0)][0] + 0.185, ya + 0.16)))
-    pins += [("VGND", "metal1", (0.0, 0.0, 0.5, 0.48)), ("VDPWR", "metal1", (W - 0.5, yt, W, yt + 0.48))]
+    x_right = XEND + 1.2
+    for net, y in STRAP.items():                                   # straps (met2)
+        P("metal2", -0.25 if net == "VGND" else 0.4, y - 0.15, x_right, y + 0.15)
+    for (x0, S, W, ka, kb, dtype, cont, sfx) in ((XA_N, NS, WN, 0, 1, "ndiff", "ndiffc", ""), (XB_N, NS, WN, 2, 3, "ndiff", "ndiffc", ""),
+                                                  (XA_P, PS, WP, 0, 1, "pdiff", "pdiffc", "b"), (XB_P, PS, WP, 2, 3, "pdiff", "pdiffc", "b")):
+        P(dtype, x0, 0.0, x0 + S[-1][1], W)
+        for gi, k in ((1, ka), (3, kb)):                           # gates: vertical poly up to the pad row
+            g0, g1 = x0 + S[gi][0], x0 + S[gi][1]
+            P("poly", g0, -0.13, g1, PAD_Y)
+            if dtype == "pdiff":
+                P("pmoslvt", g0, 0.0, g1, W)
+            xg = (g0 + g1) / 2
+            P("poly", xg - 0.165, PAD_Y - 0.135, xg + 0.165, PAD_Y + 0.135)
+            sq("polycont", xg, PAD_Y, 0.085); sq("locali", xg, PAD_Y, 0.165, 0.085); sq("viali", xg, PAD_Y, 0.085)
+            sq("metal1", xg, PAD_Y, 0.16, 0.145)
+            pins.append((f"en{k}{sfx}", "metal1", (xg - 0.16, PAD_Y - 0.145, xg + 0.16, PAD_Y + 0.145)))
+        names = ["vin", "vptat", "vbg", "VGND"]
+        for si, net in ((0, names[ka]), (2, "vadc"), (4, names[kb])):   # strips -> li -> met1 -> strap
+            xs = x0 + mid(S[si])
+            ys = [0.25 + 0.5 * j for j in range(int(W / 0.5))]
+            for y in ys:
+                sq(cont, xs, y, 0.085)
+            P("locali", xs - 0.085, -0.45, xs + 0.085, ys[-1] + 0.165)
+            sq("viali", xs, -0.3, 0.085)
+            yb = STRAP[net]
+            P("metal1", xs - 0.115, yb, xs + 0.115, -0.15)
+            sq("metal1", xs, yb, 0.16, 0.19); sq("via1", xs, yb, 0.13); sq("metal2", xs, yb, 0.185, 0.16)
+    xt = 0.0                                                       # p-tap column (VGND), tied to the VGND strap
+    P("psubdiff", xt - 0.175, 0.0, xt + 0.175, WN)
+    for y in [0.25 + 0.5 * j for j in range(int(WN / 0.5))]:
+        sq("psubdiffcont", xt, y, 0.085); sq("viali", xt, y, 0.085)
+    P("locali", xt - 0.085, 0.08, xt + 0.085, WN - 0.08)
+    P("metal1", xt - 0.17, STRAP["VGND"] - 0.19, xt + 0.17, WN)
+    sq("via1", xt, STRAP["VGND"], 0.13); sq("metal2", xt, STRAP["VGND"], 0.185, 0.16)
+    pins.append(("VGND", "metal1", (xt - 0.17, WN - 0.6, xt + 0.17, WN)))
+    xn = XEND + 0.6                                                # n-tap column (VDPWR), inside the nwell
+    P("nsubdiff", xn - 0.175, 0.3, xn + 0.175, WP - 0.3)
+    for y in [0.55 + 0.5 * j for j in range(int((WP - 0.6) / 0.5))]:
+        sq("nsubdiffcont", xn, y, 0.085); sq("viali", xn, y, 0.085)
+    P("locali", xn - 0.085, 0.38, xn + 0.085, WP - 0.38)
+    P("metal1", xn - 0.17, 0.3, xn + 0.17, WP - 0.3)
+    pins.append(("VDPWR", "metal1", (xn - 0.17, WP - 0.9, xn + 0.17, WP - 0.3)))
+    P("nwell", XA_P - 0.38, -0.38, xn + 0.55, WP + 0.38)
+    for net in ("vin", "vptat", "vbg", "vadc"):
+        y = STRAP[net]
+        pins.append((net, "metal2", (x_right - 0.5, y - 0.15, x_right, y + 0.15)))
     for k, (n, layer, b) in enumerate(pins, 1):
         L.pin(n, layer, *b, k)
     return L

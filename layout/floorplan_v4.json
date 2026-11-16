@@ -116,15 +116,15 @@
   },
   "inmux": {
    "rect": [
-    138.0,
-    7.0,
-    153.2,
-    12.64
+    136.955,
+    153.1,
+    147.74,
+    165.22
    ],
    "milestone": "M2",
    "status": "drawn",
    "orient": "R0",
-   "note": "VIN from ua[0] (x 152.3); vptat / vbg along the bottom"
+   "note": "under the digital block's enable pins; inputs from R3 on the right"
   },
   "vcm_gen": {
    "rect": [

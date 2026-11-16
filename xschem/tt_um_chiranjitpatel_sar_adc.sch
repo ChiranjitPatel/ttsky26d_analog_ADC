@@ -321,7 +321,7 @@ N -80 1820 -120 1820 {lab=pbias}
 C {lab_pin.sym} -120 1820 0 0 {name=p126 sig_type=std_logic lab=pbias}
 N 80 1780 190 1780 {lab=vcm}
 C {lab_pin.sym} 190 1780 0 1 {name=p127 sig_type=std_logic lab=vcm}
-C {cap_dac.sym} 900 1800 0 0 {name=xdac}
+C {dac.sym} 900 1800 0 0 {name=xdac}
 N 820 1580 780 1580 {lab=VDPWR}
 C {lab_pin.sym} 780 1580 0 0 {name=p128 sig_type=std_logic lab=VDPWR}
 N 820 1600 780 1600 {lab=VGND}

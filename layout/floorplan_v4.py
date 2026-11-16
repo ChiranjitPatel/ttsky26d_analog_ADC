@@ -50,7 +50,7 @@ blocks = {
     "vref_sel":     (at("vref_sel", 41.0, 7.0), "M1", "drawn", "R0", "pad (TG) runs along the bottom corridor to ua[1]"),
     # ---- right half (x 90 ... 153.5): real cell sizes ----
     "vref_buf":     (at("vref_buf", 90.0, 7.0), "M1", "drawn", "R0", "vref to vref_sel (bottom corridor) and up to dac_sw"),
-    "inmux":        (at("inmux", 138.0, 7.0), "M2", "drawn", "R0", "VIN from ua[0] (x 152.3); vptat / vbg along the bottom"),
+    "inmux":        (at("inmux", 136.955, 153.1), "M2", "drawn", "R0", "under the digital block's enable pins; inputs from R3 on the right"),
     "vcm_gen":      (at("vcm_gen", 136.0, 14.0), "M2", "drawn", "R0", "vcm up under the right stripes to the comparator"),
     "dac":          (at("dac", 88.6, 64.0), "M2", "drawn", "R0", "16 x 16 MIM array + 9 bottom-plate switches (one cell); gn/gpb from met4 tracks under it"),
     "comparator":   (at("comparator", 90.5, 134.6, "R90"), "M2", "drawn", "R90", "right above the array's vtop exit"),

@@ -3,7 +3,7 @@
 
 Generates xschem/adc_digital.sym (symbol only; circuit = src/sar/adc_digital.v -> Yosys -> gl2spice)
 and xschem/tt_um_chiranjitpatel_sar_adc.sch/.sym.   python3 xschem/gen_top.py
-Blocks: bias_gen, bandgap_core, ptat_out, vref_filt, vref_buf, vref_sel, inmux, vcm_gen, cap_dac,
+Blocks: bias_gen, bandgap_core, ptat_out, vref_filt, vref_buf, vref_sel, inmux, vcm_gen, dac,
 comparator, adc_digital (incl. the switch drivers, src/sar/sar_drv.v).
   bias_gen.pd = VGND: the bias stays on (vcm_gen needs it even with BG_PD = 1 / external reference).
   bandgap_core.pd = bg_pd; vref_buf.en = en_buf from vref_sel (off for REF_SEL = 1 or BG_PD = 1).
@@ -50,7 +50,7 @@ s.dev("inmux.sym", "xmux", mux)
 s.dev("vcm_gen.sym", "xvcm", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "vcm": "vcm"})
 dac = {"VDPWR": "VDPWR", "VGND": "VGND", "vref": "vref", "vadc": "vadc", "smp": "smp", "smpb": "smpb", "vtop": "vtop"}
 dac.update({f"gn{i}": f"gn_{i}" for i in range(8)}); dac.update({f"gpb{i}": f"gpb_{i}" for i in range(8)})
-s.dev("cap_dac.sym", "xdac", dac)
+s.dev("dac.sym", "xdac", dac)                           # cap_array + dac_sw_row (the layout cell)
 s.dev("comparator.sym", "xcmp", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "clkb": "cmp_clkb", "smpt": "smpt",
                                  "inp": "vtop", "inn": "vcm", "opb": "opb", "onb": "onb"})
 # smpb, gn/gpb (dac_sw) and en/enb (inmux) come from adc_digital (src/sar/sar_drv.v) since 2026-11-16

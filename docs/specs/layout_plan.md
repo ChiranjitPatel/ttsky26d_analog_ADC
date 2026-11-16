@@ -144,7 +144,7 @@ integration, full-chip LVS, post-layout simulation.
 - Result: route DRC 0, Magic DRC 0, KLayout DRC 0, LVS 0, antenna 0; setup slack +27.4 ns, hold +0.12 ns;
   2 max-slew warnings at ss/100 °C/1.6 V only.
 
-## M2 integration plan (2026-11-16, in progress)
+## M2 integration (2026-11-16: DRC and LVS clean)
 
 Floorplan v4 (`layout/floorplan_v4.py`, positions from the real cells; `layout/m2_place.py` builds a
 placement-only top and writes every pin's absolute position to `sim/out/layout/m2p/pins.json`).
@@ -167,3 +167,20 @@ and R3 under the right stripes (x 153.75-160.7). Routing plan:
   the 27 north pins river-route to the TT pins above the power bars.
 - M1 control signals (BG_PD, VREF_OE, REF_SEL) now come from the digital west pins onto the R1 met4 lines;
   bias_gen's pd is tied to VGND (vcm_gen needs the bias when BG_PD = 1).
+
+**Result (2026-11-16).** `layout/m2_top.py` builds the full tile (`--install` copies it into `gds/`, `lef/`):
+Magic DRC 0, KLayout feol/beol/offgrid 0, full-chip LVS "Circuits match uniquely" against
+`layout/cells/m2_top_ref.spice` (written by m2_top.py: analog subckts + LibreLane's adc_digital netlist).
+Picture: `material/layout/m2_top.png`. Differences from the plan above:
+- pbias leaves R3: bias_gen -> x 89.4 (met2, left of the dac) -> the comparator's pbias row and on down to
+  y 63.9 -> met3 under the dac to vcm_gen.
+- vref: met3 from vref_buf's pin to x 128.5, then met4 up to the dac's vref line (met4 straight from the pin
+  shorted to the gn1/gpb1 drops; LVS caught it).
+- Slim vias for dense spots (via2 0.32 with a 0.4 × 0.57 met2 / 0.45 met3 pad; via3 0.32 with 0.45 pads),
+  north river tracks at 0.8 pitch, en/enb jogs at 0.75 pitch, gn/gpb tracks at y 62.2 − 0.9 k.
+- The comparator VGND bus joins the inmux's met4 extension of digital strap 139.74.
+- adc_digital is read with `gds readonly true`: Magic's rewrite of the std cells' implant layers failed
+  KLayout FEOL (hvtp/nsdm spacing, 21 errors), the verbatim LibreLane GDS is clean.
+
+Next: M2 post-layout simulation (extracted top in the ADC testbench), CI precheck on the pushed GDS.
+
