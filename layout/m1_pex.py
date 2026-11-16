@@ -89,6 +89,14 @@ if not os.path.exists(src):
     sys.exit(f"extraction failed, see {OUT}/magic.log")
 txt = open(src).read().replace(".subckt tt_flat ", f".subckt {TOP} ")
 if XDIG:
+    # a net whose extracted part has a single device terminal (opb, onb: one comparator drain each) comes out
+    # of extresist as <net>.t0 only, with no node at the label; the digital pin connects there
+    body = txt.replace("\n+", " ")
+    nets = XDIG.split()[1:-1]
+    for k, n in enumerate(nets):
+        if not re.search(rf"\s{re.escape(n)}(\s|$)", body, re.M) and re.search(rf"\s{re.escape(n)}\.t0\s", body):
+            nets[k] = n + ".t0"
+    XDIG = "Xdig " + " ".join(nets) + " adc_digital"
     i = txt.rindex(".ends")
     txt = (f".include {ROOT}/layout/digital/adc_digital.spice\n" + txt[:i] + XDIG + "\n" + txt[i:])
 dst = os.path.join(OUT, f"{NAME}_rc.spice")
