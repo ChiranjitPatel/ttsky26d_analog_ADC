@@ -4,7 +4,7 @@
 Generates xschem/sar_logic.sym (symbol only: the circuit is src/sar/sar_logic.v, synthesized and
 converted to SPICE by tools/gl2spice.py) and xschem/adc_core.sch/.sym.   python3 xschem/gen_adc_core.py
 Connections:
-  sar_logic.b[7:0] -> cap_dac.b0..b7; smp -> cap_dac.smp (and an inverter for smpb);
+  sar_logic.b[7:0] + smp -> sar_drv (src/sar/sar_drv.v: gn/gpb per bit, smpb) -> cap_dac;
   smpt -> vcm_gen.smp (top-plate switch); cmp_clk -> comparator.clk;
   comparator.inp = vtop, .inn = vcm; comparator.q -> sar_logic.q (q = 1: vtop > vcm -> bit = 0).
 Ports: VDPWR VGND pbias vref vadc clk rst_n start mode ext_d0..7 ext_sample ext_cmp_clk d0..7 eoc cmp_out
@@ -23,6 +23,15 @@ sym.port("VDPWR", "inout"); sym.port("VGND", "inout")
 for p_ in sar_ports[0]: sym.port(p_, "in")
 for p_ in sar_ports[1]: sym.port(p_, "out")
 sym.write_symbol(os.path.join(HERE, "sar_logic.sym"))
+# --- symbol for the synthesized switch drivers (src/sar/sar_drv.v; same pin-order rule)
+drv_ports = (["smp"] + [f"b_{i}" for i in range(8)] + ["insel_0", "insel_1", "cmp_clk", "opb", "onb"],
+             ["smpb"] + [f"gn_{i}" for i in range(8)] + [f"gpb_{i}" for i in range(8)] + [f"en_{i}" for i in range(4)]
+             + [f"enb_{i}" for i in range(4)] + ["cmp_clkb", "q"])
+sym = Schematic()
+sym.port("VDPWR", "inout"); sym.port("VGND", "inout")
+for p_ in drv_ports[0]: sym.port(p_, "in")
+for p_ in drv_ports[1]: sym.port(p_, "out")
+sym.write_symbol(os.path.join(HERE, "sar_drv.sym"))
 # xschem orders a symbol's pins as written; keep VDPWR VGND first like the .subckt (write_symbol puts
 # inout/in on the left first, then outputs) -> matches '.subckt sar_logic VDPWR VGND clk ... eoc'
 
@@ -41,15 +50,24 @@ conn.update({f"ext_d_{i}": f"ext_d{i}" for i in range(8)})
 conn.update({f"b_{i}": f"b{i}" for i in range(8)})
 conn.update({f"d_{i}": f"d{i}" for i in range(8)})
 s.dev("sar_logic.sym", "xsar", conn)
+drv = {"VDPWR": "VDPWR", "VGND": "VGND", "smp": "smp", "smpb": "smpb", "insel_0": "VGND", "insel_1": "VGND",
+       "cmp_clk": "cmp_clk", "opb": "opb", "onb": "onb", "cmp_clkb": "cmp_clkb", "q": "q"}
+drv.update({f"b_{i}": f"b{i}" for i in range(8)})
+drv.update({f"gn_{i}": f"gn{i}" for i in range(8)}); drv.update({f"gpb_{i}": f"gpb{i}" for i in range(8)})
+drv.update({f"en_{i}": f"en{i}" for i in range(4)}); drv.update({f"enb_{i}": f"enb{i}" for i in range(4)})
+s.dev("sar_drv.sym", "xdrv", drv)
 dac = {"VDPWR": "VDPWR", "VGND": "VGND", "vref": "vref", "vadc": "vadc", "smp": "smp", "smpb": "smpb", "vtop": "vtop"}
-dac.update({f"b{i}": f"b{i}" for i in range(8)})
+dac.update({f"gn{i}": f"gn{i}" for i in range(8)}); dac.update({f"gpb{i}": f"gpb{i}" for i in range(8)})
 s.dev("cap_dac.sym", "xdac", dac)
-s.dev("comparator.sym", "xcmp", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "clk": "cmp_clk", "inp": "vtop", "inn": "vcm", "q": "q", "qb": "qb"})
-s.dev("vcm_gen.sym", "xvcm", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "smp": "smpt", "vtop": "vtop", "vcm": "vcm"})
-s.dev(PF, "MIP", {"D": "smpb", "G": "smp", "S": "VDPWR", "B": "VDPWR"}, model="pfet_01v8", spiceprefix="X", W=1.68, L=0.15, nf=1, mult=1)
-s.dev(NF, "MIN", {"D": "smpb", "G": "smp", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=0.84, L=0.15, nf=1, mult=1)
+s.dev("comparator.sym", "xcmp", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "clkb": "cmp_clkb", "smpt": "smpt",
+                                 "inp": "vtop", "inn": "vcm", "opb": "opb", "onb": "onb"})
+s.dev("vcm_gen.sym", "xvcm", {"VDPWR": "VDPWR", "VGND": "VGND", "pbias": "pbias", "vcm": "vcm"})
+# smpb comes from sar_drv (was a local inverter until 2026-11-16)
 # comparator output to the pad driver (buffered later at the top level)
-s.dev(PF, "MBP", {"D": "cmp_out", "G": "qb", "S": "VDPWR", "B": "VDPWR"}, model="pfet_01v8", spiceprefix="X", W=1.68, L=0.15, nf=1, mult=1)
-s.dev(NF, "MBN", {"D": "cmp_out", "G": "qb", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=0.84, L=0.15, nf=1, mult=1)
+s.dev(PF, "MBP", {"D": "cmp_out", "G": "qx", "S": "VDPWR", "B": "VDPWR"}, model="pfet_01v8", spiceprefix="X", W=1.68, L=0.15, nf=1, mult=1)
+s.dev(NF, "MBN", {"D": "cmp_out", "G": "qx", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=0.84, L=0.15, nf=1, mult=1)
+# qx = ~q (the latch's qb is internal to sar_drv now), so cmp_out = q as before
+s.dev(PF, "MXP", {"D": "qx", "G": "q", "S": "VDPWR", "B": "VDPWR"}, model="pfet_01v8", spiceprefix="X", W=0.84, L=0.15, nf=1, mult=1)
+s.dev(NF, "MXN", {"D": "qx", "G": "q", "S": "VGND", "B": "VGND"}, model="nfet_01v8", spiceprefix="X", W=0.42, L=0.15, nf=1, mult=1)
 s.write(os.path.join(HERE, "adc_core.sch"), sym=True)
 print("wrote xschem/sar_logic.sym, adc_core.sch/.sym")

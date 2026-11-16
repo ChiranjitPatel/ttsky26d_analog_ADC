@@ -1,0 +1,10 @@
+# M2 — synthesize sar_drv (dac_sw / inmux switch drivers) alone, for the adc_core simulations (gl2spice)
+read_liberty -lib sim/out/sar/hd_tt_filtered.lib
+read_verilog src/sar/sar_drv.v
+synth -top sar_drv -flatten
+abc -liberty sim/out/sar/hd_tt_filtered.lib
+opt_clean
+setundef -zero
+hilomap -hicell sky130_fd_sc_hd__conb_1 HI -locell sky130_fd_sc_hd__conb_1 LO
+stat -liberty sim/out/sar/hd_tt_filtered.lib
+write_verilog -noattr -noexpr sim/out/sar/sar_drv_gl.v

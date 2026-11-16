@@ -77,6 +77,7 @@ class Cell:
             x = r["x0"]; placed = []
             r["bar"] = "t" if (i == n - 1 and n > 1) else "b"     # top row: rail bar on top (channel below)
             for d in r["devs_spec"]:
+                x += getattr(d, "pre", 0.0)                 # optional extra space before a device (row alignment)
                 g = geom(d, r["bar"])
                 bx0, by0, bx1, by1 = g["bbox"]
                 rl, rb, rr, rt = bx0 + INSET, by0 + INSET, bx1 - INSET, by1 - INSET
@@ -161,6 +162,11 @@ class Cell:
                     if t == "G":
                         pos = self._gate_toward(p, i, nrows)
                     ch, side = self._channel_for(i, pos[1], r, nrows)
+                    if 0 < i < nrows - 1 and d.model in MOS and d.rot == 0 and d.l < 0.9:
+                        # short-L device in a middle row: gate down, D/S up - explicitly. Deciding by the strip's
+                        # y against the row centre sent the D/S of W = 0.42 devices (strip centre 0.005 um below
+                        # the centre) down next to the gate stub, shorting the nets (found in the comparator)
+                        ch, side = (i - 1, "hi") if t == "G" else (i, "lo")
                     kind = "G" if t == "G" else ("SDH" if d.rot in (90, 270) else "SD")
                     x, y = pos
                     if kind == "G" and d.rot != 0 and d.l < 0.9:
@@ -171,11 +177,21 @@ class Cell:
                         L.paint("metal1", ox_ + sh - 0.185, oy_ - 0.215, ox_ + sh + 0.185, oy_ + 0.215)
                     if kind == "G" and d.rot != 0:          # rotated: move the pad outward (toward the li-only
                         x = x + (-0.1 if x < (p["ring"][0] + p["ring"][2]) / 2 else 0.1)   # side ring line), off the strip ends
+                    short0 = kind == "G" and d.rot == 0 and d.l < 0.9
                     if kind == "G" and d.rot == 0:          # move the pad off the gate strip, away from D/S -
                         up = y > (p["ring"][1] + p["ring"][3]) / 2    # but only toward a ring line without met1
-                        if (up and r["bar"] != "t") or (not up and r["bar"] != "b"):
+                        if (up and r["bar"] != "t") or (not up and r["bar"] != "b") or short0:
+                            # short-L (narrow W): the D/S strips end ~0.27 um from the gate contact, so the pad
+                            # moves away from them even toward the rail bar (a 0.16 um met1 half-height still
+                            # clears the bar by 0.16 um)
                             y = y + (0.07 if up else -0.07)
-                    self._via(net, x, y, ch, side, kind, horizontal_gate=(kind == "G" and d.rot != 0))
+                    if short0:
+                        # the other (unused) gate contact: its met1 is a ring below met1's minimum area; pad it,
+                        # shifted away from the D/S strips
+                        ox_, oy_ = [q for q in p["term"]["G"] if q != pos][0]
+                        sh = 0.03 if oy_ > (p["ring"][1] + p["ring"][3]) / 2 else -0.03
+                        L.paint("metal1", ox_ - 0.145, oy_ + sh - 0.145, ox_ + 0.145, oy_ + sh + 0.145)
+                    self._via(net, x, y, ch, side, kind, horizontal_gate=(kind == "G" and d.rot != 0), short_gate=short0)
 
     def _gate_toward(self, p, i, nrows):
         g1, g2 = p["term"]["G"]
@@ -222,7 +238,7 @@ class Cell:
             xr = ring[0] if line == "l" else ring[2]
             L.paint("locali", min(x, xr) - 0.085, y - 0.2, max(x, xr) + 0.085, y + 0.2)
 
-    def _via(self, net, x, y, ch, side, kind, horizontal_gate=False):
+    def _via(self, net, x, y, ch, side, kind, horizontal_gate=False, short_gate=False):
         L = self.L
         if horizontal_gate:          # rotated device: the gate contact is a vertical strip
             hx, hy = 0.185, 0.215
@@ -230,7 +246,7 @@ class Cell:
             hx, hy = 0.215, 0.185
         else:
             hx, hy = (0.185, 0.215) if kind == "SD" else (0.215, 0.185)
-        L.paint("metal1", x - hx, y - hy, x + hx, y + hy)
+        L.paint("metal1", x - hx, y - (0.16 if short_gate else hy), x + hx, y + (0.16 if short_gate else hy))
         L.paint("via1", x - 0.13, y - 0.13, x + 0.13, y + 0.13)
         # met2 landing at the via1 enclosure minimum: short-L devices have their D and S strips 0.53 um apart
         L.paint("metal2", x - hx, y - hy, x + hx, y + hy)
@@ -255,9 +271,44 @@ class Cell:
         for n in nets: visit(n)
         return order[::-1]
 
-    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=(), bus_ylo=None):
+    def _pack(self, ch, order, bx):
+        """Constrained left-edge packing (opt-in, build(pack=True)): nets whose x-ranges in the channel
+        don't overlap share a track. A net goes on a track only after every net that must lie below it
+        (vertical constraints from _order) sits on a lower track. Returns {net: track index}."""
+        st = [s for s in self.stubs if s[3] == ch]
+        span = {}
+        for n, x, y, c, sd in st:
+            a, b = span.get(n, (x, x))
+            span[n] = (min(a, x), max(b, x))
+        for n in span:
+            if n in bx:
+                span[n] = (min(span[n][0], bx[n]), max(span[n][1], bx[n]))
+        must_below = {n: set() for n in span}            # must_below[b] = nets that go under b
+        for a in st:
+            for b in st:
+                if a[4] == "lo" and b[4] == "hi" and a[0] != b[0] and abs(a[1] - b[1]) < 0.8:
+                    must_below[b[0]].add(a[0])
+        left, track, k = set(span), {}, 0
+        while left:
+            ready = sorted((n for n in left if must_below[n] <= set(track)), key=lambda n: span[n][0])
+            if not ready:
+                raise RuntimeError(f"{self.name}: channel {ch} constraint cycle at {sorted(left)[0]}")
+            end = -1e9
+            for n in ready:
+                if span[n][0] - 0.25 >= end + 0.3:       # met3 spacing between the tracks' 0.25 overhangs
+                    track[n] = k
+                    end = span[n][1] + 0.25
+                    left.discard(n)
+            # a net placed on this track must not be required below another net on the same track
+            k += 1
+        return track
+
+    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=(), bus_ylo=None, pack=False, inner_pins=()):
         """Two passes: count channel tracks (and shift rows sideways if a channel can't be ordered),
-        then place, connect and route."""
+        then place, connect and route.
+        pack: share channel tracks between nets with non-overlapping x-ranges (see _pack).
+        inner_pins: nets that get a pin label on their channel track (met3) instead of a side bus,
+        for cells with many per-device pins (the top level drops onto them from met4)."""
         nch = len(self.rows) - 1
         # pass 1 with generous gaps
         for attempt in range(80):
@@ -271,32 +322,44 @@ class Cell:
                 self.rows[c + 1]["x0"] += 0.1
                 if self.rows[c + 1]["x0"] > max_shift:
                     raise
-        gaps = [len(o) * TRACK + 1.2 for o in orders]
+        def side_buses():
+            """x of each side bus. Depends only on the stubs' nets and the row x extents, not on the gaps."""
+            xmin = min(r["x0"] for r in self.rows); xmax = max(r["x1"] for r in self.rows)
+            # which nets need a side bus: used in more than one channel, a rail used in a channel, or a pin
+            chans = {}
+            for n, x, y, c, sd in self.stubs:
+                chans.setdefault(n, set()).add(c)
+            left = [n for n in sorted(chans) if (n in pins_left or len(chans[n]) > 1 or n == "VGND") and n not in pins_right and n != "VDPWR" and n not in inner_pins]
+            right = [n for n in sorted(chans) if (n in pins_right or (len(chans[n]) > 1 and n not in left) or n == "VDPWR") and n != "VGND" and n not in inner_pins]
+            # rail buses outermost, then signal buses
+            bx = {}
+            bx["VGND"] = xmin - 1.0 - BUS * (len(left) + 1)
+            bx["VDPWR"] = xmax + 1.0 + BUS * (len(right) + 1)
+            for k, n in enumerate([n for n in left if n != "VGND"]): bx[n] = xmin - 1.0 - BUS * (k + 1)
+            for k, n in enumerate([n for n in right if n != "VDPWR"]): bx[n] = xmax + 1.0 + BUS * (k + 1)
+            return bx
+        if pack:
+            # exact channel heights: pack with the real side-bus spans (known already: they don't depend on gaps)
+            bx1 = side_buses()
+            packs = [self._pack(c, orders[c], bx1) for c in range(nch)]
+            gaps = [(max(p.values()) + 1 if p else 0) * TRACK + 1.2 for p in packs]
+        else:
+            gaps = [len(o) * TRACK + 1.2 for o in orders]
         self.stubs = []; self.L = Layout(self.name)
         self._place(gaps); self._connect()
         orders = [self._order(c) for c in range(nch)]
         L = self.L
-        xmin = min(r["x0"] for r in self.rows); xmax = max(r["x1"] for r in self.rows)
-        # which nets need a side bus: used in more than one channel, a rail used in a channel, or a pin
-        chans = {}
-        for n, x, y, c, sd in self.stubs:
-            chans.setdefault(n, set()).add(c)
         rails = {r["rail"] for r in self.rows}
-        left = [n for n in sorted(chans) if (n in pins_left or len(chans[n]) > 1 or n == "VGND") and n not in pins_right and n != "VDPWR"]
-        right = [n for n in sorted(chans) if (n in pins_right or (len(chans[n]) > 1 and n not in left) or n == "VDPWR") and n != "VGND"]
-        # rail buses outermost, then signal buses
-        bx = {}
-        bx["VGND"] = xmin - 1.0 - BUS * (len(left) + 1)
-        bx["VDPWR"] = xmax + 1.0 + BUS * (len(right) + 1)
-        for k, n in enumerate([n for n in left if n != "VGND"]): bx[n] = xmin - 1.0 - BUS * (k + 1)
-        for k, n in enumerate([n for n in right if n != "VDPWR"]): bx[n] = xmax + 1.0 + BUS * (k + 1)
+        bx = side_buses()
         ylo = self.rows[0]["y"] - 1.0 if bus_ylo is None else bus_ylo
         yhi = self.rows[-1]["top"] + 1.5
         # channel tracks
         ty = {}
         for c in range(nch):
             ch0 = self.rows[c]["top"] + 0.6
-            for k, n in enumerate(orders[c]):
+            slot = self._pack(c, orders[c], bx) if pack else {n: k for k, n in enumerate(orders[c])}
+            for n in orders[c]:
+                k = slot[n]
                 ty[(n, c)] = ch0 + 0.45 + k * TRACK
                 xs = [s[1] for s in self.stubs if s[0] == n and s[3] == c]
                 x0, x1 = min(xs), max(xs)
@@ -325,6 +388,14 @@ class Cell:
             layer = "metal1" if n in rails else "metal2"
             if (n in rails or n in pins_left or n in pins_right) and n not in no_pin:
                 pins.append((n, layer, (x - 0.2, yhi - 0.6, x + 0.2, yhi)))
+        for n in inner_pins:                              # label on the net's (first) channel track
+            keys = sorted(k for k in ty if k[0] == n)
+            if not keys:
+                continue
+            c = keys[0][1]
+            xs = [s[1] for s in self.stubs if s[0] == n and s[3] == c]
+            xm, y = (min(xs) + max(xs)) / 2, ty[keys[0]]
+            pins.append((n, "metal3", (xm - 0.25, y - 0.25, xm + 0.25, y + 0.25)))
         for k, (n, layer, b) in enumerate(pins, 1):
             L.pin(n, layer, *b, k)
         self.bus_x, self.tracks = bx, ty

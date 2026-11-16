@@ -41,11 +41,11 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | 1g | vref_buf + reservoir cap | Claude (scripted; designer reviews) | **Done Nov 12**: 43.1 × 57.3 µm, DRC 0, LVS match (`gen_vref_buf.py`) |
 | 1h | vref_sel logic + `ua[1]` transmission gate | Claude (scripted; designer reviews) | **Done Nov 12**: 30.1 × 30.1 µm, DRC 0, LVS match (`gen_vref_sel.py`) |
 | **M1** | Integration, LVS, post-layout sim, precheck | Claude | **Done Nov 14** (`layout/m1_top.py`, floorplan v3): Magic DRC 0, KLayout 0, LVS match, CI precheck passed (474f254); post-layout sim (R+C) matches the schematic within 1 mV / 1 dB, B7 met in all 45 corners after two fixes (`sim/m1/`) |
-| 2a | DAC unit cell + 16 × 16 common-centroid MIM array (scripted) | Claude | Nov 18 |
-| 2b | dac_sw (one cell, used 9×) | designer | Nov 18 |
-| 2c | comparator (with preamp) | designer | Nov 19–20 |
-| 2d | vcm_gen + top-plate switch | designer | Nov 20 |
-| 2e | inmux | designer | Nov 21 |
+| 2a | DAC unit cell + 16 × 16 common-centroid MIM array (scripted) | Claude | **Done Nov 16**: `cap_array` 62.3 × 63.4 µm, DRC 0 (Magic + KLayout), LVS match (`gen_cap_dac.py`) |
+| 2b | dac_sw (one cell, used 9×) | Claude (taken over) | **Done Nov 16**: `dac_sw_row` (all 9) 47.1 × 5.7 µm, full custom, clean (`gen_dac_sw.py`) |
+| 2c | comparator (with preamp) | Claude (taken over) | **Done Nov 16**: 36.4 × 38.5 µm, clean (`gen_comparator.py`) |
+| 2d | vcm_gen + top-plate switch | Claude (taken over) | **Done Nov 16**: 17.5 × 49.5 µm, clean (`gen_vcm_gen.py`); the top-plate switch is in the comparator cell |
+| 2e | inmux | Claude (taken over) | **Done Nov 16**: 15.2 × 5.6 µm, full custom, clean (`gen_inmux.py`) |
 | 2f | adc_digital place & route (LibreLane / OpenROAD, sky130_fd_sc_hd) | Claude | Nov 18–21 |
 | **M2** | Integration, LVS, post-layout sim, precheck | both | **Nov 24–26** |
 | — | Freeze; final checks; submission | both | Nov 26 – Dec 1 |
@@ -97,3 +97,35 @@ Details in `sim/m1/README.md`, numbers in `sim/m1/results.md` and `sim/m1/corner
 - **Result:** VBG 1.2098 V (schematic 1.2105 V); B7 tt 23.8 dB at 1 MHz, corners ≥ 22.7 dB at 1 MHz and
   ≥ 31.3 dB DC at 1.62 V; startup 24 µs; `ua[1]` path 12 Ω of wiring; power-down 0.84 nA.
 - **Rule for M2:** a mirror's fingers have the same W and L as its reference (more fingers, not wider ones).
+
+## M2 cells (2026-11-16)
+
+All five analog M2 cells are drawn, Magic DRC 0, KLayout 0 and LVS-matched. Pictures: `material/layout/`.
+
+| Cell | Size (µm) | How |
+|---|---|---|
+| cap_array | 62.3 × 63.4 | 16 × 16 common-centroid units (each quadrant mirrors one 8 × 8 bit-reversed pattern; every group's centroid is the centre) + a dummy column each side; bottom-plate tracks under the plates; ten group buses below |
+| dac_sw_row | 47.1 × 5.7 | full custom: one NMOS and one PMOS stack per bit, shared poly smp/smpb lines |
+| comparator | 36.4 × 38.5 | mos_rows, 4 rows: short-L devices in the middle rows; matched pairs mirror-symmetric |
+| vcm_gen | 17.5 × 49.5 | mos_rows, narrow (6 rows) for the bottom-right strip |
+| inmux | 15.2 × 5.6 | full custom: two NMOS + two PMOS stacks sharing vadc |
+
+**Circuit changes made for the layout** (schematics updated; the ADC-level test reruns on them):
+- The switch logic moved into the standard-cell block (`src/sar/sar_drv.v`): dac_sw's NOR/NAND gates,
+  inmux's 2-to-4 decoder, the comparator's clock inverter and NAND SR latch (two explicit nand2 cells). The
+  analog cells keep only switches, the comparator core and vcm_gen. Ringed transistors for this logic would not
+  fit (the dac_sw row alone would have been ~270 µm long).
+- DAC unit cap 2 × 2 → 2 × 1.65 µm (≈ 8.0 fF): the bottom-plate via2 must stay 0.1 µm outside the capm and
+  bottom plates must be 1.2 µm apart, so 2 × 2 needed a 3.85 µm row pitch. 2 × 1.65 gives a square 3.5 µm pitch.
+  No top/bottom dummy rows (height). Extracted routing parasitics: max DNL 0.16, INL 0.12 LSB (all tracks under
+  the plates; with tracks in the gaps it was 0.45 LSB).
+- vcm_gen: decap 4 → 2 × 8/8 MOS (≈ 1.1 pF); MTOP (top-plate switch) 1 → 2 µm wide and moved into the
+  comparator cell (it must sit at the top plate; vcm_gen goes to the bottom right).
+- Comparator M3/M4 1 → 2 µm wide (rotated short-L devices need W ≥ 2).
+
+**mos_rows additions** (opt-in; the M1 cells are unchanged): channel track packing (`pack=True`), inner pins on
+channel tracks (`inner_pins`), a per-device spacer (`Dev.pre`), and two fixes for short-L devices in middle
+rows (gate pad clearance; D/S always up — W = 0.42 devices had their D/S sent down next to the gate stub, a short).
+
+Next: floorplan v4 (the real sizes), adc_digital in LibreLane (now 151 cells, 1430 µm²), M2 top-level
+integration, full-chip LVS, post-layout simulation.

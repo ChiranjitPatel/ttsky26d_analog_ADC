@@ -73,7 +73,9 @@ class Layout:
 
     def pin(self, net, layer, x0, y0, x1, y1, idx):
         self.paint(layer, x0, y0, x1, y1)
-        self.t += [f"label {net} FreeSans 0.2u -{layer}", f"port make {idx}"]
+        # full form (text font size rotation offx offy pos layer): the short "-layer" form picked nwell for
+        # labels inside an nwell (dac_sw_row)
+        self.t += [f"label {net} FreeSans 0.2u 0 0 0 c {layer}", f"port make {idx}"]
 
     def run(self, extra=()):
         os.makedirs(CELLS, exist_ok=True); os.makedirs(WORK, exist_ok=True)

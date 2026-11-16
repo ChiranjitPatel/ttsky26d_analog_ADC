@@ -18,23 +18,28 @@ module adc_digital (
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
     // to / from the analog blocks
-    input  wire       q,          // comparator output
-    output wire       smp, smpt, cmp_clk,
-    output wire [7:0] b,
+    input  wire       opb, onb,   // comparator (buffered StrongARM outputs) -> SR latch in sar_drv
+    output wire       smp, smpb, smpt, cmp_clkb,
+    output wire [7:0] gn,         // dac_sw drivers (sar_drv.v)
+    output wire [7:0] gpb,
+    output wire [3:0] en,         // inmux TG enables (one-hot) and their complements
+    output wire [3:0] enb,
     output wire       ref_sel,
     output wire       vref_oe,
-    output wire       bg_pd,
-    output wire [1:0] insel
+    output wire       bg_pd
 );
     wire mode = uio_in[0];
     wire eoc;
+    wire [7:0] b;
+    wire       q, cmp_clk;
     sar_logic u_sar (.clk(clk), .rst_n(rst_n), .start(ui_in[0] & ~mode), .mode(mode), .ext_d(ui_in),
                      .ext_sample(uio_in[1]), .ext_cmp_clk(uio_in[2]), .q(q), .smp(smp), .smpt(smpt),
                      .b(b), .cmp_clk(cmp_clk), .d(uo_out), .eoc(eoc));
     assign vref_oe = ui_in[1] & ~mode;
     assign bg_pd   = ui_in[3] & ~mode;
     assign ref_sel = uio_in[3];
-    assign insel   = uio_in[7:6];
+    sar_drv u_drv (.smp(smp), .b(b), .insel(uio_in[7:6]), .cmp_clk(cmp_clk), .opb(opb), .onb(onb), .smpb(smpb),
+                   .gn(gn), .gpb(gpb), .en(en), .enb(enb), .cmp_clkb(cmp_clkb), .q(q));
     assign uio_out = {2'b00, eoc, q, 4'b0000};
     assign uio_oe  = 8'b0011_0000;
 endmodule
