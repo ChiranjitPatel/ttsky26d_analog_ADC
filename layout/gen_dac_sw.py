@@ -5,7 +5,7 @@ Each switch is one vertical column (5 um pitch), bits 7 .. 0 then the terminatio
   NMOS stack, one diffusion W = 1:     VGND | gate gn_k (MSG 1/0.15) | bp_k | gate smp (MSN 1/0.15) | vadc
   PMOS lvt stack, one diffusion:       vadc | gate smpb (MSP 2/0.35, W = 2) | bp_k | gate gpb_k (MSR 4/0.35, W = 4) | vref
 Gates are horizontal poly. smp and smpb are continuous poly lines through all nine columns (contacted at the
-left end; a 50 um poly line with ~10 fF of gate load settles in ~0.1 ns). gn_k / gpb_k have a contact pad at the
+right end; a 50 um poly line with ~10 fF of gate load settles in ~0.1 ns). gn_k / gpb_k have a contact pad at the
 left of their column. A p-tap row (VGND) at the bottom and an n-tap row (VDPWR) at the top bias the
 substrate and the nwell.
 Wiring: bp_k  NMOS drain strip -> met1 vertical -> PMOS drain strip (crosses the vadc strips on li).
@@ -13,7 +13,7 @@ Wiring: bp_k  NMOS drain strip -> met1 vertical -> PMOS drain strip (crosses the
         vref  PMOS top strip -> met1 -> via1 -> met2 line above the PMOS row.
         VGND  NMOS bottom strip -> li -> tap row.
 Termination column: gn = smpb (met1 from its gn pad up to an extra smpb contact), gpb = VDPWR (met1 up to the rail).
-Pins (for the top level): VGND, VDPWR (met1 rails), vadc, vref (met2 lines), smp, smpb (met1 pads at the left
+Pins (for the top level): VGND, VDPWR (met1 rails), vadc, vref (met2 lines), smp, smpb (met1 pads at the right
 end), gn0..7, gpb0..7 (met1 gate pads), bp0..7, bpt (met1, on the bp vertical).
 Usage: python3 layout/gen_dac_sw.py && python3 layout/check_cell.py dac_sw_row
 """
@@ -37,12 +37,16 @@ WN, WP_LO, WP_HI = 1.0, 2.0, 4.0
 mid = lambda a: (a[0] + a[1]) / 2
 
 
-def build():
-    L = Layout("dac_sw_row")
-    P = L.paint
+def draw(L, ox=0.0, oy=0.0, pitch=None, x0=None, pins_out=None, width=None):
+    """Paint the switch row into Layout L at offset (ox, oy). pitch / x0 override PITCH / X0 (the combined dac
+    cell uses a 7.0 um pitch so each bp lands in a gap of the capacitor array). Returns {name: (x, y, layer)}
+    for every pin (absolute), and paints/labels nothing as a port unless pins_out is None (standalone cell)."""
+    PITCH_, X0_ = (pitch or PITCH), (X0 if x0 is None else x0)
+    def P(layer, a, b, c, d):
+        L.paint(layer, a + ox, b + oy, c + ox, d + oy)
     sq = lambda layer, x, y, hx, hy=None: P(layer, x - hx, y - (hx if hy is None else hy), x + hx, y + (hx if hy is None else hy))
-    xs = [X0 + PITCH * k for k in range(len(COLS))]          # left diffusion edge per column
-    W = xs[-1] + WP_HI + 1.0                                 # cell width
+    xs = [X0_ + PITCH_ * k for k in range(len(COLS))]        # left diffusion edge per column
+    W = width or (xs[-1] + WP_HI + 1.0)                      # cell width (the right-end pads need 1.0)
     # rails + taps
     P("metal1", 0, RAIL_N[0], W, RAIL_N[1]); P("locali", 0, 0.04, W, 0.44); P("psubdiff", 0.1, 0.065, W - 0.1, 0.415)
     P("metal1", 0, RAIL_P[0], W, RAIL_P[1]); P("locali", 0, 4.99, W, 5.39); P("nsubdiff", 0.25, 5.02, W - 0.25, 5.37)
@@ -51,9 +55,9 @@ def build():
         sq("nsubdiffcont", x, 5.195, 0.085); sq("viali", x, 5.195, 0.085)
     P("nwell", 0, NWELL_Y0, W, NWELL_Y1)
     # global poly lines smp (NMOS upper gate) and smpb (PMOS lower gate), contacted at the left end
-    xl = 0.45
-    P("poly", xl - 0.135, N_SMP[0], xs[-1] + WP_HI + 0.13, N_SMP[1])
-    P("poly", xl - 0.135, P_SMPB[0], xs[-1] + WP_HI + 0.13, P_SMPB[1])
+    xl = xs[-1] + WP_HI + 0.55                               # smp / smpb contacts at the right end
+    P("poly", xs[0] - 0.13, N_SMP[0], xl + 0.165, N_SMP[1])
+    P("poly", xs[0] - 0.13, P_SMPB[0], xl + 0.165, P_SMPB[1])
     pins = []
     def gate_pad(x, y, pin=None):
         """poly pad + polycont + li + mcon + met1 pad at (x, y)."""
@@ -117,7 +121,14 @@ def build():
              ("vref", "metal2", (0.2, VREF_Y - 0.15, 0.7, VREF_Y + 0.15)),
              ("VGND", "metal1", (0.0, RAIL_N[0], 0.5, RAIL_N[1])),
              ("VDPWR", "metal1", (0.0, RAIL_P[0], 0.5, RAIL_P[1]))]
-    for k, (n, layer, b) in enumerate(pins, 1):
+    out = {n: ((b[0] + b[2]) / 2 + ox, (b[1] + b[3]) / 2 + oy, layer, tuple(v + (ox if i % 2 == 0 else oy) for i, v in enumerate(b))) for n, layer, b in pins}
+    return out
+
+
+def build():
+    L = Layout("dac_sw_row")
+    pins = draw(L)
+    for k, (n, (x, y, layer, b)) in enumerate(pins.items(), 1):
         L.pin(n, layer, *b, k)
     return L
 

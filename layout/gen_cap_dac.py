@@ -36,7 +36,8 @@ SLOTS = (0.15, 0.65, 1.15, 1.65, 2.15)   # met1 track x offsets: all under the p
                                           # 7-slot version with tracks in the gaps gave 0.45 LSB DNL)
 NR, N = 16, 18                          # rows, columns (columns 0 and 17: dummies)
 GROUPS = ["b7", "b6", "b5", "b4", "b3", "b2", "b1", "b0", "bpt", "VGND"]
-BUS_Y = {g: -1.0 - 0.7 * k for k, g in enumerate(GROUPS)}
+BUS_Y = {g: -1.5 - 0.7 * k for k, g in enumerate(GROUPS)}   # the top bus 1.5 below the plates: met3 landings on it
+                                                             # (dac cell) clear the bottom plates by 1.2 (MR_capm.SP.2)
 CX = lambda c: c * PX + 1.15            # unit centre
 CY = lambda r: r * PY + 0.975
 
@@ -66,10 +67,14 @@ def site_group(r, c, G):
     return G[(r, c - 1)]
 
 
-def build():
+def draw(L, ox=0.0, oy=0.0, bus_x0=None, bus_x1=None):
+    """Paint the array into Layout L at offset (ox, oy) (array local coordinates: row 0 plates start at y = 0).
+    bus_x0: extend the buses left to this local x. Returns (pins {name: (x, y, layer, box)}, BUS_Y, tracks)."""
     G = pattern()
-    L = Layout("cap_array")
-    sq = lambda layer, x, y, h: L.paint(layer, x - h, y - h, x + h, y + h)
+    class _O:                                   # offsetting proxy for L
+        def paint(self, layer, a, b, c, d): L.paint(layer, a + ox, b + oy, c + ox, d + oy)
+    Lo = _O()
+    sq = lambda layer, x, y, h: Lo.paint(layer, x - h, y - h, x + h, y + h)
     tracks = {}                                         # (col, group) -> (x, ymax)
     for c in range(N):
         groups = sorted({site_group(r, c, G) for r in range(NR)} - {None}, key=GROUPS.index)
@@ -84,43 +89,52 @@ def build():
             if g is None:
                 continue
             x0, y0 = c * PX, r * PY
-            L.paint("metal3", x0, y0, x0 + PW, y0 + PH)
-            L.paint("mimcap", x0 + CM[0], y0 + CM[1], x0 + CM[2], y0 + CM[3])
-            L.paint("mimcapcontact", x0 + CC[0], y0 + CC[1], x0 + CC[2], y0 + CC[3])
-            L.paint("metal4", x0 + TP[0], y0 + TP[1], x0 + TP[2], y0 + TP[3])
+            Lo.paint("metal3", x0, y0, x0 + PW, y0 + PH)
+            Lo.paint("mimcap", x0 + CM[0], y0 + CM[1], x0 + CM[2], y0 + CM[3])
+            Lo.paint("mimcapcontact", x0 + CC[0], y0 + CC[1], x0 + CC[2], y0 + CC[3])
+            Lo.paint("metal4", x0 + TP[0], y0 + TP[1], x0 + TP[2], y0 + TP[3])
             vx, vy = x0 + V2[0], y0 + V2[1]
             sq("via2", vx, vy, 0.16); sq("metal2", vx, vy, 0.25)
             tx = tracks[(c, g)][0]
-            L.paint("metal2", min(vx, tx) - 0.15, vy - 0.15, max(vx, tx) + 0.15, vy + 0.15)
+            Lo.paint("metal2", min(vx, tx) - 0.15, vy - 0.15, max(vx, tx) + 0.15, vy + 0.15)
             sq("via1", tx, vy, 0.15); sq("metal2", tx, vy, 0.25); sq("metal1", tx, vy, 0.25)
             tracks[(c, g)][1] = max(tracks[(c, g)][1], vy)
     # tracks down to the buses
     xmin, xmax = 1e9, -1e9
     for (c, g), (tx, ytop) in tracks.items():
         yb = BUS_Y[g]
-        L.paint("metal1", tx - 0.1, yb, tx + 0.1, ytop)
+        Lo.paint("metal1", tx - 0.1, yb, tx + 0.1, ytop)
         sq("via1", tx, yb, 0.15); sq("metal1", tx, yb, 0.25); sq("metal2", tx, yb, 0.25)
         xmin, xmax = min(xmin, tx), max(xmax, tx)
-    bx0, bx1 = xmin - 0.25, xmax + 1.6          # pins at the right end, clear of the VGND via stack at CX(17)
+    bx0, bx1 = (xmin - 0.25 if bus_x0 is None else bus_x0), (xmax + 1.6 if bus_x1 is None else bus_x1)   # pins at the right end, clear of the VGND via stack at CX(17)
     for g, y in BUS_Y.items():
-        L.paint("metal2", bx0, y - 0.2, bx1, y + 0.2)
+        Lo.paint("metal2", bx0, y - 0.2, bx1, y + 0.2)
     # top plates: active rows + three spines; vtop out at the top of the column-8 spine
     for r in range(NR):
-        L.paint("metal4", CX(1) - 0.25, CY(r) - 0.25, CX(N - 2) + 0.25, CY(r) + 0.25)
+        Lo.paint("metal4", CX(1) - 0.25, CY(r) - 0.25, CX(N - 2) + 0.25, CY(r) + 0.25)
     ytop_out = (NR - 1) * PY + PH + 1.0
     for c in (1, 8, N - 2):
-        L.paint("metal4", CX(c) - 0.25, CY(0) - 0.25, CX(c) + 0.25, (ytop_out if c == 8 else CY(NR - 1) + 0.25))
-    L.pin("vtop", "metal4", CX(8) - 0.25, ytop_out - 0.5, CX(8) + 0.25, ytop_out, 1)
+        Lo.paint("metal4", CX(c) - 0.25, CY(0) - 0.25, CX(c) + 0.25, (ytop_out if c == 8 else CY(NR - 1) + 0.25))
+    pins = {"vtop": (CX(8) + ox, ytop_out - 0.25 + oy, "metal4", (CX(8) - 0.25 + ox, ytop_out - 0.5 + oy, CX(8) + 0.25 + ox, ytop_out + oy))}
     # dummy top plates: one met4 strip per dummy column -> VGND bus (met4 -> via3 -> met3 -> via2 -> met2)
     w = 0.25
     yg = BUS_Y["VGND"]
     for c in (0, N - 1):
-        L.paint("metal4", CX(c) - w, yg - 0.3, CX(c) + w, CY(NR - 1) + w)
+        Lo.paint("metal4", CX(c) - w, yg - 0.3, CX(c) + w, CY(NR - 1) + w)
         sq("via3", CX(c), yg, 0.2); sq("metal3", CX(c), yg, 0.3); sq("via2", CX(c), yg, 0.16); sq("metal2", CX(c), yg, 0.25)
     for k, g in enumerate(GROUPS):
         y = BUS_Y[g]
-        L.pin(g, "metal2", bx1 - 0.5, y - 0.2, bx1, y + 0.2, k + 2)
+        pins[g] = (bx1 - 0.25 + ox, y + oy, "metal2", (bx1 - 0.5 + ox, y - 0.2 + oy, bx1 + ox, y + 0.2 + oy))
+    return pins, BUS_Y, tracks
+
+
+def build():
+    L = Layout("cap_array")
+    pins, _, _ = draw(L)
+    for k, (n, (x, y, layer, b)) in enumerate(pins.items(), 1):
+        L.pin(n, layer, *b, k)
     return L
+
 
 
 if __name__ == "__main__":
