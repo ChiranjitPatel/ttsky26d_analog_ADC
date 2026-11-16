@@ -7,14 +7,15 @@ drops the resistors). Needs the Docker daemon (start it with: dockerd &).
   resistance-extracted: their currents are uA, so IR drop is uV) -> ext2spice with R and C (cthresh 0.01 fF)
 Output: sim/out/layout/m1_rc/m1_rc.spice, subckt renamed to tt_um_chiranjitpatel_sar_adc.
 Also prints the effective resistance from each used pin to the devices it drives.
-Usage: python3 layout/m1_pex.py
+Usage: python3 layout/m1_pex.py [m2]   (the name only changes the output paths: sim/out/layout/<name>_rc/<name>_rc.spice)
 """
 import os, re, subprocess, sys
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOP = "tt_um_chiranjitpatel_sar_adc"
-OUT = os.path.join(ROOT, "sim", "out", "layout", "m1_rc")
+NAME = sys.argv[1] if len(sys.argv) > 1 else "m1"
+OUT = os.path.join(ROOT, "sim", "out", "layout", f"{NAME}_rc")
 PDK = "/usr/local/share/pdk"
 IMAGE = "ghcr.io/librelane/librelane:3.0.17"
 os.makedirs(OUT, exist_ok=True)
@@ -53,12 +54,12 @@ src = os.path.join(OUT, "tt_flat.spice")
 if not os.path.exists(src):
     sys.exit(f"extraction failed, see {OUT}/magic.log")
 txt = open(src).read().replace(".subckt tt_flat ", f".subckt {TOP} ")
-dst = os.path.join(OUT, "m1_rc.spice")
+dst = os.path.join(OUT, f"{NAME}_rc.spice")
 open(dst, "w").write(txt)
 lines = txt.replace("\n+", " ").splitlines()
 R = [l.split() for l in lines if l.startswith("R")]
 C = [l for l in lines if l.startswith("C")]
-summary = [f"m1_rc.spice: {len(R)} R, {len(C)} C, " + re.search(r"Nets extracted: .*", r.stdout).group(0)]
+summary = [f"{NAME}_rc.spice: {len(R)} R, {len(C)} C, " + re.search(r"Nets extracted: .*", r.stdout).group(0)]
 
 # effective resistance from a pin to the device terminals on its net (all terminals tied together)
 dev = set()
@@ -81,9 +82,9 @@ def reff(net):
     keep = [i for i, n in enumerate(nodes) if not (n in dev and n != net)]
     I = np.zeros(len(keep)); I[keep.index(idx[net])] = 1
     return np.linalg.solve(G[np.ix_(keep, keep)], I)[keep.index(idx[net])]
-for n in ("ua[1]", "ui_in[3]", "ui_in[1]", "uio_in[3]"):
+for n in ("ua[0]", "ua[1]", "ui_in[3]", "ui_in[1]", "uio_in[3]"):
     v = reff(n)
     summary.append(f"R(pin {n} -> devices) = {v:.1f} Ohm" if v is not None else f"{n}: no R extracted")
 print("\n".join(summary))
-os.makedirs(os.path.join(ROOT, "sim", "out", "m1"), exist_ok=True)
-open(os.path.join(ROOT, "sim", "out", "m1", "extract.txt"), "w").write("\n".join(summary) + "\n")
+os.makedirs(os.path.join(ROOT, "sim", "out", NAME), exist_ok=True)
+open(os.path.join(ROOT, "sim", "out", NAME, "extract.txt"), "w").write("\n".join(summary) + "\n")
