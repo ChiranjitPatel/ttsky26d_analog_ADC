@@ -14,3 +14,4 @@ sim/out
 *.ext
 __pycache__/
 layout/*.log
+layout/digital/runs/

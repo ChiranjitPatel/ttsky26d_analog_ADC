@@ -46,7 +46,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | 2c | comparator (with preamp) | Claude (taken over) | **Done Nov 16**: 36.4 × 38.5 µm, clean (`gen_comparator.py`) |
 | 2d | vcm_gen + top-plate switch | Claude (taken over) | **Done Nov 16**: 17.5 × 49.5 µm, clean (`gen_vcm_gen.py`); the top-plate switch is in the comparator cell |
 | 2e | inmux | Claude (taken over) | **Done Nov 16**: 15.2 × 5.6 µm, full custom, clean (`gen_inmux.py`) |
-| 2f | adc_digital place & route (LibreLane / OpenROAD, sky130_fd_sc_hd) | Claude | Nov 18–21 |
+| 2f | adc_digital place & route (LibreLane / OpenROAD, sky130_fd_sc_hd) | Claude | **Done Nov 16**: 63.5 × 47.3 µm, 221 cells; route/Magic/KLayout DRC 0, LVS 0, antenna 0, setup +27.4 ns / hold +0.12 ns at 100 ns (`layout/digital/`) |
 | **M2** | Integration, LVS, post-layout sim, precheck | both | **Nov 24–26** |
 | — | Freeze; final checks; submission | both | Nov 26 – Dec 1 |
 
@@ -129,3 +129,17 @@ rows (gate pad clearance; D/S always up — W = 0.42 devices had their D/S sent 
 
 Next: floorplan v4 (the real sizes), adc_digital in LibreLane (now 151 cells, 1430 µm²), M2 top-level
 integration, full-chip LVS, post-layout simulation.
+
+## adc_digital (2026-11-16)
+
+`layout/digital/config.json` (LibreLane 3.0.17 in Docker, `librelane --manual-pdk -p sky130A config.json`).
+- Die 63.48 × 47.32 µm, routing up to met4 (no met5), PDN: vertical met4 straps only (no core ring); the top
+  level ties them to the chip stripes.
+- Pins: north = the TT pins in the TT pin order (uo_out, uio_in, ui_in, rst_n, clk); south = switch drivers
+  (gn, gpb, smp, smpb, en, enb); east = comparator (smpt, cmp_clkb, opb, onb); west = ref_sel, vref_oe, bg_pd, eoc,
+  cmp_out. The 16 constant outputs (uio_oe, uio_out[7:6,3:0]) are tied in metal at the top level.
+- Lessons: the repair step's port buffers (57 × clkdlybuf4s25_1, ~500 µm²) made the block unplaceable;
+  they are off (`DESIGN_REPAIR_BUFFER_*_PORTS`). The default core margins (4 rows / 12 sites) leave too little
+  core in a 63 µm block; they are 1 row / 4 sites.
+- Result: route DRC 0, Magic DRC 0, KLayout DRC 0, LVS 0, antenna 0; setup slack +27.4 ns, hold +0.12 ns;
+  2 max-slew warnings at ss/100 °C/1.6 V only.
