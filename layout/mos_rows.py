@@ -283,6 +283,7 @@ class Cell:
         for n in span:
             if n in bx:
                 span[n] = (min(span[n][0], bx[n]), max(span[n][1], bx[n]))
+            span[n] = self._mirrored(n, *span[n])
         must_below = {n: set() for n in span}            # must_below[b] = nets that go under b
         for a in st:
             for b in st:
@@ -303,12 +304,19 @@ class Cell:
             k += 1
         return track
 
-    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=(), bus_ylo=None, pack=False, inner_pins=()):
+    def build(self, pins_left=(), pins_right=(), max_shift=6.0, no_pin=(), bus_ylo=None, pack=False, inner_pins=(),
+              bus_order=None, mirror=None):
         """Two passes: count channel tracks (and shift rows sideways if a channel can't be ordered),
         then place, connect and route.
         pack: share channel tracks between nets with non-overlapping x-ranges (see _pack).
         inner_pins: nets that get a pin label on their channel track (met3) instead of a side bus,
-        for cells with many per-device pins (the top level drops onto them from met4)."""
+        for cells with many per-device pins (the top level drops onto them from met4).
+        bus_order: {"left": [...], "right": [...]}: side-bus order from the cell edge outward, rails included
+        (a rail bus between two groups of signal buses shields them from each other). Nets named here go on
+        that side (with a bus) even when used in one channel only; the others follow in the default order, outside them.
+        mirror: (x_axis, nets): each channel track of these nets also covers its mirror image about x_axis, so an
+        unpaired net (a clock, a bias) that enters from one side couples equally to both halves of a mirrored circuit."""
+        self._mirror = mirror
         nch = len(self.rows) - 1
         # pass 1 with generous gaps
         for attempt in range(80):
@@ -331,8 +339,17 @@ class Cell:
                 chans.setdefault(n, set()).add(c)
             left = [n for n in sorted(chans) if (n in pins_left or len(chans[n]) > 1 or n == "VGND") and n not in pins_right and n != "VDPWR" and n not in inner_pins]
             right = [n for n in sorted(chans) if (n in pins_right or (len(chans[n]) > 1 and n not in left) or n == "VDPWR") and n != "VGND" and n not in inner_pins]
-            # rail buses outermost, then signal buses
             bx = {}
+            if bus_order:
+                lo, ro = list(bus_order.get("left", [])), list(bus_order.get("right", []))
+                left = [n for n in left if n not in ro]
+                right = [n for n in right if n not in lo]
+                lseq = lo + [n for n in left if n not in lo and n != "VGND"] + ([] if "VGND" in lo else ["VGND"])
+                rseq = ro + [n for n in right if n not in ro and n != "VDPWR"] + ([] if "VDPWR" in ro else ["VDPWR"])
+                for k, n in enumerate(lseq): bx[n] = xmin - 1.0 - BUS * (k + 1)
+                for k, n in enumerate(rseq): bx[n] = xmax + 1.0 + BUS * (k + 1)
+                return bx
+            # rail buses outermost, then signal buses
             bx["VGND"] = xmin - 1.0 - BUS * (len(left) + 1)
             bx["VDPWR"] = xmax + 1.0 + BUS * (len(right) + 1)
             for k, n in enumerate([n for n in left if n != "VGND"]): bx[n] = xmin - 1.0 - BUS * (k + 1)
@@ -365,6 +382,7 @@ class Cell:
                 x0, x1 = min(xs), max(xs)
                 if n in bx:
                     x0, x1 = min(x0, bx[n]), max(x1, bx[n])
+                x0, x1 = self._mirrored(n, x0, x1)
                 # track as wide as the via2 landing pads (0.5): narrower tracks leave < 0.3 um met3 notches
                 # between neighbouring landings of the same net
                 L.paint("metal3", x0 - 0.25, ty[(n, c)] - 0.25, x1 + 0.25, ty[(n, c)] + 0.25)
@@ -400,6 +418,12 @@ class Cell:
             L.pin(n, layer, *b, k)
         self.bus_x, self.tracks = bx, ty
         return self
+
+    def _mirrored(self, n, x0, x1):
+        m = getattr(self, "_mirror", None)
+        if m and n in m[1]:
+            return min(x0, 2 * m[0] - x1), max(x1, 2 * m[0] - x0)
+        return x0, x1
 
     def _landing(self, x, y, rail=False):
         """via2 (>= 0.32 um: Magic drops smaller via2 silently) from a met3 track down to met2; for rail
