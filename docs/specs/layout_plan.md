@@ -149,7 +149,7 @@ integration, full-chip LVS, post-layout simulation.
 Floorplan v4 (`layout/floorplan_v4.py`, positions from the real cells; `layout/m2_place.py` builds a
 placement-only top and writes every pin's absolute position to `sim/out/layout/m2p/pins.json`).
 Right half, bottom to top: vref_buf (M1), vcm_gen (bottom right), `dac` (array + switches, 88.6-153.5 x
-64.0-134.05), comparator (rotated, 90.5-130.6 x 134.6-171.0), adc_digital (90.0-153.5 x 171.6-218.9).
+64.0-134.05), comparator (rotated, 90.5-127.4 x 134.6-171.1 since the F2 redraw), adc_digital (90.0-153.5 x 171.6-218.9).
 The only ways past the array are two corridors: R4 under the middle stripes (x 83-88.4, met2/met3 free)
 and R3 under the right stripes (x 153.75-160.7). Routing plan:
 - gn/gpb bits 7-4 (west pins) down R4 on met2, met3 jog right at y 56.8-62.4, met4 tracks under the dac
@@ -182,5 +182,15 @@ Picture: `material/layout/m2_top.png`. Differences from the plan above:
 - adc_digital is read with `gds readonly true`: Magic's rewrite of the std cells' implant layers failed
   KLayout FEOL (hvtp/nsdm spacing, 21 errors), the verbatim LibreLane GDS is clean.
 
-Next: M2 post-layout simulation (extracted top in the ADC testbench), CI precheck on the pushed GDS.
+**Post-layout (2026-11-16).** `sim/m2/README.md`: 5 conversions on the extracted tile give the schematic's
+codes (10 / 65 / 127 / 190 / 247). The first run read ~40 LSB low: the comparator's latch nodes (~10 fF,
+preamp gain ~2) turned fF of routing imbalance into −64 mV of offset. Fixed by xp/xn load caps and a 0.5/8
+preamp load (schematic) plus mirrored side buses and tracks (`mos_rows` options `bus_order`, `mirror`); the
+extracted comparator is now within ~4 mV of the schematic (`sim/comparator/README.md`). Top-level changes:
+pbias, smpt/clkb/opb join the comparator buses on met2; onb (now on the comparator's other side) runs down its
+right edge. Magic DRC 0, KLayout 0/0/0, LVS match after the change.
+Open: the comparator and the inmux get VDPWR only through adc_digital's power grid (LVS-clean; a direct tie of
+straps 116.84 / 136.84 to the stripe would be more robust); stage 6 testbenches for the new comparator sizing.
+
+Next: CI precheck on the pushed GDS; Phase 2 Monte Carlo (comparator, cap DAC) on the final cells.
 
