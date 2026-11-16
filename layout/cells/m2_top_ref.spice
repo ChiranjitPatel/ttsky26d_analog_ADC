@@ -430,9 +430,9 @@ XMA1 pan inp pts VDPWR sky130_fd_pr__pfet_01v8_lvt L=0.5 W=4 nf=1 ad=1.16 as=1.1
 + sd=0 mult=1
 XMA2 pap inn pts VDPWR sky130_fd_pr__pfet_01v8_lvt L=0.5 W=4 nf=1 ad=1.16 as=1.16 pd=8.58 ps=8.58 nrd=0.0725 nrs=0.0725 sa=0 sb=0
 + sd=0 mult=1
-XMAL1 pan pan VGND VGND sky130_fd_pr__nfet_01v8 L=1 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0 sd=0
+XMAL1 pan pan VGND VGND sky130_fd_pr__nfet_01v8 L=8 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0 sd=0
 + mult=1
-XMAL2 pap pap VGND VGND sky130_fd_pr__nfet_01v8 L=1 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0 sd=0
+XMAL2 pap pap VGND VGND sky130_fd_pr__nfet_01v8 L=8 W=0.5 nf=1 ad=0.145 as=0.145 pd=1.58 ps=1.58 nrd=0.58 nrs=0.58 sa=0 sb=0 sd=0
 + mult=1
 XMT ts clkb VDPWR VDPWR sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1 ad=1.16 as=1.16 pd=8.58 ps=8.58 nrd=0.0725 nrs=0.0725 sa=0 sb=0
 + sd=0 mult=1
@@ -456,6 +456,10 @@ XMR3 op clkb VGND VGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad=0.1218 as=0
 + nrs=0.69047619047619 sa=0 sb=0 sd=0 mult=1
 XMR4 on clkb VGND VGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad=0.1218 as=0.1218 pd=1.42 ps=1.42 nrd=0.69047619047619
 + nrs=0.69047619047619 sa=0 sb=0 sd=0 mult=1
+XMCXP VDPWR xp VDPWR VDPWR sky130_fd_pr__pfet_01v8 L=1.5 W=4 nf=1 ad=1.16 as=1.16 pd=8.58 ps=8.58 nrd=0.0725 nrs=0.0725 sa=0 sb=0
++ sd=0 mult=1
+XMCXN VDPWR xn VDPWR VDPWR sky130_fd_pr__pfet_01v8 L=1.5 W=4 nf=1 ad=1.16 as=1.16 pd=8.58 ps=8.58 nrd=0.0725 nrs=0.0725 sa=0 sb=0
++ sd=0 mult=1
 XMIOP opb op VDPWR VDPWR sky130_fd_pr__pfet_01v8 L=0.15 W=0.84 nf=1 ad=0.2436 as=0.2436 pd=2.26 ps=2.26 nrd=0.345238095238095
 + nrs=0.345238095238095 sa=0 sb=0 sd=0 mult=1
 XMION opb op VGND VGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad=0.1218 as=0.1218 pd=1.42 ps=1.42 nrd=0.69047619047619

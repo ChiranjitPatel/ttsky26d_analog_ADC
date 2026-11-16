@@ -258,17 +258,23 @@ cpx, cpy = pin("comparator", "pbias")
 # and the dac's left edge to y 63.9, then right under the dac to vcm_gen's pbias pin
 xpb, YPB = 89.4, 63.9
 hwire("metal3", bx, xpb, by, 0.3); via23(xpb, by)
-vwire("metal2", xpb, by, YPB, W2); via23(xpb, cpy); via23(xpb, YPB)
-hwire("metal3", xpb, PJ["comparator"]["bbox"][0] + 0.5, cpy, 0.3)
-stack(PJ["comparator"]["bbox"][0] + 0.5, cpy, "metal2", "metal3")
+vwire("metal2", xpb, by, YPB, W2); via23(xpb, YPB)
+# on met2 into the comparator's pbias bus (its outermost bus, next to the VDPWR lane at y 171.3: no met3 here)
+hwire("metal2", xpb, PJ["comparator"]["bbox"][0] + 0.5, cpy, 0.4)
 vpx, vpy = pin("vcm_gen", "pbias")
 hwire("metal3", xpb, vpx, YPB, 0.3); stack(vpx, YPB, "metal2", "metal3"); vwire("metal2", vpx, vpy, YPB, W2)
 
 # ---------------------------------------------------------------- comparator <-> digital south pins, inmux enables
-for n, cn in (("smpt", "smpt"), ("cmp_clkb", "clkb"), ("opb", "opb"), ("onb", "onb")):
+# smpt / clkb / opb: the comparator's buses (0.6 um apart) end at its right edge and the digital pins sit further
+# right in the same order, so each net goes on met2 straight down and across into its bus without crossing
+for n, cn in (("smpt", "smpt"), ("cmp_clkb", "clkb"), ("opb", "opb")):
     px, py = dg["pins"][n][0][:2]; cx, cy = pin("comparator", cn)
-    vwire("metal2", px, py, cy, W2); stack(px, cy, "metal2", "metal3")
-    hwire("metal3", cx, px, cy, 0.3); stack(cx, cy, "metal2", "metal3")
+    vwire("metal2", px, py, cy, W2); hwire("metal2", cx, px, cy, 0.4)
+# onb: its bus is on the comparator's other side (mirror of opb, at the bottom here): met2 down to y 167.6 (above
+# the inmux, below the opb route), met3 left to x 129.5, met2 down along the comparator's right edge into the bus
+px, py = dg["pins"]["onb"][0][:2]; cx, cy = pin("comparator", "onb"); YO, XO = 167.6, 129.5
+vwire("metal2", px, py, YO, W2); via23(px, YO); hwire("metal3", XO, px, YO, 0.3); via23(XO, YO)
+vwire("metal2", XO, YO, cy, W2); hwire("metal2", cx, XO, cy, 0.4)
 JOG = [171.05 - 0.75 * k for k in range(8)]                        # rightmost net jogs lowest
 for k, (dn, inn) in enumerate([(f"en[{i}]", f"en{i}") for i in range(4)] + [(f"enb[{i}]", f"en{i}b") for i in range(4)]):
     px, py = dg["pins"][dn][0][:2]; ix, iy = im[inn]

@@ -63,7 +63,9 @@ def make(x0s, **kw):
 # (clkb, pbias, smpt), and inp/inn (both buses on the right), get mirror-image track extensions, so they couple
 # equally to both halves.
 KW = dict(pins_left=("pbias", "clkb", "smpt", "opb"), pins_right=("inp", "inn", "onb"), pack=True,
-          bus_order={"left": ["op", "pan", "xp", "opb", "VGND", "clkb", "pbias", "smpt"],
+          # pbias outermost on the left: it has no channel-0 track, so no met3 reaches the cell edge next to the
+          # top level's VDPWR lane (y 171.3, above the comparator's channel 0)
+          bus_order={"left": ["op", "pan", "xp", "opb", "VGND", "clkb", "smpt", "pbias"],
                      "right": ["on", "pap", "xn", "onb", "VDPWR", "inn", "inp"]})
 # pass 1: row widths; pass 2: every row centred on the widest one (equal track lengths to the mirrored buses)
 c0 = make((0, 0, 0, 0), **KW)

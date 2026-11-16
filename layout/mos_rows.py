@@ -420,9 +420,13 @@ class Cell:
         return self
 
     def _mirrored(self, n, x0, x1):
+        """Mirror-image extension, clamped to the device rows (it covers the mirrored circuit; it must not reach
+        the side buses, where it would widen the cell or run under another net's bus landing)."""
         m = getattr(self, "_mirror", None)
         if m and n in m[1]:
-            return min(x0, 2 * m[0] - x1), max(x1, 2 * m[0] - x0)
+            lo = min(r["x0"] for r in self.rows); hi = max(r["x1"] for r in self.rows)
+            ext0, ext1 = 2 * m[0] - x1, 2 * m[0] - x0
+            return min(x0, max(ext0, lo)), max(x1, min(ext1, hi))
         return x0, x1
 
     def _landing(self, x, y, rail=False):
