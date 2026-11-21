@@ -37,6 +37,16 @@ if os.path.exists(f):
             "", "| corner | T (°C) | VDD (V) | offset (mV) | t_dec (ns) |", "|---|---|---|---|---|"]
     out += [f"| {a} | {b} | {c} | {'—' if d is None else f'{d:+.2f}'} | {'—' if e is None else f'{e:.2f}'} |"
             for a, b, c, d, e in rows]
+out += ["", "### ss at 1.62 V", "",
+        "At ss with VDD = 1.62 V the 1 mV decision takes longer than this testbench's 50 ns evaluation window (10 MHz "
+        "clock), so those three runs show no decision time and a distorted toggle point. `tb_cmp_ss.spice` repeats the "
+        "worst case (ss, 125 °C, 1.62 V) with the ADC's 1 MHz clock (500 ns evaluation): all decisions at ±20 mV and ±2 mV "
+        "are right and take 73–77 ns. A10 (≤ 50 ns) is missed at this corner only; the ADC at 1 MHz is unaffected, the "
+        "maximum clock there is a few MHz (A12 asks for 10 MHz at tt only).",
+        "", "## Decision (2026-11-21)", "",
+        "Both misses are accepted for the tape-out (no redesign before the 11-26 freeze): the offset only shifts the "
+        "transfer curve and is calibrated out (two-point offset/gain calibration in `docs/info.md`, test 2); the slow "
+        "corner still converts correctly at the specified 1 MHz clock."]
 txt = "\n".join(out)
 print(txt)
 open(os.path.join(H, "phase2.md"), "w").write(txt + "\n")

@@ -1,0 +1,33 @@
+* Worst corner (ss, 125 C, 1.62 V) with the ADC's 1 MHz clock (evaluation 500 ns): decisions at inn +/- 20 mV and
+* +/- 2 mV and their time (clk 50 % -> opb/onb 50 %, 4th cycle). tb_cmp_mc.spice (10 MHz, 50 ns window) cannot
+* resolve this corner. Run: ngspice -b tb_cmp_ss.spice
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice ss
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/comparator.spice
+.include cmpq.spice
+.options reltol=1e-5 abstol=1e-12 vntol=1e-6 chgtol=1e-16 method=gear
+.temp 125
+VDD vdd 0 1.62
+VPD pd 0 0
+xbias vdd 0 pd nbias pbias bias_gen
+VCK clk 0 pulse(0 1.62 0.5u 1n 1n 0.5u 1u)
+VN inn 0 0.716
+VA a 0 0.736
+VB b 0 0.696
+VC c 0 0.718
+VD d 0 0.714
+xa vdd 0 pbias clk a inn qa qba cmpq
+xb vdd 0 pbias clk b inn qb qbb cmpq
+xc vdd 0 pbias clk c inn qc qbc cmpq
+xd vdd 0 pbias clk d inn qd qbd cmpq
+.control
+save v(clk) v(qa) v(qb) v(qc) v(qd) v(xa.opb) v(xa.onb) v(xb.opb) v(xb.onb) v(xc.opb) v(xc.onb) v(xd.opb) v(xd.onb)
+tran 1n 6u
+meas tran ta trig v(clk) val=0.81 rise=4 targ v(xa.opb) val=0.81 fall=4
+meas tran tb trig v(clk) val=0.81 rise=4 targ v(xb.onb) val=0.81 fall=4
+meas tran tc trig v(clk) val=0.81 rise=4 targ v(xc.opb) val=0.81 fall=4
+meas tran td trig v(clk) val=0.81 rise=4 targ v(xd.onb) val=0.81 fall=4
+print v(qa)[length(qa)-1] v(qb)[length(qb)-1] v(qc)[length(qc)-1] v(qd)[length(qd)-1]
+quit
+.endc
+.end

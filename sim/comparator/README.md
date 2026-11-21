@@ -63,6 +63,17 @@ op/on as well gained < 1 mV. The longer preamp load raises the gain and also the
 Extracted comparator after the fix (mirrored layout, `layout/gen_comparator.py`): toggle point +5 mV against
 the schematic's +1 mV (1 mV steps), i.e. ≈ 4 mV systematic, inside A7 (σ ≤ 10 mV, random).
 
+## Phase 2 (2026-11-21): `phase2.md`
+
+- **Monte Carlo (100 seeds, `tt_mm`): offset σ 17.5 mV (A7 ≤ 10 mV missed)**, 95th percentile 39 mV (≈ 8 LSB).
+  The offset only shifts the transfer curve; `docs/info.md` has a two-point offset/gain calibration.
+  Accepted (no redesign before the freeze; halving it needs ~4× preamp area and a new layout).
+- **Corners (45):** systematic offset +0.3 mV, 1 mV decision 1.1–24 ns, except ss at 1.62 V: 73–77 ns at the
+  worst case (ss, 125 °C, 1.62 V; `tb_cmp_ss.spice` with the ADC's 1 MHz clock, all decisions right). A10 is
+  missed at that corner only; the ADC at 1 MHz has a 500 ns evaluation window.
+- Testbenches: `tb_cmp_mc.spice` (`tools/run_corners.py`, toggle point on a 0.5 mV/cycle ramp + decision time),
+  `tb_cmp_ss.spice`; report `phase2.py`.
+
 ## Simulation notes (apply to every comparator / ADC run)
 
 1. **Tolerance:** with ngspice's default reltol (1e-3) and a 0.1 ns step, about 10 % of the 1 mV decisions came
