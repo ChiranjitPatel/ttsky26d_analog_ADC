@@ -131,7 +131,9 @@ def report():
     VREF_INT = VREF_I3
     d = load("gnd")
     if d is not None:
-        c = codes(d); v1 = d[-1, 5]; VREF_INT = v1
+        # DMM reading = the DC level before the conversions start (during conversions the DAC's charge draws dip
+        # ua[1] by up to ~35 mV for a few hundred ns; a DMM averages them out)
+        c = codes(d); v1 = d[int(np.argmin(abs(d[:, 0] - (T0 - 0.2e-6)))), 5]; VREF_INT = v1
         rows.append(f"| VGND input + VREF check | INSEL = 11, VREF_OE = 1, 10 MΩ DMM on ua[1], 1 MHz | code 0; ua[1] ≈ VREF "
                     f"(I3: {VREF_I3} V) | codes {c}; ua[1] = {v1:.4f} V (used as VREF below) | "
                     f"{ok(c and all(x == 0 for x in c) and abs(v1 - VREF_I3) < 0.01)} |")

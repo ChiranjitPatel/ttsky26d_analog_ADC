@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Decode the M2 conversions (make_tb.py runs) at each EOC and compare sch vs rc and with floor(256 vin / VREF).
 VREF is the internal reference and is not on a pin in this test (VREF_OE = 0), so the ideal code uses
-VREF = 1.2143 V (the I3 / M1 value); the sch netlist is the reference for the layout.
+VREF = 1.2078 V, measured on ua[1] (VREF_OE = 1, 10 MOhm DMM) in the whole-tile 'gnd' scenario (scenarios.py);
+I3 had 1.2143 V. The sch netlist is the reference for the layout.
 Usage: python3 decode.py  -> prints a table and writes results.md
 """
 import os
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "out", "m2")
-VREF = 1.2143
+VREF = 1.2078
 
 
 def codes(dut):
@@ -28,7 +29,7 @@ def codes(dut):
 
 vins = [float(x) for x in open(os.path.join(OUT, "sch_vin.txt"))]
 res = {d: codes(d) for d in ("sch", "rc")}
-rows = ["| vin (V) | ideal floor(256 vin / 1.2143) | sch | rc |", "|---|---|---|---|"]
+rows = [f"| vin (V) | ideal floor(256 vin / {VREF}) | sch | rc |", "|---|---|---|---|"]
 for i, v in enumerate(vins):
     ideal = min(max(int(np.floor(256 * v / VREF)), 0), 255)
     c = [str(res[d][i]) if res[d] and i < len(res[d]) else "—" for d in ("sch", "rc")]

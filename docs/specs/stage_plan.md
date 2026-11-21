@@ -160,6 +160,6 @@ pass through simulation, layout and LVS on a small block.
 | I1 Analog core | — | — | | | | | | merged into I2: the real SAR logic was verified first, so I2 uses it directly |
 | I2 Full ADC | ✅ 2026-11-07 | ✅ 5/5, 18/18 edges, ENOB 8.04 | | | | | | `sim/adc/README.md`: 5/5 exact codes after two fixes (smpt glitch, comparator preamp); edges + sine running |
 | I3 Self-referenced | ✅ 2026-11-07 | ✅ 5/5 exact | | | | | | real bandgap → filter → buffer reference (1.2143 V) |
-| I4 Top level | ✅ | | | ✅ 2026-11-16 (M2) | ✅ Magic + KLayout 0 | ✅ full chip | ✅ 2026-11-16: 5/5 codes rc = sch | `layout/m2_top.py`, `material/layout/m2_top.png`, `sim/m2/README.md`; post-layout found a −40 LSB comparator offset (fixed) |
+| I4 Top level | ✅ | ✅ 2026-11-21: all 6 scenarios of `top_level.md` on the whole tile (`sim/m2/scenarios.md`) | | ✅ 2026-11-16 (M2) | ✅ Magic + KLayout 0 | ✅ full chip | ✅ 2026-11-16: 5/5 codes rc = sch | `layout/m2_top.py`, `material/layout/m2_top.png`, `sim/m2/README.md`; post-layout found a −40 LSB comparator offset (fixed) |
 
 a = schematic, b = Phase 1 sim, c = Phase 2 sim, d = layout, e = DRC, f = LVS, g = post-layout sim.
