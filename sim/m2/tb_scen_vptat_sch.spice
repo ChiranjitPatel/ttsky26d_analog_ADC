@@ -15,6 +15,7 @@ CPAD1 pad1 0 5p
 RPAD1 pad1 pin1 500
 CDMM pin1 0 10p
 RDMM pin1 0 10meg
+.nodeset v(xdut.vbg)=1.21 v(xdut.vbg_f)=1.21
 * unused outputs: 1 GOhm to ground
 .control
 set wr_singlescale

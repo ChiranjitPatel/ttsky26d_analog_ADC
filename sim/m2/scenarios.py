@@ -106,6 +106,15 @@ def tb(name, dut):
         s += [f"VEXT ext 0 {VEXT}", "REXT ext pin1 10", "CDEC pin1 0 100n"]
     if name == "mode1":
         s += mode1_sources()
+    # .nodeset on the bandgap output and the VREF filter: with REF_SEL = 1 the VREF buffer is off, the filter node
+    # (1.6 MOhm chain into a gate) has no other DC anchor, and on the extracted netlist the operating point
+    # converged to a non-physical state (vbg -0.77 V, filter node -193 kV; LVS-clean, so not an open). The
+    # nodesets only guide the solver: it lands on vbg = 1.209 V (schematic 1.210 V).
+    txt = open(NETS[dut]).read().replace("\n+", " ")
+    pat = (r"(inmux_0\.vbg|vref_buf_0\.in|vref_filt_0\.[A-Za-z0-9_.]+)" if dut == "rc" else r"(vbg|vbg_f)")
+    nn = sorted(set(re.findall(rf"(?<=\s){pat}(?=\s)", txt)))
+    if nn:
+        s.append(".nodeset " + " ".join(f"v(xdut.{x})=1.21" for x in nn))
     s += ["* unused outputs: 1 GOhm to ground", *[f"R{x} {x} 0 1g" for x in nc],
           ".control", "set wr_singlescale", "set wr_vecnames", f"save {vec}",
           f"tran {min(tc / 500, 2e-9):.3g} {c['tstop']:.6g}",

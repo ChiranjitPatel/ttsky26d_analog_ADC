@@ -25,6 +25,7 @@ VEXD4 ext_d4 0 pwl(0 0 3.199e-06 0 3.2e-06 1.8 4.199e-06 1.8 4.2e-06 1.8 5.199e-
 VEXD5 ext_d5 0 pwl(0 0 3.199e-06 0 3.2e-06 1.8 4.199e-06 1.8 4.2e-06 1.8 5.199e-06 1.8 5.2e-06 1.8 6.199e-06 1.8 6.2e-06 0)
 VEXD6 ext_d6 0 pwl(0 0 3.199e-06 0 3.2e-06 1.8 4.199e-06 1.8 4.2e-06 1.8 5.199e-06 1.8 5.2e-06 1.8 6.199e-06 1.8 6.2e-06 0)
 VEXD7 ext_d7 0 pwl(0 0 3.199e-06 0 3.2e-06 0 4.199e-06 0 4.2e-06 0 5.199e-06 0 5.2e-06 0 6.199e-06 0 6.2e-06 1.8)
+.nodeset v(xdut.vbg)=1.21 v(xdut.vbg_f)=1.21
 * unused outputs: 1 GOhm to ground
 .control
 set wr_singlescale
