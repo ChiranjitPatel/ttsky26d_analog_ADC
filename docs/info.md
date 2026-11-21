@@ -58,24 +58,38 @@ conversion: the filtered reference settles in ≈ 45 µs (simulated).
    measured value and use it as VREF in all conversions: D · VREF_measured / 256.
    (A 1 MΩ probe reads ≈ 17 mV low, because the buffer's output resistance is ≈ 12 kΩ. Conversions are
    not affected.)
+
+   **Offset and gain calibration (recommended for any absolute measurement).** The comparator's random
+   offset is ≈ 17.5 mV σ (Monte Carlo; ≈ 4 LSB, up to ≈ 8 LSB on a 95th-percentile chip). It shifts every
+   code by the same amount; it does not affect linearity. Convert two known DC inputs on `ua[0]`, e.g.
+   VA ≈ 0.2 V and VB ≈ 1.0 V (measured with the multimeter), giving codes DA and DB. Then
+   VIN = VA + (D − DA) · (VB − VA) / (DB − DA). This removes offset and gain (VREF) error together.
+   Avoid calibration points within ≈ 50 mV of 0 V or VREF: there a chip with a large offset clips at
+   code 0 or 255.
 3. **Linearity.** Sweep VIN slowly over 0 … 1.2 V (or use a sine from a function generator) and record
    codes. Compute DNL/INL from the code histogram, ENOB from an FFT.
 4. **Temperature sensor.** INSEL = 01, **clock ≤ 100 kHz** (VPTAT has ≈ 270 kΩ source impedance and
    needs a ≥ 4 µs sample phase). About 2.4 °C per code.
    - 1-point calibration: read D0 at a known temperature T0 (°C), then T(°C) = (D / D0) · (T0 + 273.15) − 273.15.
-     Simulated: within ±5 °C for most chips, but mismatch can make up to ~10 % of chips worse.
+     Simulated: within ±5 °C for most chips, but mismatch can make up to ~10 % of chips worse. This formula
+     assumes no ADC offset: first subtract the offset found in the calibration under test 2 (in codes), or
+     use the 2-point method, which absorbs it.
    - 2-point calibration (recommended): read D1 at T1 and D2 at T2 (e.g. room temperature and a hot plate at
      85 °C), then T = T1 + (D − D1) · (T2 − T1) / (D2 − D1). Simulated: within ±2.7 °C (−40…125 °C),
      plus the ±1.2 °C quantization.
 5. **Bandgap voltage through the ADC.** Apply a known reference (e.g. 1.500 V) to `ua[1]`, decoupled with
    ≥ 100 nF next to the pin. REF_SEL = 1, INSEL = 10, clock ≤ 100 kHz. VBG = D · VREF_ext / 256.
+   For better than ≈ ±20 mV, correct D for the comparator offset first: with the same settings but INSEL = 00,
+   convert a known voltage near 1.2 V on `ua[0]` and use the difference to its ideal code.
 6. **Fallback: external reference.** If the bandgap doesn't work, REF_SEL = 1 with an external
    reference on `ua[1]` still runs the ADC (tests 1 and 3).
 7. **Fallback: external SAR mode.** MODE = 1. Drive EXT_SAMPLE = 1, then 0 (sample), then for each bit
    from MSB to LSB: set the trial code on EXT_D, pulse EXT_CMP_CLK high, read CMP_OUT
    (1 = input below the trial level → clear that bit). This exercises the DAC and comparator without the
    on-chip SAR logic.
-8. **Offset check.** INSEL = 11 (ground) should give code 0.
+8. **Offset check.** INSEL = 11 (ground): depending on the sign of the comparator offset, this gives code 0
+   or a small non-zero code (a few LSB are normal, see the calibration under test 2). A small known input
+   (e.g. 50 mV) on `ua[0]` measures the offset of either sign.
 
 Simulated on the whole tile (from its pins, `sim/m2/`): test 1 gives the ideal code floor(256 · VIN / VREF)
 at 0.05 / 0.31 / 0.6 / 0.9 / 1.17 V (schematic and extracted layout); test 4 gives 127 at 27 °C; test 5
