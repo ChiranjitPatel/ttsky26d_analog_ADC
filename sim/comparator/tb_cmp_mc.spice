@@ -1,0 +1,32 @@
+* Comparator offset and decision time, for Phase 2 (corners and Monte Carlo) with tools/run_corners.py:
+*   ../../tools/run_corners.py tb_cmp_mc.spice --temps -40,27,125 --vdd 1.62,1.8,1.98     (45 corners)
+*   ../../tools/run_corners.py tb_cmp_mc.spice --mc 100 --mc-corner tt_mm                  (mismatch)
+* xr: inp ramps inn - 60 mV -> inn + 60 mV at 0.5 mV per cycle (clk 10 MHz); vos = inp where q rises (after the
+*     1 us start-up of the latch).
+* xd: inp = inn + 1 mV; tdec = clk rising (50 %) -> opb falling (50 %), 10th cycle (A10: <= 50 ns).
+* Wrapper cmpq.spice: std-cell clock inverter + NAND SR latch, as in adc_digital.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/comparator.spice
+.include cmpq.spice
+.options reltol=1e-5 abstol=1e-12 vntol=1e-6 chgtol=1e-16 method=gear
+.temp 27
+VDD vdd 0 1.8
+VPD pd 0 0
+xbias vdd 0 pd nbias pbias bias_gen
+VCK clk 0 pulse(0 1.8 50n 0.2n 0.2n 50n 100n)
+VN inn 0 0.716
+VR rp 0 pwl(0 0.656 24u 0.776)
+VD dp 0 0.717
+xr vdd 0 pbias clk rp inn qr qbr cmpq
+xd vdd 0 pbias clk dp inn qd qbd cmpq
+.control
+save v(clk) v(rp) v(qr) v(xd.opb)
+tran 0.5n 24u
+meas tran vtog find v(rp) when v(qr)=0.9 td=1u rise=1
+meas tran tdec trig v(clk) val=0.9 rise=10 targ v(xd.opb) val=0.9 fall=10
+let vos = vtog - 0.716
+print vos tdec
+quit
+.endc
+.end

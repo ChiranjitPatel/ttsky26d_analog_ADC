@@ -56,6 +56,8 @@ def make(tag, corner, temp, vdd, seed):
     s = re.sub(r"(@VDD\[pulse\]\s*=\s*\[\s*0\s+)1\.8\b", lambda m: m.group(1) + vdd, s)
     s = s.replace("../out/netlist/", os.path.abspath(os.path.join(here, "..", "out", "netlist")) + "/")
     s = re.sub(r"\.\./out/[\w/]+/", d + "/", s)
+    # every other relative include (a wrapper next to the testbench, ../../layout/...): from the testbench's directory
+    s = re.sub(r"^(\.include\s+)(?!/)(\S+)", lambda m: m.group(1) + os.path.normpath(os.path.join(here, m.group(2))), s, flags=re.M)
     f = os.path.join(d, "tb.spice"); open(f, "w").write(s)
     # each run needs the .spiceinit next to it. The Monte Carlo seed goes there: the mismatch
     # parameters (agauss) are drawn while the netlist is parsed, i.e. before .control runs.
