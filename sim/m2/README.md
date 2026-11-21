@@ -35,17 +35,24 @@ The extracted tile gives the schematic's code at every input, and both are the i
 VREF (1.2078 V, measured on ua[1] in the `gnd` scenario below; I3 had 1.2143 V). Run time: 34 min (sch),
 51 min (rc) for 5 conversions.
 
-## I4 operating scenarios (2026-11-21, schematic netlist)
+## I4 operating scenarios (2026-11-21): schematic and extracted layout
 
-`scenarios.py` (all settings from `docs/specs/top_level.md`, pins only) → `scenarios.md`:
+`scenarios.py` (all settings from `docs/specs/top_level.md`, pins only; `sch` and `rc` netlists) → `scenarios.md`:
 
-| Scenario | Result |
-|---|---|
-| VGND input + VREF on ua[1] (DMM) | code 0; ua[1] = 1.2078 V DC (dips of up to 35 mV for ~100 ns while the DAC switches) |
-| Temperature sensor, 100 kHz | 127 (expected 127.0 for VPTAT 0.599 V) |
-| Bandgap via ADC, 1.5 V on ua[1], 100 kHz | 206 → VBG ≈ 1.208 V |
-| Bandgap fallback, BG_PD = 1, 1.5 V on ua[1] | 102, 199 = floor(256 vin / 1.5) |
-| External SAR (MODE = 1) | CMP_OUT 0 / 0 / 0 / 1 for trial codes 120 / 126 / 127 / 133 (vin = code 127.2); D mirrors EXT_D |
+| Scenario | Schematic | Extracted layout |
+|---|---|---|
+| VGND input + VREF on ua[1] (DMM) | code 0; ua[1] = 1.2078 V | code 0; ua[1] = 1.2060 V |
+| Temperature sensor, 100 kHz | 127 (expected 127.0) | 127 (expected 127.1) |
+| Bandgap via ADC, 1.5 V on ua[1], 100 kHz | 206 → VBG ≈ 1.210 V | 207 → VBG ≈ 1.216 V |
+| Bandgap fallback, BG_PD = 1, 1.5 V on ua[1] | 102, 199 (exact) | 102, 199 (exact) |
+| External SAR (MODE = 1) | CMP_OUT 0/0/0/1 for 120/126/127/133; D mirrors EXT_D | same |
+
+ua[1] dips by up to ~35 mV for ~100 ns while the DAC switches (VREF_OE = 1); the values above are DC.
+The extracted netlist needs `.nodeset` hints on vbg and the VREF filter when REF_SEL = 1 (the buffer is off,
+and the filter node is then anchored only through its 1.6 MΩ chain): without them its `.op` converged to a
+non-physical state (vbg −0.77 V) and both external-reference scenarios read wrong codes. LVS is clean, and
+with the hints the operating point matches the schematic (vbg 1.209 V vs 1.210 V). Run times on 4 cores:
+6–37 min per scenario.
 
 ## What this test found (all fixed)
 
