@@ -1,12 +1,3 @@
-<!---
-
-This file is used to generate your project datasheet. Please fill in the information below and delete any unused
-sections.
-
-You can also include images in this folder and reference them in the markdown. Each image must be less than
-512 kb in size, and the combined size of all images must be less than 1 MB.
--->
-
 > Numbers are simulation results (tt, 27 °C, 1.8 V) unless stated otherwise. The full tile was simulated
 > from its pins in every operating mode below, and again from the extracted layout (R + C): the codes match
 > the schematic exactly. Corner and Monte Carlo results are in the repository (`sim/*/README.md`).
