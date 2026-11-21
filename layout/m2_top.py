@@ -102,6 +102,10 @@ YVP = dgb[1] - 0.3
 paint("metal4", strap_x["VDPWR"][0] - 0.6, YVP - 0.3, strap_x["VDPWR"][0] + 0.6, dgb[1] + 0.5)
 stack(strap_x["VDPWR"][0], YVP, "metal3", "metal4")
 hwire("metal3", M_VDD, strap_x["VDPWR"][0], YVP, 0.3); stack(M_VDD, YVP, "metal3", "metal4")
+# met4 bar joining the three VDPWR straps' downward extensions (116.84: comparator, 136.84: inmux, below) to the
+# left one, so the comparator and the inmux reach the stripe directly, not only through the block's std-cell rails.
+# 0.5 um below the block (its VGND straps start at its bottom edge); no met4 in the comparator.
+paint("metal4", strap_x["VDPWR"][0] - 0.6, dgb[1] - 1.5, strap_x["VDPWR"][2] + 0.6, dgb[1] - 0.5)
 # north pins: met2 up through the bars, met3 river tracks (left edge packing), via3, met4 up to the TT pin
 north = [n for n in dg["pins"] if re.match(r"(uo_out|uio_in|ui_in)\[|rst_n$|clk$", n)]
 spans = sorted(((pins[n][0], dg["pins"][n][0][0], n) for n in north), key=lambda t: t[0])

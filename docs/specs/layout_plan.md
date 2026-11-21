@@ -189,8 +189,9 @@ preamp load (schematic) plus mirrored side buses and tracks (`mos_rows` options 
 extracted comparator is now within ~4 mV of the schematic (`sim/comparator/README.md`). Top-level changes:
 pbias, smpt/clkb/opb join the comparator buses on met2; onb (now on the comparator's other side) runs down its
 right edge. Magic DRC 0, KLayout 0/0/0, LVS match after the change.
-Open: the comparator and the inmux get VDPWR only through adc_digital's power grid (LVS-clean; a direct tie of
-straps 116.84 / 136.84 to the stripe would be more robust).
+2026-11-21: the comparator's and the inmux's VDPWR straps (116.84 / 136.84) are now tied to the left strap (and
+so to the middle stripe) by a met4 bar just below adc_digital (y 170.1-171.1), instead of only through the block's
+std-cell rails. Magic DRC 0, KLayout 0/0/0, LVS match.
 
 Next: CI precheck on the pushed GDS; Phase 2 Monte Carlo (comparator, cap DAC) on the final cells.
 
