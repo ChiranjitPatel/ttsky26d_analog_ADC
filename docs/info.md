@@ -7,8 +7,9 @@ You can also include images in this folder and reference them in the markdown. E
 512 kb in size, and the combined size of all images must be less than 1 MB.
 -->
 
-> **Draft (2026-11-07)** — written while the blocks are verified at the typical corner. Numbers are
-> simulation results (tt, 27 °C, 1.8 V) and will be updated after corner/Monte Carlo checks and layout.
+> Numbers are simulation results (tt, 27 °C, 1.8 V) unless stated otherwise. The full tile was simulated
+> from its pins in every operating mode below, and again from the extracted layout (R + C): the codes match
+> the schematic exactly. Corner and Monte Carlo results are in the repository (`sim/*/README.md`).
 
 ## How it works
 
@@ -60,7 +61,9 @@ conversion: the filtered reference settles in ≈ 45 µs (simulated).
    pulse `rst_n` low, then set START = 1. Apply a DC voltage (0 … 1.2 V) to `ua[0]` from a low-impedance
    source. On each rising edge of EOC, read D[7:0]. Expect D ≈ 256 · VIN / VREF with VREF ≈ 1.21 V.
 2. **Reference check and calibration.** Set VREF_OE = 1 and measure `ua[1]` with a ≥ 10 MΩ multimeter:
-   ≈ 1.21 V (simulated chip-to-chip spread σ ≈ 18 mV from mismatch, ±0.4 % over process). Store the
+   ≈ 1.21 V (whole tile: 1.208 V; simulated chip-to-chip spread σ ≈ 18 mV from mismatch, ±0.4 % over
+   process). While converting, `ua[1]` shows short dips (up to ≈ 35 mV for ≈ 100 ns) when the DAC switches;
+   a multimeter averages them out. Store the
    measured value and use it as VREF in all conversions: D · VREF_measured / 256.
    (A 1 MΩ probe reads ≈ 17 mV low, because the buffer's output resistance is ≈ 12 kΩ. Conversions are
    not affected.)
@@ -82,6 +85,12 @@ conversion: the filtered reference settles in ≈ 45 µs (simulated).
    (1 = input below the trial level → clear that bit). This exercises the DAC and comparator without the
    on-chip SAR logic.
 8. **Offset check.** INSEL = 11 (ground) should give code 0.
+
+Simulated on the whole tile (from its pins, `sim/m2/`): test 1 gives the ideal code floor(256 · VIN / VREF)
+at 0.05 / 0.31 / 0.6 / 0.9 / 1.17 V (schematic and extracted layout); test 4 gives 127 at 27 °C; test 5
+gives 206 with a 1.5 V reference (VBG ≈ 1.21 V); test 6 with the bandgap powered down (BG_PD = 1) gives
+the ideal codes; in test 7 CMP_OUT flips between the trial codes just below and above the input; test 8
+gives 0.
 
 ## External hardware
 
