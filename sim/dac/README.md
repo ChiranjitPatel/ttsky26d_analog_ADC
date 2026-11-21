@@ -30,4 +30,10 @@ These rules are in CLAUDE.md.
 
 ## Phase 2
 
-Monte Carlo on the unit caps (A13: mismatch-induced DNL σ ≤ 0.25 LSB), corners.
+**Mismatch Monte Carlo (A13, 2026-11-21):** `tb_dac_mc.spice` measures the nine bit capacitances of the
+layout's `cap_array` netlist per seed (AC, one bottom plate at a time), `dac_mc_stats.py` computes DNL/INL
+→ `mc.md`. 104 seeds (`tt_mm`; 200 were started, the run hit the 2 h job limit):
+DNL σ at the MSB transition **0.279 LSB (A13 target ≤ 0.25 LSB: missed by ~10 %)**, max |DNL| per chip median
+0.25 / 95th percentile 0.55 LSB, no missing codes, max |INL| ≤ 0.40 LSB. This is what the PDK's MIM
+mismatch (σ = 2.8 % / √(W L m) → 1.5 % per 2 × 1.65 µm unit) gives: σ_DNL ≈ σ_unit · √255. Meeting A13 with
+margin needs ~25 % more unit-cap area (array ~12 % larger each way); not done before the freeze unless decided.
