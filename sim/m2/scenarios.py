@@ -8,7 +8,8 @@ Same DUT, pad models and simulator settings as make_tb.py (tt, 27 C, 1.8 V). One
   fallback  REF_SEL = 1 (1.500 V on ua[1]) with BG_PD = 1 (bandgap off), INSEL = 00    -> 256 vin / 1.5
   mode1     MODE = 1: EXT_SAMPLE high then low, then trial codes on EXT_D with an EXT_CMP_CLK pulse each;
             CMP_OUT must be 0 for trial codes below the input and 1 above it
-Usage: python3 scenarios.py [netlist: sch|rc] -> tb_scen_<name>_<netlist>.spice; run with ngspice -b,
+Usage: python3 scenarios.py [netlist: sch|rc] -> tb_scen_<name>_<netlist>.spice; run with ngspice -b (rc needs
+`python3 layout/m1_pex.py m2` first),
 then python3 scenarios.py --report  -> scenarios.md
 """
 import os, re, sys
@@ -115,9 +116,10 @@ def tb(name, dut):
 
 
 def report():
-    rows = ["| Scenario | Settings | Expected | Result | |", "|---|---|---|---|---|"]
-    def load(n):
-        f = os.path.join(OUT, f"scen_{n}_sch.dat")
+    """One row per scenario; a result column for the schematic (sch) and, where run, the extracted layout (rc).
+    Expectations use each netlist's own VREF, read on ua[1] in its gnd run."""
+    def load(n, dut):
+        f = os.path.join(OUT, f"scen_{n}_{dut}.dat")
         return np.loadtxt(f, skiprows=1) if os.path.exists(f) else None
     def codes(d):
         t, eoc = d[:, 0], d[:, 2]; bits = d[:, 7:15]
@@ -128,46 +130,60 @@ def report():
             out.append(int(sum(int(bits[kk, b] > 0.9) << b for b in range(8))))
         return out
     ok = lambda x: "✅" if x else "❌"
-    VREF_INT = VREF_I3
-    d = load("gnd")
-    if d is not None:
+    duts = [u for u in ("sch", "rc") if any(load(n, u) is not None for n in SC)]
+    vref = {}
+    for u in duts:
+        d = load("gnd", u)
         # DMM reading = the DC level before the conversions start (during conversions the DAC's charge draws dip
-        # ua[1] by up to ~35 mV for a few hundred ns; a DMM averages them out)
-        c = codes(d); v1 = d[int(np.argmin(abs(d[:, 0] - (T0 - 0.2e-6)))), 5]; VREF_INT = v1
-        rows.append(f"| VGND input + VREF check | INSEL = 11, VREF_OE = 1, 10 MΩ DMM on ua[1], 1 MHz | code 0; ua[1] ≈ VREF "
-                    f"(I3: {VREF_I3} V) | codes {c}; ua[1] = {v1:.4f} V (used as VREF below) | "
-                    f"{ok(c and all(x == 0 for x in c) and abs(v1 - VREF_I3) < 0.01)} |")
-    d = load("vptat")
-    if d is not None:
+        # ua[1] by up to ~35 mV for ~100 ns; a DMM averages them out)
+        vref[u] = d[int(np.argmin(abs(d[:, 0] - (T0 - 0.2e-6)))), 5] if d is not None else VREF_I3
+
+    def gnd(d, u):
         c = codes(d)
-        e = 256 * 0.599 / VREF_INT
-        rows.append(f"| Temperature sensor | INSEL = 01, 100 kHz | ≈ 256 · 0.599 / {VREF_INT:.4f} = {e:.1f} (VPTAT 0.599 V, I3) | "
-                    f"codes {c} | {ok(c and abs(c[0] - e) <= 3)} |")
-    d = load("vbg")
-    if d is not None:
+        return f"codes {c}; ua[1] = {vref[u]:.4f} V", bool(c) and all(x == 0 for x in c) and abs(vref[u] - VREF_I3) < 0.01
+    def vptat(d, u):
+        c = codes(d); e = 256 * 0.599 / vref[u]
+        return f"codes {c} (expected {e:.1f})", bool(c) and abs(c[0] - e) <= 3
+    def vbg(d, u):
         c = codes(d); e = 256 * 1.2143 / VEXT
-        rows.append(f"| Bandgap via ADC | REF_SEL = 1 ({VEXT} V + 100 nF on ua[1]), INSEL = 10, 100 kHz | "
-                    f"≈ 256 · VBG / {VEXT} = {e:.1f} | codes {c} | {ok(c and abs(c[0] - e) <= 3)} |")
-    d = load("fallback")
-    if d is not None:
+        return f"codes {c} → VBG ≈ {(c[0] + 0.5) * VEXT / 256:.3f} V" if c else "no EOC", bool(c) and abs(c[0] - e) <= 3
+    def fallback(d, u):
         c = codes(d); e = [int(256 * v / VEXT) for v in SC["fallback"]["vin"]]
-        rows.append(f"| Bandgap fallback | REF_SEL = 1 ({VEXT} V), BG_PD = 1, vin {SC['fallback']['vin']} V, 1 MHz | "
-                    f"floor(256 vin / {VEXT}) = {e} | codes {c} | {ok(len(c) >= len(e) and all(abs(a - b) <= 1 for a, b in zip(c, e)))} |")
-    d = load("mode1")
-    if d is not None:
+        return f"codes {c}", len(c) >= len(e) and all(abs(a - b) <= 1 for a, b in zip(c, e))
+    def mode1(d, u):
         t = d[:, 0]; cmpv = d[:, 6]
         r = [int(cmpv[int(np.argmin(abs(t - (3.2e-6 + k * 1e-6 + 0.95e-6))))] > 0.9) for k in range(len(TRIALS))]
         dm = [int(sum(int(d[int(np.argmin(abs(t - (3.2e-6 + k * 1e-6 + 0.3e-6)))), 7 + b] > 0.9) << b for b in range(8)))
               for k in range(len(TRIALS))]
-        exp = [int(x > 256 * 0.6 / VREF_INT) for x in TRIALS]       # trial level above vin -> CMP_OUT = 1
-        rows.append(f"| External SAR (MODE = 1) | vin 0.6 V, trial codes {TRIALS} on EXT_D | CMP_OUT {exp}; D mirrors EXT_D | "
-                    f"CMP_OUT {r}; D {dm} | {ok(r == exp and dm == TRIALS)} |")
+        exp = [int(x > 256 * 0.6 / vref[u]) for x in TRIALS]       # trial level above vin -> CMP_OUT = 1
+        return f"CMP_OUT {r} (expected {exp}); D {dm}", r == exp and dm == TRIALS
+    spec = [("gnd", "VGND input + VREF check", "INSEL = 11, VREF_OE = 1, 10 MΩ DMM on ua[1], 1 MHz",
+             f"code 0; ua[1] ≈ VREF (I3: {VREF_I3} V)", gnd),
+            ("vptat", "Temperature sensor", "INSEL = 01, 100 kHz", "≈ 256 · 0.599 V / VREF (VPTAT from I3)", vptat),
+            ("vbg", "Bandgap via ADC", f"REF_SEL = 1 ({VEXT} V + 100 nF on ua[1]), INSEL = 10, 100 kHz",
+             f"≈ 256 · VBG / {VEXT} = {256 * 1.2143 / VEXT:.1f}", vbg),
+            ("fallback", "Bandgap fallback", f"REF_SEL = 1 ({VEXT} V), BG_PD = 1, vin {SC['fallback']['vin']} V, 1 MHz",
+             f"floor(256 vin / {VEXT}) = {[int(256 * v / VEXT) for v in SC['fallback']['vin']]}", fallback),
+            ("mode1", "External SAR (MODE = 1)", f"vin 0.6 V, trial codes {TRIALS} on EXT_D",
+             "CMP_OUT 1 above the input; D mirrors EXT_D", mode1)]
+    hdr = "| Scenario | Settings | Expected | " + " | ".join(f"Result ({u})" for u in duts) + " |"
+    rows = [hdr, "|" + "---|" * (3 + len(duts))]
+    for n, title, sett, expd, fn in spec:
+        cells = []
+        for u in duts:
+            d = load(n, u)
+            if d is None:
+                cells.append("—"); continue
+            txt, good = fn(d, u)
+            cells.append(f"{txt} {ok(good)}")
+        rows.append(f"| {title} | {sett} | {expd} | " + " | ".join(cells) + " |")
     txt = "\n".join(rows)
     print(txt)
     open(os.path.join(HERE, "scenarios.md"), "w").write(
-        "# I4 operating scenarios on the whole tile (schematic netlist, tt, 27 °C, 1.8 V)\n\n"
+        "# I4 operating scenarios on the whole tile (tt, 27 °C, 1.8 V)\n\n"
         "Generated by `scenarios.py --report`; settings from `docs/specs/top_level.md`, pins only, pad models as in "
-        "`make_tb.py`.\n\n" + txt + "\n")
+        "`make_tb.py`. sch = `layout/cells/m2_top_ref.spice`; rc = extracted layout (`layout/m1_pex.py m2`).\n\n"
+        + txt + "\n")
 
 
 if __name__ == "__main__":
