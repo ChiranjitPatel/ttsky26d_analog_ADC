@@ -8,6 +8,11 @@ tt corner, 27 °C, VDPWR 1.8 V (Phase 3 key test, `CLAUDE.md`).
 | `make_tb.py [vin ...]` | writes `tb_m2_sch.spice` and `tb_m2_rc.spice` (default 5 inputs, 0.05–1.17 V) |
 | `decode.py` | decodes the codes 0.2 µs after each EOC rise, writes `results.md` |
 | `results.md` | schematic vs extracted vs ideal codes |
+| `scenarios.py`, `scenarios.md` | the six operating scenarios of `top_level.md`, sch and rc |
+| `plot.py` → `plots/conversions.png`, `plots/scenarios.png` | waveforms, schematic and extracted layout overlaid |
+
+The raw waveform data (`sim/out/m2/*.dat`, `wrdata` columns, ~150 MB) is not in git (`sim/out/` is ignored):
+re-run the testbenches to regenerate it. Top-level netlists (pre-layout, LVS, post-layout): `layout/netlists/`.
 
 Netlists:
 - **sch**: `layout/cells/m2_top_ref.spice` (written by `layout/m2_top.py`: the xschem analog subckts + LibreLane's

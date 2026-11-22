@@ -47,7 +47,7 @@ gets a brief (devices, sizes, matching groups, pin positions, target outline).
 | 2d | vcm_gen + top-plate switch | Claude (taken over) | **Done Nov 16**: 17.5 × 49.5 µm, clean (`gen_vcm_gen.py`); the top-plate switch is in the comparator cell |
 | 2e | inmux | Claude (taken over) | **Done Nov 16**: 15.2 × 5.6 µm, full custom, clean (`gen_inmux.py`) |
 | 2f | adc_digital place & route (LibreLane / OpenROAD, sky130_fd_sc_hd) | Claude | **Done Nov 16**: 63.5 × 47.3 µm, 221 cells; route/Magic/KLayout DRC 0, LVS 0, antenna 0, setup +27.4 ns / hold +0.12 ns at 100 ns (`layout/digital/`) |
-| **M2** | Integration, LVS, post-layout sim, precheck | both | **Nov 24–26** |
+| **M2** | Integration, LVS, post-layout sim, precheck | both | **Done Nov 21**: Magic DRC 0, KLayout 0, LVS match, CI precheck passed; post-layout: 5 conversions and all 6 scenarios match the schematic (`sim/m2/`); netlists in `layout/netlists/` |
 | — | Freeze; final checks; submission | both | Nov 26 – Dec 1 |
 
 In parallel (Claude): Phase 2 block sweeps (before each cell), I4 full-chip simulation, post-layout
