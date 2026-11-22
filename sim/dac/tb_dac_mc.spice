@@ -1,0 +1,67 @@
+* Cap DAC mismatch (A13), Phase 2: the bit capacitances of cap_array (the layout's netlist), per Monte Carlo seed.
+*   ../../tools/run_corners.py tb_dac_mc.spice --mc 200 --mc-corner tt_mm ; python3 dac_mc_stats.py
+* The top plate is held at AC ground by VT; one bottom plate at a time gets 1 V AC at 1 MHz:
+* C_bit = |i(VT)| / (2 pi f). Bottom-plate parasitics don't enter (VT only sees the top-plate coupling).
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../../layout/cells/m2_top_ref.spice
+.temp 27
+VT vtop 0 0
+V7 b7 0 dc 0 ac 0
+V6 b6 0 dc 0 ac 0
+V5 b5 0 dc 0 ac 0
+V4 b4 0 dc 0 ac 0
+V3 b3 0 dc 0 ac 0
+V2 b2 0 dc 0 ac 0
+V1 b1 0 dc 0 ac 0
+V0 b0 0 dc 0 ac 0
+VTT bt 0 dc 0 ac 0
+x1 vtop b7 b6 b5 b4 b3 b2 b1 b0 bt 0 cap_array
+.control
+alter @V7[acmag] = 1
+ac lin 1 1meg 1meg
+let c7 = abs(i(VT)) / (2 * pi * 1e6)
+print c7
+alter @V7[acmag] = 0
+alter @V6[acmag] = 1
+ac lin 1 1meg 1meg
+let c6 = abs(i(VT)) / (2 * pi * 1e6)
+print c6
+alter @V6[acmag] = 0
+alter @V5[acmag] = 1
+ac lin 1 1meg 1meg
+let c5 = abs(i(VT)) / (2 * pi * 1e6)
+print c5
+alter @V5[acmag] = 0
+alter @V4[acmag] = 1
+ac lin 1 1meg 1meg
+let c4 = abs(i(VT)) / (2 * pi * 1e6)
+print c4
+alter @V4[acmag] = 0
+alter @V3[acmag] = 1
+ac lin 1 1meg 1meg
+let c3 = abs(i(VT)) / (2 * pi * 1e6)
+print c3
+alter @V3[acmag] = 0
+alter @V2[acmag] = 1
+ac lin 1 1meg 1meg
+let c2 = abs(i(VT)) / (2 * pi * 1e6)
+print c2
+alter @V2[acmag] = 0
+alter @V1[acmag] = 1
+ac lin 1 1meg 1meg
+let c1 = abs(i(VT)) / (2 * pi * 1e6)
+print c1
+alter @V1[acmag] = 0
+alter @V0[acmag] = 1
+ac lin 1 1meg 1meg
+let c0 = abs(i(VT)) / (2 * pi * 1e6)
+print c0
+alter @V0[acmag] = 0
+alter @VTT[acmag] = 1
+ac lin 1 1meg 1meg
+let ct = abs(i(VT)) / (2 * pi * 1e6)
+print ct
+alter @VTT[acmag] = 0
+quit
+.endc
+.end

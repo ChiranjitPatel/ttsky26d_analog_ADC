@@ -1,0 +1,165 @@
+# Stage plan — bottom-up design and integration
+
+**Status: DRAFT v0.1**
+
+The design is built bottom-up. Each stage is **one block with a clear interface and its own
+testbench**. Integration adds **one proven block at a time**, so a failure always points to the
+newest block or its interface.
+
+## Rules for every stage
+
+1. **Don't start a stage until the stages it depends on are done** (see "Depends on").
+2. Each stage goes through the same steps. A stage is **done** only when all steps up to the
+   current project phase are checked:
+
+   | Step | Tool | Output |
+   |---|---|---|
+   | a. Schematic + symbol | xschem | `xschem/<cell>.sch`, `xschem/<cell>.sym` |
+   | b. Pre-layout sim, Phase 1 (tt, 27 °C, 1.80 V) | ngspice | `sim/<block>/tb_*.spice`, results in the spec Status table |
+   | c. Pre-layout sim, Phase 2 (corners, temp, supply, Monte Carlo) | ngspice | same testbenches, swept |
+   | d. Layout | KLayout | `layout/<cell>.gds` |
+   | e. DRC | KLayout deck + Magic | clean |
+   | f. Extraction + LVS | Magic + netgen | LVS match |
+   | g. Post-layout sim (Phase 3) | ngspice | key testbenches on the extracted netlist |
+
+3. Steps a–b come first for all stages, because they're cheap and catch architecture problems early.
+   Layout (d–g) starts per block once its Phase 2 results are good.
+4. Testbenches that touch a pad include the pad model: 500 Ω in series and 5 pF to ground (CLAUDE.md rule 2).
+5. Every block with a power-down input is also tested powered down (leakage, and correct restart).
+6. Record the result of each stage in the Status table at the bottom, with the date.
+
+## Block stages
+
+Targets marked † are stage-level design targets. They don't appear in the block specs, because
+the specs only define what the final system must do.
+
+### Stage 0 — Device sanity
+- **Goal:** confirm the PDK, models and tools behave as expected before any design work.
+- **Cells:** none (primitive devices only).
+- **Testbenches:** `sim/devices/`. nfet/pfet Id–Vgs and Id–Vds (W/L used later), gm/Id curves;
+  PNP `pnp_05v5_W3p40L3p40` Vbe vs. current and temperature; `res_xhigh_po_0p35` sheet resistance;
+  `cap_mim_m3_1` 2 × 2 µm capacitance.
+- **Exit:** the numbers match the PDK documentation within a few %; gm/Id lookup tables saved for sizing.
+- **Depends on:** PDK install.
+
+### Stage 1 — Bias current reference
+- **Goal:** a supply-independent bias current for the OTA, the VREF buffer and the comparator tail (if needed).
+- **Cells:** `bias_gen` (β-multiplier, chosen in stage 1 so the bandgap's OTA bias doesn't depend on the bandgap itself).
+- **Targets†:** I_bias = 1 µA nominal, mirrored outputs; changes < 10 % for VDPWR 1.62–1.98 V (Phase 2);
+  has a startup circuit and powers down with `bg_pd`.
+- **Testbenches:** `tb_bias_op`, `tb_bias_startup` (supply ramp from 0 V, CLAUDE.md rule 7).
+- **Depends on:** 0.
+
+### Stage 2 — Error amplifier (OTA)
+- **Goal:** the bandgap's error amplifier. The same topology may be reused for the VREF buffer (stage 5).
+- **Cells:** `ota`. Two-stage Miller with PMOS input: a 5-transistor OTA gives only ≈ 38 dB with these devices.
+- **Targets†:** DC gain ≥ 50 dB; phase margin ≥ 60 ° with the bandgap load; input offset σ ≤ 2 mV
+  (Phase 2 Monte Carlo); input common-mode range covers Vbe ≈ 0.55–0.75 V.
+- **Testbenches:** `tb_ota_ac` (gain, unity-gain bandwidth, phase margin), `tb_ota_dc` (input range), `tb_ota_mc` (offset).
+- **Depends on:** 1.
+
+### Stage 3 — Bandgap core + startup
+- **Goal:** VBG ≈ 1.215 V (B1 after 2026-11-07).
+- **Cells:** `bandgap_core` (PNP 1:8 array, resistors, OTA from stage 2, startup).
+- **Specs:** B1, B2, B3 in Phase 1; B4–B8 in Phase 2; B9 at layout.
+- **Testbenches:** `tb_bg_op`, `tb_bg_startup`, `tb_bg_line`, `tb_bg_temp`, `tb_bg_psrr`.
+- **Exit check:** the circuit must start from 0 V and must not stay in the zero-current state at any corner.
+- **Depends on:** 2.
+
+### Stage 4 — PTAT branch
+- **Goal:** VPTAT for the temperature sensor, without loading the core.
+- **Cells:** `ptat_out` (mirrored PTAT current into its own resistor).
+- **Specs:** B10 in Phase 1; B11 in Phase 2; B12–B13 are calculated from B11 and the ADC LSB.
+- **Testbenches:** `tb_bg_ptat`, plus a check that loading VPTAT changes VBG by < 0.1 mV.
+- **Depends on:** 3.
+
+### Stage 5 — VREF filter + buffer + reference select
+- **Goal:** drive the DAC reference and (optionally) the `ua[1]` pad from a filtered VBG.
+- **Cells:** `vref_filt` (RC low-pass on `vbg` → `vbg_f`: ≈ 1 MΩ xhigh_po + ≈ 4 pF MOS cap, decided
+  2026-11-07 for PSRR at 1 MHz), `vref_buf` (unity-gain, based on the stage 2 OTA or a variant),
+  `vref_sel` (internal/external selection + output switch, controlled by `REF_SEL` and `VREF_OE`).
+- **Specs:** B7 measured at `vbg_f` (DC ≥ 40 dB, 1 MHz ≥ 20 dB).
+- **Targets†:** VREF settles to within 0.5 LSB (2.4 mV) by the end of each bit cycle while driving the DAC
+  (2.4 pF switched); stable driving pad + probe (5 pF, 500 Ω, plus 10 pF probe); phase margin ≥ 45 °;
+  filter startup (τ ≈ 4 µs) still meets B3-like startup (VREF within 1 % in ≤ 40 µs).
+- **Testbenches:** `tb_vref_psrr`, `tb_vref_step` (DAC-like load steps), `tb_vref_pad` (stability with pad), `tb_vref_sel`.
+- **Depends on:** 2 (topology), 3 (input).
+
+### Stage 6 — Comparator
+- **Goal:** decide `vtop` vs. the comparison voltage within one bit cycle, with low kickback.
+- **Cells:** `comp_strongarm`, `sr_latch`, wrapper `comparator`.
+- **Specs:** A10 in Phase 1; A7, A8 in Phase 2.
+- **Targets†:** kickback on a 2.5 pF top-plate node ≤ 0.25 LSB (1.2 mV) after the decision (CLAUDE.md rule 5).
+- **Testbenches:** `tb_cmp`, `tb_cmp_kickback`, `tb_cmp_mc`.
+- **Depends on:** 0.
+
+### Stage 7 — Sampling switch + input mux
+- **Goal:** select the ADC input and sample it onto the DAC.
+- **Cells:** `tgate`, `inmux` (VIN / VPTAT / VBG / VGND), `sample_sw`.
+- **Specs:** A9, A14.
+- **Testbenches:** `tb_sample` (VIN step through the pad model onto 2.5 pF), `tb_inmux`.
+- **Depends on:** 0.
+
+### Stage 8 — Cap DAC
+- **Goal:** binary-weighted 256-unit MIM DAC.
+- **Cells:** `cap_unit` (one MIM unit cell + dummy variant), `cap_dac` (16 × 16 common-centroid array
+  with bottom-plate switches).
+- **Specs:** A13 in Phase 2; the linearity part of A4/A5 for the DAC alone.
+- **Steps:** unit cell → 2-bit sub-array check → full array. The array layout is script-generated (KLayout Python).
+- **Testbenches:** `tb_dac` (step through all 256 codes, ideal comparator), `tb_dac_mc`.
+- **Depends on:** 0.
+
+### Stage 9 — SAR logic
+- **Goal:** sequencer + successive-approximation register + external-mode multiplexing.
+- **Cells:** `sar_logic` (sky130_fd_sc_hd standard cells).
+- **Steps:** behavioural Verilog first (iverilog/cocotb in `test/`) → gate-level netlist →
+  transistor-level ngspice simulation with ideal analog parts.
+- **Targets†:** correct code for all 256 inputs with an ideal comparator; works at 10 MHz (A12 stretch);
+  `MODE`=1 passes `ui[7:0]` straight to the DAC; all unused outputs tied to VGND.
+- **Depends on:** none (digital); for ngspice, 0.
+
+## Integration stages
+
+Each step uses proven blocks plus **ideal models for everything that isn't integrated yet**.
+
+| Stage | Adds | Ideal (still modelled) | Proves | Specs |
+|---|---|---|---|---|
+| **I1** Analog core | DAC (8) + comparator (6) + sampling switch (7) | SAR logic (behavioural, in-netlist), VREF (ideal source), input (ideal) | The analog path converts correctly; kickback in the real loop | A4, A5 (ideal ref) |
+| **I2** Full ADC | + SAR logic (9) | VREF, input mux | Timing between logic and comparator; `EOC`; external mode | A3, A4, A5, A6, A11 |
+| **I3** Self-referenced ADC | + bandgap (3), VREF buffer (5), bias (1) | input | VREF settling under real DAC switching; supply coupling | A4–A6 with the real reference |
+| **I4** Top level | + PTAT branch (4), input mux (7), pads, power straps, `tt_um_chiranjitpatel_sar_adc` pins | — | All scenarios in `top_level.md`; temperature-sensor mode; external-reference fallback | all |
+
+After I4: top-level layout, full-chip DRC/LVS, post-layout simulation of I2–I4, then the TT precheck in GitHub Actions.
+
+## Suggested order
+
+Stages 6–9 don't depend on the bandgap chain (1–5), so the two chains can run side by side:
+
+```
+0 ─┬─ 1 ─ 2 ─ 3 ─ 4 ─ 5 ──────────────┐
+   └─ 6 ─ 7 ─ 8 ─ 9 ── I1 ─ I2 ───────┴─ I3 ─ I4
+```
+
+The plan is to start with the **bandgap chain** (stage 0 → 1 → 2 → 3) to get a first end-to-end
+pass through simulation, layout and LVS on a small block.
+
+## Status
+
+| Stage | a | b | c | d | e | f | g | Notes |
+|---|---|---|---|---|---|---|---|---|
+| 0 Devices | — | ✅ 2026-11-01 | | — | — | — | — | `sim/devices/README.md`: ideal zero-TC VBG ≈ 1.25 V (stage 3 later found 1.215 V for the real circuit), tight headroom at 1.62 V |
+| 1 Bias | ✅ 2026-11-01 (layout changes 11-08) | ✅ 2026-11-01 | ✅ 2026-11-08, 45/45 | ✅ scripted | ✅ | ✅ | ✅ 2026-11-14 (M1) | `sim/bias/README.md`: 1.00 µA, 2.15 µA own current, starts on fast and slow ramps; Phase 2 0.68–1.64 µA (mostly temperature), line ≤ 8.9 %, PD ≤ 43 nA (`corners.md`) |
+| 2 OTA | ✅ 2026-11-01 | ✅ 2026-11-01 | | | | | | `sim/ota/README.md`: two-stage, 80.4 dB, PM 81° (0.5 pF load, CC 0.7 pF), 5.8 µA; Monte Carlo offset in Phase 2 |
+| 3 Bandgap | ✅ 2026-11-01 (resized 11-08) | ✅ 2026-11-08 | ✅ 2026-11-08: corners 63/63, MC σ 17.6 mV (B6 open) | ✅ scripted (M5/M7 units 11-14) | ✅ | ✅ | ✅ 2026-11-14 (M1): VBG −0.7 mV vs schematic | `sim/bandgap/README.md`: VBG 1.215 V (B1 margin), 15.7 µA, PM 82.5°, 22 ppm/°C at tt; raw PSRR at 1 MHz fails (fixed by the stage 5 filter) |
+| 4 PTAT | ✅ 2026-11-07 (resized 11-08) | ✅ 2026-11-08 | ✅ 2026-11-08: corners ≤ 2.6 °C, MC needs 2-point cal. (B13 open) | ✅ scripted | ✅ | ✅ | ✅ 2026-11-14 (M1): VPTAT +0.4 mV | `sim/ptat/README.md`: 0.599 V, 2.00 mV/°C, VBG unaffected, loop PM 79.9° |
+| 5 VREF chain | ✅ 2026-11-07 (filter grown 11-08; MIM + tail 2 × 8/2 11-14) | ✅ 2026-11-08 | ✅ 2026-11-08: 45/45 run, B7 DC open at 1.62 V | ✅ scripted | ✅ | ✅ | ✅ 2026-11-14 (M1): B7 ≥ 22.7 dB at 1 MHz in 45/45 corners (`sim/m1/`) | `sim/vref/README.md`: B7 met at vbg_f, DAC-load error 25 µV, stable with pad, external-ref mode works |
+| 6 Comparator | ✅ 2026-11-07 (load caps + MAL 0.5/8 11-16) | ✅ 2026-11-07 | ⚠️ 2026-11-21: MC offset σ 17.5 mV (A7 ≤ 10 missed, accepted); A10 met except ss at 1.62 V (77 ns) | ✅ scripted 11-16 (mirrored) | ✅ | ✅ | ✅ 2026-11-16: offset +5 mV vs +1 mV sch | `sim/comparator/README.md`: 3.76 ns at 1 mV, all ±1 mV decisions right (stage 6 TBs re-run 11-16); 2 fF layout imbalance → ≤ 3 mV (was > 80 mV); MC offset/noise in Phase 2 |
+| 7 Switch + mux | ✅ 2026-11-07 | ✅ 2026-11-07 | | ✅ scripted 11-16 | ✅ | ✅ | | `sim/inmux/README.md`: A9/A14 met; VPTAT/VBG need clk ≤ 100 kHz (decided) |
+| 8 Cap DAC | ✅ 2026-11-07 | ✅ 2026-11-07 | ⚠️ 2026-11-21: MC DNL σ 0.279 LSB (A13 ≤ 0.25 missed by ~10 %), no missing codes in 104 | ✅ scripted 11-16 | ✅ | ✅ | | `sim/dac/README.md`: all 256 codes, DNL 0.001 / INL 0.0007 LSB (ideal caps), 0.6 pA top-plate leak; MC in Phase 2 |
+| 9 SAR logic | ✅ 2026-11-07 (Verilog) | ✅ RTL + gate-level | | ✅ LibreLane 11-16 | ✅ | ✅ | | `src/sar/README.md`: 0 errors in 2764 conversions; 136 cells, 1217 µm²; SPICE check in I2 |
+| I1 Analog core | — | — | | | | | | merged into I2: the real SAR logic was verified first, so I2 uses it directly |
+| I2 Full ADC | ✅ 2026-11-07 | ✅ 5/5, 18/18 edges, ENOB 8.04 | | | | | | `sim/adc/README.md`: 5/5 exact codes after two fixes (smpt glitch, comparator preamp); edges + sine running |
+| I3 Self-referenced | ✅ 2026-11-07 | ✅ 5/5 exact | | | | | | real bandgap → filter → buffer reference (1.2143 V) |
+| I4 Top level | ✅ | ✅ 2026-11-21: all 6 scenarios of `top_level.md` on the whole tile (`sim/m2/scenarios.md`) | | ✅ 2026-11-16 (M2) | ✅ Magic + KLayout 0 | ✅ full chip | ✅ 2026-11-16: 5/5 codes rc = sch; 2026-11-21: all 6 scenarios on the extracted tile | `layout/m2_top.py`, `material/layout/m2_top.png`, `sim/m2/README.md`; post-layout found a −40 LSB comparator offset (fixed) |
+
+a = schematic, b = Phase 1 sim, c = Phase 2 sim, d = layout, e = DRC, f = LVS, g = post-layout sim.

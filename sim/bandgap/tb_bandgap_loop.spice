@@ -1,0 +1,49 @@
+* Stage 3 — bandgap loop gain and PSRR (tt, 27 C, 1.8 V)
+* Loop gain by Middlebrook double injection at the OTA output: bandgap_core_brk.spice (made by
+* run.sh) brings the OTA output out as port 'vo', separate from the PMOS gate net 'vgp'.
+*   VINJ: series voltage injection, v(vgp) - v(vo) = vinj   ->  Tv = -v(vo)/v(vgp)
+*   IINJ: shunt current injection into vgp                  ->  Ti = -i_drv/i_load
+*   T = (Tv*Ti - 1) / (Tv + Ti + 2)   (exact for any source/load impedance)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core_brk.spice
+.temp 27
+
+VDD  vdd  0 dc 1.8
+VPD  pd   0 0
+xb   vdd  0 pd nbias pbias bias_gen
+xbg  vdd  0 pbias pd vbg vgp vo bandgap_core
+VINJ vgp vo dc 0 ac 1
+IINJ 0 vgp dc 0 ac 0
+
+* PSRR copy: normal (unbroken) core on its own supply with an AC ripple (vgp and vo shorted)
+VDDP vddp 0 dc 1.8 ac 1
+xbp  vddp 0 pd nbiasp pbiasp bias_gen
+xbgp vddp 0 pbiasp pd vbgp vgpp vgpp bandgap_core
+
+.control
+set wr_singlescale
+set wr_vecnames
+* run 1: voltage injection
+ac dec 40 1 1e9
+let tv = -v(vo)/v(vgp)
+let psrr = -db(v(vbgp))
+* run 2: current injection
+alter @VINJ[acmag] = 0
+alter @IINJ[acmag] = 1
+ac dec 40 1 1e9
+let idrv = -i(VINJ)
+let ti = -idrv/(idrv + 1)
+let t = (ac1.tv*ti - 1)/(ac1.tv + ti + 2)
+let tdb = db(t)
+let tph = 180/pi*cph(t)
+let psrr = ac1.psrr
+wrdata ../out/bandgap/loop.dat tdb tph psrr
+meas ac t0 find tdb at=1
+meas ac fu when tdb=0
+meas ac phu find tph when tdb=0
+meas ac psrr_dc find psrr at=1
+meas ac psrr_1m find psrr at=1e6
+quit
+.endc
+.end

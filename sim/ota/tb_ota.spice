@@ -1,0 +1,66 @@
+* Stage 2 — ota testbench (Phase 1: tt, 27 C, VDPWR 1.8 V)
+* Bias from the real bias_gen (stage 1). Load CL = 0.5 pF (estimated bandgap PMOS gate load + margin).
+* The OTA has its own supply source (VDDO) so its current is measured separately from bias_gen.
+* Power-down is checked in tb_ota_pd.spice (op after tran + alter gave a false solution in ngspice-36).
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/ota.spice
+.temp 27
+.param vcm=0.68
+
+VDD  vdd  0 1.8
+VDDO vddo 0 1.8
+VPD  pd   0 0
+xb vdd 0 pd nbias pbias bias_gen
+
+* --- open loop: DC feedback through LFB (closed at DC, open at AC); CFB grounds inn for AC
+VIN  inp 0 dc {vcm} ac 1
+xo  vddo 0 pbias pd inp inn out ota
+LFB out inn 1e9
+CFB inn 0 1
+CL  out 0 0.5p
+
+* --- follower copy for DC range, offset and step tests
+VINF inpf 0 dc {vcm} pulse({vcm} {vcm+0.02} 5u 1n 1n 20u 40u)
+xof vddo 0 pbias pd inpf outf outf ota
+CLF outf 0 0.5p
+
+.control
+set wr_singlescale
+set wr_vecnames
+echo "=== OP"
+op
+let iota = -i(VDDO)/2
+print v(out) v(xo.out1) v(xo.tail) v(xo.d1) iota
+let offs = v(outf) - v(inpf)
+print offs
+
+echo "=== AC open loop"
+ac dec 50 1 1e9
+let gain_db = vdb(out)
+let ph = 180/pi*cph(v(out))
+wrdata ../out/ota/ac.dat gain_db ph
+meas ac a0 find gain_db at=1
+meas ac ugf when gain_db=0
+meas ac ph_ugf find ph when gain_db=0
+let pm = ph_ugf + 180
+print pm
+
+echo "=== Follower input range"
+dc VINF 0.2 1.4 0.005
+let err = v(outf) - v(inpf)
+wrdata ../out/ota/range.dat err
+
+echo "=== Follower 20 mV step"
+tran 2n 20u
+wrdata ../out/ota/step.dat v(outf) v(inpf)
+meas tran vfinal find v(outf) at=19.5u
+meas tran vpeak max v(outf) from=5u to=19u
+meas tran t10 when v(outf)=0.682 rise=1
+meas tran t90 when v(outf)=0.698 rise=1
+let trise = t90 - t10
+print trise
+
+quit
+.endc
+.end

@@ -1,0 +1,37 @@
+* Stage 8 — cap_dac transfer: all 256 codes (tt, 27 C, VDPWR 1.8 V), ideal vref/vcm/vin
+* Each 1 us: sample (0 ... 0.4 us: top plate = vcm via ideal STOP, bottoms = vadc = 0 V), then hold
+* with code k on b7..b0 (a binary counter of pulse sources). STOP opens 10 ns before smp falls
+* (bottom-plate sampling). vtop - vcm at the end of each microsecond = VREF*k/256 * gain.
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/cap_dac.spice
+.temp 27
+* precision transient: ngspice default reltol (1e-3) lets node voltages wander by ~1 mV (0.2 LSB)
+.options reltol=1e-5 abstol=1e-12 vntol=1e-7 chgtol=1e-16
+VDD vdd 0 1.8
+VREF vref 0 1.215
+VCM vcm 0 0.716
+VADC vadc 0 0
+VS smp 0 pulse(0 1.8 0 0.2n 0.2n 0.4u 1u)
+VSB smpb 0 pulse(1.8 0 0 0.2n 0.2n 0.4u 1u)
+VST smpt 0 pulse(0 1.8 0 0.2n 0.2n 0.39u 1u)
+STOP vtop vcm smpt 0 swm
+.model swm sw vt=0.9 vh=0.1 ron=200 roff=1e12
+VB0 b0 0 pulse(0 1.8 1u 0.2n 0.2n 1u 2u)
+VB1 b1 0 pulse(0 1.8 2u 0.2n 0.2n 2u 4u)
+VB2 b2 0 pulse(0 1.8 4u 0.2n 0.2n 4u 8u)
+VB3 b3 0 pulse(0 1.8 8u 0.2n 0.2n 8u 16u)
+VB4 b4 0 pulse(0 1.8 16u 0.2n 0.2n 16u 32u)
+VB5 b5 0 pulse(0 1.8 32u 0.2n 0.2n 32u 64u)
+VB6 b6 0 pulse(0 1.8 64u 0.2n 0.2n 64u 128u)
+VB7 b7 0 pulse(0 1.8 128u 0.2n 0.2n 128u 256u)
+x1 vdd 0 vref vadc smp smpb b0 b1 b2 b3 b4 b5 b6 b7 vtop cap_dac
+.control
+set wr_singlescale
+set wr_vecnames
+tran 5n 256u
+let vd = v(vtop) - v(vcm)
+wrdata ../out/dac/dac.dat vd
+meas tran iref avg i(VREF) from=1u to=256u
+quit
+.endc
+.end

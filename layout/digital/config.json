@@ -1,0 +1,45 @@
+{
+  "DESIGN_NAME": "adc_digital",
+  "VERILOG_FILES": [
+    "dir::../../src/sar/sar_logic.v",
+    "dir::../../src/sar/sar_drv.v",
+    "dir::../../src/sar/adc_digital.v"
+  ],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 100,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [
+    0,
+    0,
+    63.48,
+    47.32
+  ],
+  "PL_TARGET_DENSITY_PCT": 65,
+  "FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
+  "RT_MAX_LAYER": "met4",
+  "VDD_NETS": [
+    "VDPWR"
+  ],
+  "GND_NETS": [
+    "VGND"
+  ],
+  "FP_PDN_MULTILAYER": false,
+  "FP_PDN_CORE_RING": false,
+  "FP_PDN_VWIDTH": 1.2,
+  "FP_PDN_VPITCH": 20,
+  "FP_PDN_VOFFSET": 5,
+  "GRT_ALLOW_CONGESTION": false,
+  "RUN_LINTER": false,
+  "MAGIC_DEF_LABELS": false,
+  "QUIT_ON_SYNTH_CHECKS": false,
+  "SYNTH_STRATEGY": "AREA 2",
+  "BOTTOM_MARGIN_MULT": 1,
+  "TOP_MARGIN_MULT": 1,
+  "LEFT_MARGIN_MULT": 4,
+  "RIGHT_MARGIN_MULT": 4,
+  "PL_MAX_DISPLACEMENT_X": 1000,
+  "PL_MAX_DISPLACEMENT_Y": 1000,
+  "DESIGN_REPAIR_BUFFER_INPUT_PORTS": false,
+  "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": false,
+  "PDN_EXTEND_TO": "boundary"
+}

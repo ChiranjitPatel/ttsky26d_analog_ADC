@@ -1,0 +1,20 @@
+* Stage 2 — ota power-down check: pd = 1 for both bias_gen and the OTA (tt, 27 C, 1.8 V)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/ota.spice
+.temp 27
+VDD  vdd  0 1.8
+VDDO vddo 0 1.8
+VPD  pd   0 1.8
+xb vdd 0 pd nbias pbias bias_gen
+VIN inp 0 0.68
+xo vddo 0 pbias pd inp out out ota
+CL out 0 0.5p
+.control
+op
+let ipd_ota = -i(VDDO)
+let ipd_bias = -i(VDD)
+print ipd_ota ipd_bias v(out)
+quit
+.endc
+.end

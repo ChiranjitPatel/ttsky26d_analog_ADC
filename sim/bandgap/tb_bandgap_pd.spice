@@ -1,0 +1,16 @@
+* Stage 3 — bandgap power-down check: pd = 1 for bias_gen and bandgap_core (tt, 27 C, 1.8 V)
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.temp 27
+VDD vdd 0 1.8
+VPD pd  0 1.8
+xb  vdd 0 pd nbias pbias bias_gen
+xbg vdd 0 pbias pd vbg vgp bandgap_core
+.control
+op
+let ipd = -i(VDD)
+print ipd v(vbg) v(vgp)
+quit
+.endc
+.end

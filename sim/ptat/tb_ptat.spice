@@ -1,0 +1,30 @@
+* Stage 4 — ptat_out testbench (tt; 27 C unless swept; VDPWR 1.8 V)
+* xbg1 + xpt1: bandgap with the PTAT branch (the stage 4 configuration).
+* xbg2 + xpt2: same, but vptat heavily loaded by RLOAD = 100 kOhm -> VBG of xbg2 must not move.
+* xbg3: bandgap alone (stage 3 reference).
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/bias_gen.spice
+.include ../out/netlist/bandgap_core.spice
+.include ../out/netlist/ptat_out.spice
+.temp 27
+VDD vdd 0 1.8
+VPD pd  0 0
+xb  vdd 0 pd nbias pbias bias_gen
+xbg1 vdd 0 pbias pd vbg1 vgp1 bandgap_core
+xpt1 vdd 0 vgp1 vptat1 ptat_out
+xbg2 vdd 0 pbias pd vbg2 vgp2 bandgap_core
+xpt2 vdd 0 vgp2 vptat2 ptat_out
+RLOAD vptat2 0 100k
+xbg3 vdd 0 pbias pd vbg3 vgp3 bandgap_core
+.control
+set wr_singlescale
+set wr_vecnames
+op
+let dvbg_branch = v(vbg1) - v(vbg3)
+let dvbg_load = v(vbg2) - v(vbg1)
+print v(vptat1) v(vptat2) v(vbg1) v(vbg3) dvbg_branch dvbg_load
+dc temp -40 125 5
+wrdata ../out/ptat/temp.dat v(vptat1) v(vbg1)
+quit
+.endc
+.end

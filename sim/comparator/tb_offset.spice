@@ -1,0 +1,27 @@
+* Comparator toggle point, schematic (xs) vs extracted layout (xl), tt 27 C 1.8 V.
+* inn = 0.716 V (vcm); inp ramps 0.40 -> 0.80 V at 1 mV per clock cycle (10 MHz, evaluate while clkb is low).
+* Netlists: tools/netlist.sh comparator; python3 layout/cell_pex.py comparator.  Result: python3 offset.py
+.lib /usr/local/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include ../out/netlist/comparator.spice
+* bias_gen from the M2 reference netlist (its old comparator is ignored: ngspice keeps the first definition)
+.include ../../layout/cells/m2_top_ref.spice
+.include ../out/layout/comparator_rc/comparator_rc.spice
+.options reltol=1e-5 abstol=1e-12 vntol=1e-6 chgtol=1e-16
+.temp 27
+VDD vdd 0 1.8
+xbias vdd 0 0 nbias pbias bias_gen
+VCKB clkb 0 pulse(1.8 0 50n 0.2n 0.2n 50n 100n)
+VSM smpt 0 0
+VN inn 0 0.716
+VP inp 0 pwl(0 0.40 40u 0.80)
+xs vdd 0 pbias clkb smpt inp inn opbs onbs comparator
+xl vdd 0 pbias clkb smpt inp inn opbl onbl comparator_pl
+.control
+set wr_singlescale
+set wr_vecnames
+save v(clkb) v(inp) v(opbs) v(onbs) v(opbl) v(onbl)
+tran 0.5n 40u
+wrdata ../out/comparator/offset.dat v(clkb) v(inp) v(opbs) v(onbs) v(opbl) v(onbl)
+quit
+.endc
+.end

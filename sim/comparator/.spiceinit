@@ -1,0 +1,6 @@
+* ngspice init for sky130 (from $PDK_ROOT/sky130A/libs.tech/ngspice/spinit, adapted for ngspice-36)
+set ngbehavior=hsa     ; compatibility mode for reading the PDK libs
+set skywaterpdk        ; skip some checks for faster lib loading
+set ng_nomodcheck      ; don't check the model parameters
+set num_threads=1   ; small circuits gain nothing from threads, and parallel runs oversubscribe the CPU
+option noinit          ; don't print operating point data

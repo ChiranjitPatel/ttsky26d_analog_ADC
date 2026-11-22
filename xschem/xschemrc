@@ -1,0 +1,6 @@
+# Project xschemrc: sky130 PDK setup + this directory as a symbol library.
+# Start xschem from this directory:  cd xschem && xschem bias_gen.sch
+if {![info exists env(PDK_ROOT)] || $env(PDK_ROOT) eq {}} { set env(PDK_ROOT) /usr/local/share/pdk }
+source $env(PDK_ROOT)/sky130A/libs.tech/xschem/xschemrc
+append XSCHEM_LIBRARY_PATH :[file dirname [file normalize [info script]]]
+set netlist_dir [file dirname [file normalize [info script]]]/../sim/out/netlist
