@@ -2,7 +2,7 @@
 
 **Status: DRAFT v0.2** — targets a **1x2 tile with 2 analog pins** (already purchased).
 
-## What sets this design apart
+## What sets this design apart?
 
 Other projects have submitted plain SAR ADCs and stand-alone bandgaps before (see
 `prior_art.md`). This design combines them into one small, self-measuring system:
