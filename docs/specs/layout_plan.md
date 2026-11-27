@@ -201,5 +201,6 @@ full-custom cells: 9 in `dac` (the dac_sw row, 0.29 µm) and 8 in `inmux` (0.20 
 pmoslvt channel grown by 0.18 µm, and these two cells drew their nwell relative to the diffusion. Fix: inmux's
 nwell 0.18 µm taller at top and bottom; in dac_sw the PMOS stack moved up by 0.09 µm (its nwell's lower edge is
 already at the nwell-to-ndiff minimum), so `dac` is 0.09 µm taller. `layout/klayout_drc.py` now also checks
-lvtn.10. Tile: Magic DRC 0, KLayout 0/0/0, lvtn.10 0, LVS match.
+lvtn.10. Tile: Magic DRC 0, KLayout 0/0/0, lvtn.10 0, LVS match, TT precheck passed (57e53fb). Re-extracted tile:
+the 5 post-layout conversions give the same codes as before (10 / 65 / 127 / 190 / 247 = schematic).
 
