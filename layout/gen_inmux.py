@@ -81,7 +81,10 @@ def build():
     P("locali", xn - 0.085, 0.38, xn + 0.085, WP - 0.38)
     P("metal1", xn - 0.17, 0.3, xn + 0.17, WP - 0.3)
     pins.append(("VDPWR", "metal1", (xn - 0.17, WP - 0.9, xn + 0.17, WP - 0.3)))
-    P("nwell", XA_P - 0.38, -0.38, xn + 0.55, WP + 0.38)
+    # nwell: >= 0.38 um beyond the lvtn implant (lvtn.10). Magic writes lvtn as the pmoslvt channel grown by 0.18 um,
+    # and the channels span the whole diffusion height (0 .. WP), so lvtn reaches -0.18 / WP + 0.18 in y
+    # (2026-11-27: the well ended 0.38 um from the diffusion, 0.20 um from lvtn; flagged by TT after submission)
+    P("nwell", XA_P - 0.38, -0.18 - 0.38, xn + 0.55, WP + 0.18 + 0.38)
     for net in ("vin", "vptat", "vbg", "vadc"):
         y = STRAP[net]
         pins.append((net, "metal2", (x_right - 0.5, y - 0.15, x_right, y + 0.15)))

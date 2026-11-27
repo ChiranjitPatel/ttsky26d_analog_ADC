@@ -3,6 +3,8 @@
 precheck/tech-files): runs the feol, beol and offgrid checks on a GDS, like the TT precheck does.
 KLayout runs in the LibreLane container (ghcr.io/librelane/librelane:3.0.17, KLayout 0.30.7; the
 precheck uses 0.30.4). Needs the Docker daemon (start it with: dockerd &).
+Extra checks the TT deck doesn't have (run here with the klayout Python package, flat):
+  lvtn.10  nwell enclosure of lvtn >= 0.38 um (TT found 17 violations in the TTSKY26d submission, 2026-11-27)
 Usage: python3 layout/klayout_drc.py layout/cells/bias_gen.gds      (reports in sim/out/layout/<cell>/)
 """
 import os, re, subprocess, sys
@@ -28,4 +30,25 @@ for check in ("feol", "beol", "offgrid"):
     cats = sorted(set(re.findall(r"<category>'?([^<']+)'?</category>", xml)))
     print(f"KLayout {check}: {n} errors" + (f"  {cats[:8]}" if n else ""))
     total += n
+
+
+def extra_checks(path):
+    """Rules missing from the TT deck. Returns {rule: [(x, y, value_um), ...]}."""
+    import klayout.db as db
+    L = db.Layout(); L.read(path)
+    top = L.top_cell()
+    reg = lambda ln, dt: db.Region(top.begin_shapes_rec(L.layer(ln, dt))).merged()
+    nwell, lvtn = reg(64, 20), reg(125, 44)
+    um = lambda v: round(v * L.dbu, 3)
+    viol = {}
+    ep = nwell.enclosing_check(lvtn, int(round(0.38 / L.dbu)))
+    viol["lvtn.10 nwell enclosure of lvtn >= 0.38 um"] = [(um(e.bbox().center().x), um(e.bbox().center().y), um(e.distance()))
+                                                         for e in ep.each()]
+    viol["lvtn.10 lvtn outside nwell"] = [(um(b.center().x), um(b.center().y), 0.0) for b in (lvtn - nwell).each()]
+    return viol
+
+
+for rule, v in extra_checks(gds).items():
+    print(f"extra {rule}: {len(v)} errors" + (f"  e.g. {v[:3]}" if v else ""))
+    total += len(v)
 sys.exit(0 if total == 0 else 1)

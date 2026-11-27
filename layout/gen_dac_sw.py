@@ -27,12 +27,18 @@ COLS = [str(i) for i in range(7, -1, -1)] + ["t"]
 RAIL_N = (0.0, 0.48)                    # VGND met1 rail
 NDIFF = (0.70, 1.88)
 N_S0, N_GN, N_D, N_SMP, N_S1 = (0.70, 0.99), (0.99, 1.14), (1.14, 1.44), (1.44, 1.59), (1.59, 1.88)
-NWELL_Y0 = 2.22
-P_VA, P_SMPB, P_BP, P_GPB, P_VR = (2.40, 2.69), (2.69, 3.04), (3.04, 3.44), (3.44, 3.79), (3.79, 4.08)
-P_STEP = 3.12                           # PMOS diffusion: W = 2 below, W = 4 above (inside the bp strip)
-VADC_Y, VREF_Y = 2.10, 4.50             # met2 lines
-RAIL_P = (4.95, 5.43)                   # VDPWR met1 rail
-NWELL_Y1 = 5.60
+NWELL_Y0 = 2.22                         # 0.34 above the NMOS diffusion (nwell to n+ diff, the minimum)
+# DP: the PMOS stack and everything above it sit 0.09 um higher than in the first version, so the nwell reaches
+# 0.38 um beyond the lvtn implant (lvtn.10; Magic writes lvtn as the pmoslvt channel + 0.18 um, so lvtn starts
+# at P_SMPB[0] - 0.18). Before: 0.29 um, flagged by TT after the TTSKY26d submission (2026-11-27). The nwell edge
+# can't move down instead: NWELL_Y0 is already at the nwell-to-ndiff minimum.
+DP = 0.09
+P_VA, P_SMPB, P_BP, P_GPB, P_VR = [(a + DP, b + DP) for a, b in
+                                   ((2.40, 2.69), (2.69, 3.04), (3.04, 3.44), (3.44, 3.79), (3.79, 4.08))]
+P_STEP = 3.12 + DP                      # PMOS diffusion: W = 2 below, W = 4 above (inside the bp strip)
+VADC_Y, VREF_Y = 2.10, 4.50 + DP        # met2 lines
+RAIL_P = (4.95 + DP, 5.43 + DP)         # VDPWR met1 rail
+NWELL_Y1 = 5.60 + DP
 WN, WP_LO, WP_HI = 1.0, 2.0, 4.0
 mid = lambda a: (a[0] + a[1]) / 2
 
@@ -49,10 +55,10 @@ def draw(L, ox=0.0, oy=0.0, pitch=None, x0=None, pins_out=None, width=None):
     W = width or (xs[-1] + WP_HI + 1.0)                      # cell width (the right-end pads need 1.0)
     # rails + taps
     P("metal1", 0, RAIL_N[0], W, RAIL_N[1]); P("locali", 0, 0.04, W, 0.44); P("psubdiff", 0.1, 0.065, W - 0.1, 0.415)
-    P("metal1", 0, RAIL_P[0], W, RAIL_P[1]); P("locali", 0, 4.99, W, 5.39); P("nsubdiff", 0.25, 5.02, W - 0.25, 5.37)
+    P("metal1", 0, RAIL_P[0], W, RAIL_P[1]); P("locali", 0, 4.99 + DP, W, 5.39 + DP); P("nsubdiff", 0.25, 5.02 + DP, W - 0.25, 5.37 + DP)
     for x in [0.5 + 0.5 * k for k in range(int((W - 1.0) / 0.5) + 1)]:      # >= 0.12 inside the tap ends (licon.7)
         sq("psubdiffcont", x, 0.24, 0.085); sq("viali", x, 0.24, 0.085)
-        sq("nsubdiffcont", x, 5.195, 0.085); sq("viali", x, 5.195, 0.085)
+        sq("nsubdiffcont", x, 5.195 + DP, 0.085); sq("viali", x, 5.195 + DP, 0.085)
     P("nwell", 0, NWELL_Y0, W, NWELL_Y1)
     # global poly lines smp (NMOS upper gate) and smpb (PMOS lower gate), contacted at the left end
     xl = xs[-1] + WP_HI + 0.55                               # smp / smpb contacts at the right end

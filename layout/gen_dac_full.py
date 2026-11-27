@@ -21,7 +21,7 @@ import gen_cap_dac, gen_dac_sw
 
 PITCH, X0S = 7.0, 0.7
 OXS = -0.6 - 0.3 - X0S                 # switch row origin x: bp of column 0 at the gap x = -0.6
-SW_H = 5.6                             # switch row height (nwell top)
+SW_H = gen_dac_sw.NWELL_Y1             # switch row height (nwell top; 5.69 since the lvtn.10 fix, was 5.6)
 X_LEFT = -1.7                          # cell left edge (array-local)
 
 
